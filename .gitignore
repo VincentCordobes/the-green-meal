@@ -1,0 +1,11 @@
+build/
+node_modules/
+coverage/
+.next/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macos
+.DS_Store

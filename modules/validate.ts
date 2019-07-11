@@ -1,0 +1,19 @@
+import {head} from "ramda"
+import Joi from "@hapi/joi"
+
+import {HTTPError} from "./error-handler"
+
+export function validate<T>(schema: Joi.Schema, valueToCheck: T): T {
+  const {error, value} = schema.validate<T>(valueToCheck, {
+    stripUnknown: true,
+    presence: "required",
+    abortEarly: true,
+  })
+
+  if (error) {
+    const {message} = head(error.details)
+    throw new HTTPError(400, message)
+  }
+
+  return value
+}
