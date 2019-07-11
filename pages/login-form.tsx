@@ -33,7 +33,7 @@ const LoginForm: React.FC<Props> = props => {
         request<AuthResponse>("/api/auth", {method: "POST", body}).then(
           response => {
             if (response.ok) {
-              message.info("UserId: " + response.userId)
+              message.info("UserId: " + response.personId)
             } else {
               setApiError("Invalid username or password")
             }

@@ -4,7 +4,6 @@ import {SQL} from "sql-template-strings"
 
 import {query} from "./database"
 import {ApiRequest, ApiResponse} from "./api-types"
-import {withErrorHandler} from "./error-handler"
 import {AuthPayload, AuthResponse} from "./auth-types"
 import {Person} from "./person"
 import {validate} from "./validate"
@@ -18,9 +17,9 @@ const requestSchema = Joi.object({
   password: Joi.string().required(),
 })
 
-export default withErrorHandler(handle)
+export default auth
 
-async function handle(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
+async function auth(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
   const {username, password} = validate<AuthPayload>(requestSchema, req.body)
 
   const [person] = await query<Person>(
@@ -28,23 +27,24 @@ async function handle(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
         where username=${username}`,
   )
 
-  const passwordOk = await bcrypt.compare(password, person.password)
+  if (person) {
+    const passwordOk = await bcrypt.compare(password, person.password)
+    if (passwordOk) {
+      return {
+        ok: true,
+        personId: person.id,
+      }
+    }
+  }
 
-  if (passwordOk) {
-    return {
-      ok: true,
-      personId: person.id,
-    }
-  } else {
-    return {
-      ok: false,
-      statusCode: 401,
-      error: "Wrong username or password",
-    }
+  return {
+    ok: false,
+    statusCode: 401,
+    error: "Wrong username or password",
   }
 }
 
-export async function encryptPassword(plainPassword: string): Promise<string> {
+export async function hashPassword(plainPassword: string): Promise<string> {
   const saltRounds = 10
   return bcrypt.hash(plainPassword, saltRounds)
 }

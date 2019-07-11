@@ -1,10 +1,15 @@
 import {AuthPayload} from "./auth-types"
 import auth from "./auth"
 import {ApiRequest} from "./api-types"
-import signup from "./sign-up"
+import signup from "./signup"
+import {aRequest, initTestDb} from "./test-helpers"
+import {closeDb} from "./database"
+
+beforeEach(() => initTestDb())
+afterAll(() => closeDb())
 
 describe("Auth endpoint", () => {
-  test("should successfully authenticate the user", async () => {
+  test("should successfully authenticate a user", async () => {
     // given
     const req: ApiRequest<AuthPayload> = aRequest({
       username: "Vincent",
@@ -42,9 +47,3 @@ describe("Auth endpoint", () => {
     })
   })
 })
-
-function aRequest<T>(body: T): ApiRequest<T> {
-  return {
-    body,
-  }
-}

@@ -1,5 +1,5 @@
 import fetch from "isomorphic-unfetch"
-import {startsWith} from "ramda"
+import {ApiResponse} from "./api-types"
 
 const API_URL = process.env.API_URL || "http://localhost:3000"
 
@@ -11,7 +11,7 @@ type RequestOptions<T = any> = {
 export async function request<T>(
   path: string,
   options: Partial<RequestOptions> = {},
-): Promise<T> {
+): Promise<ApiResponse<T>> {
   const defaultOptions = {
     method: "GET",
     headers: {

@@ -1,10 +1,12 @@
 import {ApiRequest, ApiResponse} from "./api-types"
 import Joi from "@hapi/joi"
-import {query} from "./database"
+import {query, DBError, DB_ERROR} from "./database"
 import SQL from "sql-template-strings"
 import {validate} from "./validate"
 import {Person} from "./person"
-import {encryptPassword} from "./auth"
+import {hashPassword} from "./auth"
+import {head} from "ramda"
+import {responseOK, responseKO} from "./api"
 
 export default signup
 
@@ -25,14 +27,21 @@ async function signup(req: ApiRequest): Promise<ApiResponse<SignupResponse>> {
     }),
     req.body,
   )
-  const passwordHash = await encryptPassword(password)
+  const passwordHash = await hashPassword(password)
 
-  const [person] = await query<Person>(
+  return query<Person>(
     SQL`insert into person (username, password) 
         values (${username}, ${passwordHash}) returning id`,
   )
-  return {
-    ok: true,
-    personId: person.id,
-  }
+    .then(head)
+    .then(person => responseOK({personId: person.id}))
+    .catch((e: DBError) => {
+      if (e.code === DB_ERROR.uniqueViolation) {
+        return responseKO({
+          statusCode: 400,
+          error: "Username already exists",
+        })
+      }
+      throw e
+    })
 }

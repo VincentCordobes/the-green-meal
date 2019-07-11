@@ -14,11 +14,11 @@ const Index: NextPage<Props> = props => (
   </div>
 )
 
-Index.getInitialProps = async () => {
-  const {user} = await fetch("http://localhost:3000/api/user").then(response =>
-    response.json(),
-  )
-  return {user}
-}
+// Index.getInitialProps = async () => {
+//   const {user} = await fetch("http://localhost:3000/api/user").then(response =>
+//     response.json(),
+//   )
+//   return {user}
+// }
 
 export default Index

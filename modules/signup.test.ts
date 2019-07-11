@@ -34,6 +34,21 @@ describe("sign up a new user", () => {
     )
   })
 
-  // TODO: test("should not create the user when the username exists", async () => {
-  // })
+  test("should not create the user when the username exists", async () => {
+    const request = {
+      body: {
+        username: "VincentC",
+        password: "toto",
+      },
+    }
+
+    // when
+    await signup(request)
+    const response = await signup(request)
+    expect(response).toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "Username already exists",
+    })
+  })
 })
