@@ -1,15 +1,15 @@
 import {AuthPayload} from "./auth-types"
 import auth from "./auth"
-import {ApiRequest} from "./api-types"
-import signup from "./signup"
-import {aRequest, initTestDb} from "./test-helpers"
-import {closeDb} from "./database"
+import {ApiRequest} from "../api-types"
+import signup from "../signup"
+import {aRequest, initTestDb} from "../test-helpers"
+import {closeDb} from "../database"
 
 beforeEach(() => initTestDb())
 afterAll(() => closeDb())
 
 describe("Auth endpoint", () => {
-  test("should successfully authenticate a user", async () => {
+  test("should authenticate a user and returns an access token", async () => {
     // given
     const req: ApiRequest<AuthPayload> = aRequest({
       username: "Vincent",
@@ -21,9 +21,16 @@ describe("Auth endpoint", () => {
     const response = await auth(req)
 
     // then
+    if (!response.ok) {
+      expect(response.ok).toBe(true)
+      return
+    }
     expect(response).toEqual({
       ok: true,
-      personId: expect.any(Number),
+      value: {
+        personId: expect.any(Number),
+        token: expect.any(String),
+      },
     })
   })
 

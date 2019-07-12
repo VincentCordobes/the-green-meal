@@ -16,7 +16,10 @@ export type ApiRequest<Body = any, Params = any> = {
 
 export type ApiResponse<T> = OKResponse<T> | KOResponse
 
-export type OKResponse<T> = {ok: true} & T
+export type OKResponse<T> = {
+  ok: true
+  value: T
+}
 
 export type KOResponse = {
   ok: false

@@ -10,8 +10,8 @@ import Card from "antd/lib/card"
 import Alert from "antd/lib/alert"
 import {FormComponentProps} from "antd/lib/form/Form"
 
-import {request} from "../modules/http-client"
-import {AuthResponse, AuthPayload} from "../modules/auth-types"
+import {request} from "../http-client"
+import {AuthResponse, AuthPayload} from "./auth-types"
 
 import "./login-form.css"
 
@@ -25,15 +25,18 @@ const inlineStyles = {
 
 const LoginForm: React.FC<Props> = props => {
   const [apiError, setApiError] = useState<string | undefined>()
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     props.form.validateFields((err, body) => {
       if (!err) {
+        setLoading(true)
         request<AuthResponse>("/api/auth", {method: "POST", body}).then(
           response => {
+            setLoading(false)
             if (response.ok) {
-              message.info("UserId: " + response.personId)
+              message.info("UserId: " + response.value.personId)
             } else {
               setApiError("Invalid username or password")
             }
@@ -90,6 +93,7 @@ const LoginForm: React.FC<Props> = props => {
               type="primary"
               htmlType="submit"
               className="login-form-button"
+              loading={loading}
             >
               Log in
             </Button>

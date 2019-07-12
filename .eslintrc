@@ -1,6 +1,8 @@
 {
   "env": {
     "browser": true,
+    "commonjs": true,
+    "node": true,
     "es6": true
   },
   "extends": [
@@ -50,6 +52,7 @@
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-member-accessibility": "off",
+    "react/display-name": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn"
   }

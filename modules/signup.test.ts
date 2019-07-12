@@ -24,7 +24,7 @@ describe("sign up a new user", () => {
     }
 
     // then
-    const personInDb = await Person.findById(response.personId)
+    const personInDb = await Person.findById(response.value.personId)
     expect(personInDb).toEqual(
       expect.objectContaining({
         id: expect.any(Number),

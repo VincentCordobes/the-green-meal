@@ -2,11 +2,11 @@ import Joi from "@hapi/joi"
 import bcrypt from "bcrypt"
 import {SQL} from "sql-template-strings"
 
-import {query} from "./database"
-import {ApiRequest, ApiResponse} from "./api-types"
+import {query} from "../database"
+import {ApiRequest, ApiResponse} from "../api-types"
 import {AuthPayload, AuthResponse} from "./auth-types"
-import {Person} from "./person"
-import {validate} from "./validate"
+import {Person} from "../person"
+import {validate} from "../validate"
 
 process.on("unhandledRejection", e => {
   console.log(e)
@@ -32,7 +32,10 @@ async function auth(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
     if (passwordOk) {
       return {
         ok: true,
-        personId: person.id,
+        value: {
+          personId: person.id,
+          token: "mytoken",
+        },
       }
     }
   }

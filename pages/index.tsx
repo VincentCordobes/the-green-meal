@@ -1,18 +1,38 @@
-import fetch from "isomorphic-unfetch"
 import {NextPage} from "next"
-import LoginForm from "./login-form"
-
-import "antd/dist/antd.css"
-import "./index.css"
+import Layout from "../modules/app/layout"
+import {MealList} from "../modules/meals/meals-list.view"
+import React from "react"
 
 type Props = {
   user: string
 }
 const Index: NextPage<Props> = props => (
-  <div className="container">
-    <LoginForm />
-  </div>
+  <Layout>
+    <ErrorBoundary>
+      <MealList />
+    </ErrorBoundary>
+  </Layout>
 )
+
+type ErrorBoundaryState = {
+  error: any
+}
+class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
+  state = {error: null}
+
+  componentDidCatch(error: any) {
+    this.setState({error})
+    console.log(error)
+  }
+
+  render() {
+    if (this.state.error) {
+      return <h1>Something went wrong.</h1>
+    }
+
+    return this.props.children
+  }
+}
 
 // Index.getInitialProps = async () => {
 //   const {user} = await fetch("http://localhost:3000/api/user").then(response =>

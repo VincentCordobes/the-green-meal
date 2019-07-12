@@ -18,15 +18,12 @@ export function withNextResponse<T>(fn: RequestHandler<T>): NextHandler {
 }
 
 export function responseOK<T extends object>(value: T): OKResponse<T> {
-  return {...value, ok: true}
+  return {ok: true, value}
 }
 
 export function responseKO(value: {
   error: string
   statusCode: number
 }): KOResponse {
-  return {
-    ok: false,
-    ...value,
-  }
+  return {...value, ok: false}
 }

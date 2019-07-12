@@ -1,7 +1,7 @@
 import fetch from "isomorphic-unfetch"
 import {ApiResponse} from "./api-types"
 
-const API_URL = process.env.API_URL || "http://localhost:3000"
+const API_URL = process.env.API_URL
 
 type RequestOptions<T = any> = {
   method: "GET" | "POST" | "PUT"
@@ -16,7 +16,7 @@ export async function request<T>(
     method: "GET",
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json",
+      ...(options.body ? {"Content-Type": "application/json"} : {}),
     },
   }
 

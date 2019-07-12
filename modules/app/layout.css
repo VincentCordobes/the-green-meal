@@ -1,0 +1,37 @@
+.layout {
+  height: calc(100vh);
+}
+.app-header {
+  position: fixed;
+  z-index: 99;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.app-header-menu {
+  line-height: 64px;
+  height: 64px;
+}
+
+.logo {
+  color: white;
+  float: left;
+  font-size: 2em;
+  margin-right: 20px;
+}
+
+.app-content {
+  margin-top: 96px;
+}
+
+/* blue header */
+/* background: '#042040', */
+
+#heart {
+  color: #ac4d4d;
+}
+
+.footer {
+  text-align: center;
+}

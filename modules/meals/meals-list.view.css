@@ -1,0 +1,12 @@
+.table-actions {
+  margin-bottom: 16px;
+}
+
+.meal-item {
+  background: white;
+}
+
+.meal-calories {
+  font-weight: bold;
+  /* color: black; */
+}

@@ -4,7 +4,7 @@ import {query, DBError, DB_ERROR} from "./database"
 import SQL from "sql-template-strings"
 import {validate} from "./validate"
 import {Person} from "./person"
-import {hashPassword} from "./auth"
+import {hashPassword} from "./auth/auth"
 import {head} from "ramda"
 import {responseOK, responseKO} from "./api"
 
