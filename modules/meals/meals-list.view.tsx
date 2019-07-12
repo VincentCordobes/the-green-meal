@@ -23,15 +23,13 @@ const columns: ColumnProps<MealDTO>[] = [
     title: "Date",
     key: "date",
     dataIndex: "at",
-    render: (at: string) =>
-      DateTime.fromISO(at).toLocaleString(DateTime.DATE_SHORT),
+    render: (at: string) => DateTime.fromISO(at).toFormat("MM-dd-yyyy"),
   },
   {
     title: "Time",
     key: "time",
     dataIndex: "at",
-    render: (at: string) =>
-      DateTime.fromISO(at).toLocaleString(DateTime.TIME_SIMPLE),
+    render: (at: string) => DateTime.fromISO(at).toFormat("HH:mm a"),
   },
   {
     title: "Calories",
@@ -45,9 +43,13 @@ const columns: ColumnProps<MealDTO>[] = [
   },
 ]
 
-export const MealList: FC = () => {
+type Props = {
+  meals: MealDTO[]
+}
+
+export const MealList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
-  const {loading, data, setData} = useFetch<MealDTO[]>("/api/meals")
+  const [meals, setMeals] = useState(props.meals)
 
   const addMeal = async (meal: AddMealDTO) => {
     const response = await request<MealDTO>("/api/meals/add", {
@@ -56,7 +58,7 @@ export const MealList: FC = () => {
     })
 
     if (response.ok) {
-      setData(meals => (meals || []).concat(response.value))
+      setMeals(meals => meals.concat(response.value))
       message.success("Meal added")
     } else {
       message.error("Oops something went wrong...")
@@ -75,10 +77,9 @@ export const MealList: FC = () => {
       </Row>
       <Row>
         <Table
-          loading={loading}
           rowClassName={() => "meal-item"}
           rowKey="id"
-          dataSource={data || []}
+          dataSource={meals}
           columns={columns}
         />
       </Row>

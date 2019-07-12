@@ -2,14 +2,17 @@ import {NextPage} from "next"
 import Layout from "../modules/app/layout"
 import {MealList} from "../modules/meals/meals-list.view"
 import React from "react"
+import {MealDTO} from "../modules/meals/meals-types"
+import {request} from "../modules/http-client"
 
 type Props = {
-  user: string
+  meals: MealDTO[]
 }
+
 const Index: NextPage<Props> = props => (
   <Layout>
     <ErrorBoundary>
-      <MealList />
+      <MealList meals={props.meals} />
     </ErrorBoundary>
   </Layout>
 )
@@ -34,11 +37,15 @@ class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
   }
 }
 
-// Index.getInitialProps = async () => {
-//   const {user} = await fetch("http://localhost:3000/api/user").then(response =>
-//     response.json(),
-//   )
-//   return {user}
-// }
+Index.getInitialProps = async (): Promise<Props> => {
+  const response = await request<MealDTO[]>("/api/meals")
+  if (response.ok) {
+    return {
+      meals: response.value,
+    }
+  } else {
+    return {meals: []}
+  }
+}
 
 export default Index

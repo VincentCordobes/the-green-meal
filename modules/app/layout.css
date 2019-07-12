@@ -1,6 +1,7 @@
 .layout {
-  height: calc(100vh);
+  min-height: calc(100vh);
 }
+
 .app-header {
   position: fixed;
   z-index: 99;
