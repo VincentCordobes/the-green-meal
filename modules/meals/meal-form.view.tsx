@@ -1,19 +1,19 @@
-import React from "react"
+import React, {useState} from "react"
+import moment, {Moment} from "moment"
 import Modal from "antd/lib/modal"
 import Form from "antd/lib/form"
-import Input from "antd/lib/input"
 import DatePicker from "antd/lib/date-picker"
 import InputNumber from "antd/lib/input-number"
 import TimePicker from "antd/lib/time-picker"
-
 import {FormComponentProps} from "antd/lib/form"
-
-import {MealDTO} from "./meals-types"
 import TextArea from "antd/lib/input/TextArea"
+
+import {MealDTO, AddMealDTO} from "./meals-types"
 
 type ModalProps = {
   visible: boolean
   onCancel: () => void
+  onSave: (meal: AddMealDTO) => Promise<void>
   // meal: MealDTO
 }
 
@@ -28,20 +28,46 @@ const formItemLayout = {
   },
 }
 
+type FormValue = {
+  text: string
+  date: Moment
+  time: Moment
+  calories: number
+}
 export const MealForm = Form.create<Props>({
   name: "meal-form",
 })((props: Props) => {
-  const {getFieldDecorator} = props.form
+  const [loading, setLoading] = useState(false)
 
-  // const {meal} = props
+  const {getFieldDecorator, getFieldsValue} = props.form
 
-  const save = () => {}
+  const save = async () => {
+    setLoading(true)
+    const {date, time, calories, text} = getFieldsValue() as FormValue
+    const at = moment(date).set({
+      hour: time.get("hour"),
+      minute: time.get("minute"),
+      second: time.get("second"),
+    })
+
+    const meal: AddMealDTO = {
+      at: at.toISOString(),
+      calories,
+      text,
+    }
+
+    await props.onSave(meal)
+
+    props.form.resetFields()
+    setLoading(false)
+  }
 
   return (
     <Modal
       keyboard={false}
       visible={props.visible}
       title="Add meal"
+      confirmLoading={loading}
       onOk={save}
       onCancel={props.onCancel}
     >
@@ -53,7 +79,7 @@ export const MealForm = Form.create<Props>({
         }}
       >
         <Form.Item label="Meal">
-          {getFieldDecorator("meal", {
+          {getFieldDecorator("text", {
             // initialValue: meal.text,
           })(<TextArea autosize autoFocus placeholder="Banana with apple" />)}
         </Form.Item>

@@ -1,15 +1,17 @@
 import React, {FC, useEffect, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Tag from "antd/lib/tag"
-import {MealDTO} from "./meals-types"
+import {MealDTO, AddMealDTO} from "./meals-types"
 import {request} from "../http-client"
 
 import "./meals-list.view.css"
+import message from "antd/lib/message"
 import Button from "antd/lib/button"
 import Icon from "antd/lib/icon"
 import Row from "antd/lib/row"
 import {MealForm} from "./meal-form.view"
 import {DateTime} from "luxon"
+import {useFetch} from "../use-fetch"
 
 const columns: ColumnProps<MealDTO>[] = [
   {
@@ -44,20 +46,25 @@ const columns: ColumnProps<MealDTO>[] = [
 ]
 
 export const MealList: FC = () => {
-  const [meals, setMeals] = useState<MealDTO[]>([])
-  const [loading, setLoading] = useState(true)
-
   const {isOpen, openModal, closeModal} = useModal()
+  const {loading, data, setData} = useFetch<MealDTO[]>("/api/meals")
 
-  useEffect(() => {
-    setLoading(true)
-    request<MealDTO[]>("/api/meals").then(response => {
-      setLoading(false)
-      if (response.ok) {
-        setMeals(response.value)
-      }
+  const addMeal = async (meal: AddMealDTO) => {
+    const response = await request<MealDTO>("/api/meals/add", {
+      method: "POST",
+      body: meal,
     })
-  }, [])
+
+    if (response.ok) {
+      setData(meals => (meals || []).concat(response.value))
+      message.success("Meal added")
+    } else {
+      message.error("Oops something went wrong...")
+    }
+
+    closeModal()
+  }
+
   return (
     <>
       <Row type="flex" justify="end" className="table-actions">
@@ -71,11 +78,11 @@ export const MealList: FC = () => {
           loading={loading}
           rowClassName={() => "meal-item"}
           rowKey="id"
-          dataSource={meals}
+          dataSource={data || []}
           columns={columns}
         />
       </Row>
-      <MealForm visible={isOpen} onCancel={closeModal} />
+      <MealForm onSave={addMeal} visible={isOpen} onCancel={closeModal} />
     </>
   )
 }
