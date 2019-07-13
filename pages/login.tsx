@@ -8,7 +8,7 @@ import "../modules/app/style.css"
 type Props = {
   user: string
 }
-const Index: NextPage<Props> = props => (
+const Index: NextPage<Props> = () => (
   <div className="login-container">
     <LoginForm />
   </div>

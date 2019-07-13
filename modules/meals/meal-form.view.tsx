@@ -8,16 +8,16 @@ import TimePicker from "antd/lib/time-picker"
 import {FormComponentProps} from "antd/lib/form"
 import TextArea from "antd/lib/input/TextArea"
 
-import {MealDTO, AddMealDTO} from "./meals-types"
+import {AddMealDTO} from "./meals-types"
 
 type ModalProps = {
   visible: boolean
   onCancel: () => void
-  onSave: (meal: AddMealDTO) => Promise<void>
+  onSave: (meal: AddMealDTO) => any
   // meal: MealDTO
 }
 
-type Props = ModalProps & FormComponentProps<Omit<MealDTO, "id">>
+type Props = ModalProps & FormComponentProps<FormValue>
 
 const formItemLayout = {
   labelCol: {
@@ -39,27 +39,31 @@ export const MealForm = Form.create<Props>({
 })((props: Props) => {
   const [loading, setLoading] = useState(false)
 
-  const {getFieldDecorator, getFieldsValue} = props.form
+  const {getFieldDecorator} = props.form
 
-  const save = async () => {
-    setLoading(true)
-    const {date, time, calories, text} = getFieldsValue() as FormValue
-    const at = moment(date).set({
-      hour: time.get("hour"),
-      minute: time.get("minute"),
-      second: time.get("second"),
+  const save = () => {
+    props.form.validateFields(async (err, values) => {
+      if (!err) {
+        setLoading(true)
+        const {date, time, calories, text} = values
+        const at = moment(date).set({
+          hour: time.get("hour"),
+          minute: time.get("minute"),
+          second: time.get("second"),
+        })
+
+        const meal: AddMealDTO = {
+          at: at.toISOString(),
+          calories,
+          text,
+        }
+
+        await props.onSave(meal)
+
+        props.form.resetFields()
+        setLoading(false)
+      }
     })
-
-    const meal: AddMealDTO = {
-      at: at.toISOString(),
-      calories,
-      text,
-    }
-
-    await props.onSave(meal)
-
-    props.form.resetFields()
-    setLoading(false)
   }
 
   return (
@@ -80,21 +84,28 @@ export const MealForm = Form.create<Props>({
       >
         <Form.Item label="Meal">
           {getFieldDecorator("text", {
+            rules: [{required: true, message: "Please enter a text"}],
             // initialValue: meal.text,
           })(<TextArea autosize autoFocus placeholder="Banana with apple" />)}
         </Form.Item>
         <Form.Item label="Date">
           {getFieldDecorator("date", {
+            rules: [{required: true, message: "Please enter a date"}],
             // initialValue: meal.date,
           })(<DatePicker style={{width: "100%"}} />)}
         </Form.Item>
         <Form.Item label="Time">
           {getFieldDecorator("time", {
+            rules: [{required: true, message: "Please enter a time"}],
             // initialValue: meal.time,
           })(<TimePicker style={{width: "100%"}} />)}
         </Form.Item>
         <Form.Item label="Calories (kCal)">
           {getFieldDecorator("calories", {
+            rules: [
+              {required: true, message: "Please enter the calories count"},
+              {validator: validateCalorieCount},
+            ],
             // initialValue: meal.calories,
           })(<InputNumber style={{width: "100%"}} />)}
         </Form.Item>
@@ -103,3 +114,15 @@ export const MealForm = Form.create<Props>({
     </Modal>
   )
 })
+
+function validateCalorieCount(
+  _: any,
+  value: number,
+  cb: (error?: string) => void,
+) {
+  if (value > 0) {
+    cb()
+  } else {
+    cb("Calories must be positive")
+  }
+}

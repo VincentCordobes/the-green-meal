@@ -30,8 +30,13 @@ export async function request<T>(
     body: JSON.stringify(options.body),
   })
 
-  // status not in the range 200-299
-  if (!response.ok && response.status !== 401) {
+  // 500 or any other
+  const isCriticalError = (code: number) => ![401, 400].includes(code)
+
+  if (
+    !response.ok && // status not in the range 200-299
+    isCriticalError(response.status)
+  ) {
     throw new HTTPError(response)
   }
 

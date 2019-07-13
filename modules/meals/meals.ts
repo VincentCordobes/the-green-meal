@@ -19,7 +19,7 @@ export async function add(req: ApiRequest): Promise<ApiResponse<MealDTO>> {
     Joi.object({
       at: Joi.date(),
       text: Joi.string(),
-      calories: Joi.number(),
+      calories: Joi.number().positive(),
     }),
     req.body,
   )

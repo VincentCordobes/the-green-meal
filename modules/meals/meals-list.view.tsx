@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react"
+import React, {FC, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Tag from "antd/lib/tag"
 import {MealDTO, AddMealDTO} from "./meals-types"
@@ -11,7 +11,6 @@ import Icon from "antd/lib/icon"
 import Row from "antd/lib/row"
 import {MealForm} from "./meal-form.view"
 import {DateTime} from "luxon"
-import {useFetch} from "../use-fetch"
 
 const columns: ColumnProps<MealDTO>[] = [
   {
@@ -61,7 +60,7 @@ export const MealList: FC<Props> = props => {
       setMeals(meals => meals.concat(response.value))
       message.success("Meal added")
     } else {
-      message.error("Oops something went wrong...")
+      message.error("Could not add the meal :(")
     }
 
     closeModal()
