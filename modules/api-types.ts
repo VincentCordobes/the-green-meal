@@ -9,9 +9,9 @@ export type RequestHandler<T = any> = (
   req: ApiRequest,
 ) => Promise<ApiResponse<T>>
 
-export type ApiRequest<Body = any, Params = any> = {
+export type ApiRequest<Body = any, Query = any> = {
   body?: Body
-  params?: Params
+  query?: Query
 }
 
 export type ApiResponse<T> = OKResponse<T> | KOResponse

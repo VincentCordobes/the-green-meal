@@ -3,7 +3,7 @@ import Joi from "@hapi/joi"
 
 import {HTTPError} from "./error-handler"
 
-export function validate<T>(schema: Joi.Schema, valueToCheck: T): T {
+export function validate<T>(schema: Joi.Schema, valueToCheck: any): T {
   const {error, value} = schema.validate<T>(valueToCheck, {
     stripUnknown: true,
     presence: "required",

@@ -12,8 +12,10 @@ describe("Auth endpoint", () => {
   test("should authenticate a user and returns an access token", async () => {
     // given
     const req: ApiRequest<AuthPayload> = aRequest({
-      username: "Vincent",
-      password: "toto",
+      body: {
+        username: "Vincent",
+        password: "toto",
+      },
     })
 
     // when

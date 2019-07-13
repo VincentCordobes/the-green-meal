@@ -3,8 +3,10 @@ import {execute} from "./database"
 import fs from "fs"
 import path from "path"
 
-export function aRequest<T>(body?: T): ApiRequest<T> {
-  return {body}
+export function aRequest<T = any>(
+  props: Partial<ApiRequest<T>> = {},
+): ApiRequest<T> {
+  return props
 }
 
 export async function initDbWithFixtures(fixturesPath: string) {
