@@ -1,11 +1,14 @@
 import fetch from "isomorphic-unfetch"
 import {ApiResponse} from "./api-types"
 
+import queryString from "query-string"
+
 const API_URL = process.env.API_URL
 
-type RequestOptions<T = any> = {
+export type RequestOptions<T = any> = {
   method: "GET" | "POST" | "PUT"
   body: T
+  params: Record<string, string>
   headers: Record<string, string>
 }
 export async function request<T>(
@@ -20,7 +23,12 @@ export async function request<T>(
     },
   }
 
-  const response = await fetch(API_URL + path, {
+  const url =
+    API_URL +
+    path +
+    (options.params ? "?" + queryString.stringify(options.params) : "")
+
+  const response = await fetch(url, {
     ...defaultOptions,
     ...options,
     headers: {

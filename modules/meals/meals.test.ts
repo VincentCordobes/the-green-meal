@@ -35,10 +35,8 @@ describe("List meals", () => {
   test("should return KO when the meal filter is invalid", async () => {
     // when
     const query: MealsFilter = {
-      date: {
-        from: "invalid from ",
-        to: "2019-02-11",
-      },
+      fromDate: "invalid from ",
+      toDate: "2019-02-11",
     }
     const response = await withErrorHandler(list)(aRequest({query}))
 
@@ -58,8 +56,8 @@ describe("List meals", () => {
     ["2019-01-02", "2019-02-01", []],
   ])(
     "should return user meals between the range %s - %s",
-    async (from, to, ids) => {
-      const response = await list(aRequest({query: {date: {from, to}}}))
+    async (fromDate, toDate, ids) => {
+      const response = await list(aRequest({query: {fromDate, toDate}}))
       if (!response.ok) {
         expect(response.ok).toBe(true)
         return
@@ -74,8 +72,8 @@ describe("List meals", () => {
     ["2018-01-01", [1, 2]],
     ["2019-01-01", [2]],
     ["2019-01-02", []],
-  ])("should return user meals from the date %s", async (from, ids) => {
-    const response = await list(aRequest({query: {date: {from}}}))
+  ])("should return user meals from the date %s", async (fromDate, ids) => {
+    const response = await list(aRequest({query: {fromDate}}))
     if (!response.ok) {
       expect(response.ok).toBe(true)
       return
@@ -88,8 +86,8 @@ describe("List meals", () => {
     ["2018-05-21", [1]],
     ["2019-01-01", [1, 2]],
     ["2019-01-02", [1, 2]],
-  ])("should return user meals untill the date %s", async (to, ids) => {
-    const response = await list(aRequest({query: {date: {to}}}))
+  ])("should return user meals untill the date %s", async (toDate, ids) => {
+    const response = await list(aRequest({query: {toDate}}))
     if (!response.ok) {
       expect(response.ok).toBe(true)
       return
@@ -103,8 +101,8 @@ describe("List meals", () => {
     ["18:00", "21:00", [2]],
   ])(
     "should return user meals between the time range %s -%s",
-    async (from, to, ids) => {
-      const response = await list(aRequest({query: {time: {from, to}}}))
+    async (fromTime, toTime, ids) => {
+      const response = await list(aRequest({query: {fromTime, toTime}}))
       if (!response.ok) {
         expect(response.ok).toBe(true)
         return
@@ -118,27 +116,33 @@ describe("List meals", () => {
     ["13:01", [2]],
     ["11:00", [1, 2]],
     ["21:00", []],
-  ])("should return user meals between from the time %s", async (from, ids) => {
-    const response = await list(aRequest({query: {time: {from}}}))
-    if (!response.ok) {
-      expect(response.ok).toBe(true)
-      return
-    }
-    expect(response.value.map(meal => meal.id)).toEqual(ids)
-  })
+  ])(
+    "should return user meals between from the time %s",
+    async (fromTime, ids) => {
+      const response = await list(aRequest({query: {fromTime}}))
+      if (!response.ok) {
+        expect(response.ok).toBe(true)
+        return
+      }
+      expect(response.value.map(meal => meal.id)).toEqual(ids)
+    },
+  )
   test.each([
     // prettier-ignore
     ["10:00", []],
     ["13:01", [1]],
     ["21:00", [1, 2]],
-  ])("should return user meals between until the time %s", async (to, ids) => {
-    const response = await list(aRequest({query: {time: {to}}}))
-    if (!response.ok) {
-      expect(response.ok).toBe(true)
-      return
-    }
-    expect(response.value.map(meal => meal.id)).toEqual(ids)
-  })
+  ])(
+    "should return user meals between until the time %s",
+    async (toTime, ids) => {
+      const response = await list(aRequest({query: {toTime}}))
+      if (!response.ok) {
+        expect(response.ok).toBe(true)
+        return
+      }
+      expect(response.value.map(meal => meal.id)).toEqual(ids)
+    },
+  )
 })
 
 describe("Add a meal", () => {

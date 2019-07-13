@@ -1,13 +1,13 @@
-import SQL, {SQLStatement} from "sql-template-strings"
+import SQL from "sql-template-strings"
 import Joi from "@hapi/joi"
 
 import {ApiRequest, ApiResponse} from "../api-types"
 import {query} from "../database"
 import {responseOK} from "../api"
-import {Meal, MealDTO, AddMealDTO, MealsFilter, DateRange} from "./meals-types"
+import {Meal, MealDTO, MealsFilter} from "./meals-types"
 import {DateTime} from "luxon"
 import {validate} from "../validate"
-import {path, pathOr} from "ramda"
+import {propOr} from "ramda"
 
 const timeSchema = Joi.string().regex(
   /^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$/,
@@ -16,25 +16,20 @@ const timeSchema = Joi.string().regex(
 const dateSchema = Joi.string().isoDate()
 
 const MealsFilterSchema = Joi.object({
-  time: Joi.object({
-    from: timeSchema.optional(),
-    to: timeSchema.optional(),
-  }).optional(),
-  date: Joi.object({
-    from: dateSchema.optional(),
-    to: dateSchema.optional(),
-  }).optional(),
+  fromTime: timeSchema.optional(),
+  toTime: timeSchema.optional(),
+  fromDate: dateSchema.optional(),
+  toDate: dateSchema.optional(),
 }).optional()
 
 export async function list(req: ApiRequest): Promise<ApiResponse<MealDTO[]>> {
   const mealsFilter = validate<MealsFilter>(MealsFilterSchema, req.query)
 
-  const now = DateTime.utc().toFormat("yyyy-MM-dd")
-  const dateFrom = pathOr("1970-01-01", ["date", "from"], mealsFilter)
-  const dateTo = pathOr(now, ["date", "to"], mealsFilter)
+  const dateFrom = propOr("-infinity", "fromDate", mealsFilter)
+  const dateTo = propOr("infinity", "toDate", mealsFilter)
 
-  const timeFrom = pathOr("00:00", ["time", "from"], mealsFilter)
-  const timeTo = pathOr("24:00", ["time", "to"], mealsFilter)
+  const timeFrom = propOr("00:00", "fromTime", mealsFilter)
+  const timeTo = propOr("24:00", "toTime", mealsFilter)
 
   const meals = await query<Meal>(
     SQL`select * from meal 

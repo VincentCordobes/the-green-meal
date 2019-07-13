@@ -18,12 +18,9 @@ export type AddMealDTO = {
   calories: number
 }
 
-export type DateRange = {
-  from?: string
-  to?: string
-}
-
 export type MealsFilter = {
-  time?: DateRange
-  date?: DateRange
+  fromTime?: string
+  toTime?: string
+  fromDate?: string
+  toDate?: string
 }

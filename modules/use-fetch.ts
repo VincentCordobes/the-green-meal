@@ -1,22 +1,32 @@
-import {useState, useEffect} from "react"
-import {request} from "./http-client"
+import {useState, useEffect, useRef} from "react"
+import {request, RequestOptions} from "./http-client"
 
-export const useFetch = <T>(url: string) => {
-  const [data, setData] = useState<T | null>(null)
+type Options<T> = {
+  body?: any
+  params?: any
+  initialData?: T
+}
+export const useFetch = <T>(
+  url: string,
+  {body, initialData, params}: Options<T>,
+) => {
+  const isInitialFetch = useRef(true)
+  const [data, setData] = useState<T | undefined>(initialData)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    request<T>(url).then(response => {
+    request<T>(url, {body, params}).then(response => {
       setLoading(false)
+      isInitialFetch.current = false
       if (response.ok) {
         setData(response.value)
       } else {
         setError(response.error)
       }
     })
-  }, [url])
+  }, [url, body, params])
 
-  return {data, loading, error, setData}
+  return {data, loading, error, setData, isInitialFetch}
 }
