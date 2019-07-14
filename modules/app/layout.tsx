@@ -29,6 +29,10 @@ const AppLayout: FC = props => (
             <Icon type="home" />
             Home
           </Menu.Item>
+          <Menu.Item style={{top: 0, height: 64}} key="users">
+            <Icon type="usergroup-delete" />
+            Users
+          </Menu.Item>
         </Menu>
       </div>
     </Header>

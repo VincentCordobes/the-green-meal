@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef} from "react"
-import {request, RequestOptions} from "./http-client"
+import {request} from "./http-client"
 
 type Options<T> = {
   body?: any
@@ -16,7 +16,6 @@ export const useFetch = <T>(
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
     request<T>(url, {body, params}).then(response => {
       setLoading(false)
       isInitialFetch.current = false
@@ -28,5 +27,11 @@ export const useFetch = <T>(
     })
   }, [url, body, params])
 
-  return {data, loading, error, setData, isInitialFetch}
+  return {
+    data,
+    loading,
+    error,
+    setData,
+    isInitialFetch: isInitialFetch.current,
+  }
 }

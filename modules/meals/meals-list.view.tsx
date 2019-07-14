@@ -1,4 +1,4 @@
-import React, {FC, useState, useRef} from "react"
+import React, {FC, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Tag from "antd/lib/tag"
 import {MealDTO, AddMealDTO, MealsFilter} from "./meals-types"
@@ -14,6 +14,9 @@ import {MealForm} from "./meal-form.view"
 import {DateTime} from "luxon"
 import moment from "moment"
 import {useFetch} from "../use-fetch"
+import TimePicker from "antd/lib/time-picker"
+import Divider from "antd/lib/divider"
+import {dissoc} from "ramda"
 
 const {RangePicker} = DatePicker
 
@@ -54,9 +57,10 @@ type Props = {
 export const MealList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
   const [filter, setFilter] = useState<MealsFilter>()
-  const {data: meals, setData: setMeals, loading, isInitialFetch} = useFetch<
-    MealDTO[]
-  >("/api/meals", {params: filter, initialData: props.meals})
+  const {data: meals, setData: setMeals} = useFetch<MealDTO[]>("/api/meals", {
+    params: filter,
+    initialData: props.meals,
+  })
 
   const addMeal = async (meal: AddMealDTO) => {
     const response = await request<MealDTO>("/api/meals/add", {
@@ -74,30 +78,54 @@ export const MealList: FC<Props> = props => {
     closeModal()
   }
 
-  // const filterByDate = (v) => {
-  // }
-
   const PICKER_FORMAT = "MM-DD-YYYY"
+
   return (
     <>
       <Row type="flex" justify="space-between" className="table-actions">
-        <RangePicker
-          format={PICKER_FORMAT}
-          onChange={(_, [start, end]) => {
-            let filterValue: MealsFilter = {}
-            const formatDate = (date: string) =>
-              moment(date, PICKER_FORMAT).format("YYYY-MM-DD")
+        <div>
+          <RangePicker
+            format={PICKER_FORMAT}
+            onChange={(_, [start, end]) => {
+              let filterValue: MealsFilter = {}
+              const formatDate = (date: string) =>
+                moment(date, PICKER_FORMAT).format("YYYY-MM-DD")
 
-            if (start) {
-              filterValue.fromDate = formatDate(start)
-            }
-            if (end) {
-              filterValue.toDate = formatDate(end)
-            }
+              if (start) {
+                filterValue.fromDate = formatDate(start)
+              }
+              if (end) {
+                filterValue.toDate = formatDate(end)
+              }
 
-            setFilter(filterValue)
-          }}
-        />
+              setFilter(filterValue)
+            }}
+          />
+          <Divider type="vertical" />
+          <TimePicker
+            format="HH:mm"
+            placeholder="From time"
+            className="date-picker"
+            onChange={(_, fromTime) => {
+              if (fromTime) {
+                setFilter({fromTime})
+              } else {
+                setFilter(dissoc("fromTime"))
+              }
+            }}
+          />
+          <TimePicker
+            format="HH:mm"
+            placeholder="To time"
+            onChange={(_, toTime) => {
+              if (toTime) {
+                setFilter({toTime})
+              } else {
+                setFilter(dissoc("toTime"))
+              }
+            }}
+          />
+        </div>
         <Button type="primary" onClick={openModal}>
           <Icon type="plus" />
           Add meal
@@ -105,7 +133,6 @@ export const MealList: FC<Props> = props => {
       </Row>
       <Row>
         <Table
-          loading={!isInitialFetch && loading}
           rowClassName={() => "meal-item"}
           rowKey="id"
           dataSource={meals}
