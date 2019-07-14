@@ -30,7 +30,6 @@ Router.events.on("routeChangeError", () => NProgress.done())
 
 const AppLayout: FC = props => {
   const router = useRouter()
-  console.log(router)
   return (
     <Layout className="layout">
       <Header className="app-header">

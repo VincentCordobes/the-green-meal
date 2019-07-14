@@ -44,7 +44,8 @@ describe("List meals", () => {
     expect(response).toEqual({
       ok: false,
       statusCode: 400,
-      error: expect.any(String),
+      error: "BadRequest",
+      errorMessage: expect.any(String),
     })
   })
 

@@ -1,7 +1,9 @@
-import {RequestHandler} from "./api-types"
+import {RequestHandler, ApiError} from "./api-types"
 import logger from "./logger"
 
-export function withErrorHandler<T>(fn: RequestHandler<T>): RequestHandler<T> {
+export function withErrorHandler<T>(
+  fn: RequestHandler<T>,
+): RequestHandler<T, ApiError> {
   return async req => {
     try {
       const res = await fn(req)
@@ -10,8 +12,9 @@ export function withErrorHandler<T>(fn: RequestHandler<T>): RequestHandler<T> {
       if (e.statusCode === 400) {
         return {
           ok: false,
+          error: "BadRequest",
           statusCode: e.statusCode,
-          error: e.message,
+          errorMessage: e.message,
         }
       } else {
         if (process.env.NODE_ENV === "development") {
@@ -20,7 +23,8 @@ export function withErrorHandler<T>(fn: RequestHandler<T>): RequestHandler<T> {
         return {
           ok: false,
           statusCode: 500,
-          error: "Oops something went wrong",
+          error: "InternalServerError",
+          errorMessage: "Oops something went wrong",
         }
       }
     }

@@ -5,24 +5,26 @@ export type NextHandler = (
   res: NextApiResponse,
 ) => Promise<void>
 
-export type RequestHandler<T = any> = (
+export type RequestHandler<T = any, E = any> = (
   req: ApiRequest,
-) => Promise<ApiResponse<T>>
+) => Promise<ApiResponse<T, E>>
 
 export type ApiRequest<Body = any, Query = any> = {
   body?: Body
   query?: Query
 }
 
-export type ApiResponse<T> = OKResponse<T> | KOResponse
+export type ApiError = "BadRequest" | "InternalServerError"
+export type ApiResponse<T, E = any> = OKResponse<T> | KOResponse<E | ApiError>
 
-export type OKResponse<T> = {
+export type OKResponse<T> = Readonly<{
   ok: true
   value: T
-}
+}>
 
-export type KOResponse = {
+export type KOResponse<T> = Readonly<{
   ok: false
-  error: string
+  error: T
   statusCode: number
-}
+  errorMessage?: string
+}>

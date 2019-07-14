@@ -11,10 +11,10 @@ export type RequestOptions<T = any> = {
   params: Record<string, string>
   headers: Record<string, string>
 }
-export async function request<T>(
+export async function request<T, E = any>(
   path: string,
   options: Partial<RequestOptions> = {},
-): Promise<ApiResponse<T>> {
+): Promise<ApiResponse<T, E>> {
   const defaultOptions = {
     method: "GET",
     headers: {

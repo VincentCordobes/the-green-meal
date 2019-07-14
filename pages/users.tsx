@@ -3,7 +3,7 @@ import Layout from "../modules/app/layout"
 import {UserList} from "../modules/users/user-list"
 import React from "react"
 import {request} from "../modules/http-client"
-import {UserDTO} from "../modules/users/users"
+import {UserDTO} from "../modules/users/types"
 
 type Props = {
   users: UserDTO[]

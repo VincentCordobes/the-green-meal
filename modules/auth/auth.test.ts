@@ -52,7 +52,8 @@ describe("Auth endpoint", () => {
     expect(response).toEqual({
       ok: false,
       statusCode: 401,
-      error: "Wrong username or password",
+      error: "InvalidCredentials",
+      errorMessage: "Wrong username or password",
     })
   })
 })

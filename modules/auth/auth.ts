@@ -4,9 +4,10 @@ import {SQL} from "sql-template-strings"
 
 import {query} from "../database"
 import {ApiRequest, ApiResponse} from "../api-types"
-import {AuthPayload, AuthResponse} from "./auth-types"
+import {AuthPayload, AuthResponse, AuthError} from "./auth-types"
 import {Person} from "../users/person"
 import {validate} from "../validate"
+import {responseKO} from "../api"
 
 process.on("unhandledRejection", e => {
   console.log(e)
@@ -19,7 +20,9 @@ const requestSchema = Joi.object({
 
 export default auth
 
-async function auth(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
+async function auth(
+  req: ApiRequest,
+): Promise<ApiResponse<AuthResponse, AuthError>> {
   const {username, password} = validate<AuthPayload>(requestSchema, req.body)
 
   const [person] = await query<Person>(
@@ -40,11 +43,11 @@ async function auth(req: ApiRequest): Promise<ApiResponse<AuthResponse>> {
     }
   }
 
-  return {
-    ok: false,
+  return responseKO({
+    error: "InvalidCredentials",
     statusCode: 401,
-    error: "Wrong username or password",
-  }
+    errorMessage: "Wrong username or password",
+  })
 }
 
 export async function hashPassword(plainPassword: string): Promise<string> {

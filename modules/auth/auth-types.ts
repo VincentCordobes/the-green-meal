@@ -4,3 +4,4 @@ export type AuthPayload = {
 }
 
 export type AuthResponse = {personId: number; token: string}
+export type AuthError = "InvalidCredentials"

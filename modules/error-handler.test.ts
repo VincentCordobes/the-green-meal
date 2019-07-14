@@ -15,7 +15,8 @@ describe("error-handler", () => {
       expect(res.ok).toBe(false)
     } else {
       expect(res.statusCode).toBe(500)
-      expect(res.error).not.toContain("My error")
+      expect(res.errorMessage).not.toContain("My error")
+      expect(res.error).toBe("InternalServerError")
     }
   })
 
@@ -33,7 +34,8 @@ describe("error-handler", () => {
       expect(res.ok).toBe(false)
     } else {
       expect(res.statusCode).toBe(400)
-      expect(res.error).toContain("Hello world")
+      expect(res.error).toBe("BadRequest")
+      expect(res.errorMessage).toContain("Hello world")
     }
   })
 })

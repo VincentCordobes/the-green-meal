@@ -21,9 +21,10 @@ export function responseOK<T extends object>(value: T): OKResponse<T> {
   return {ok: true, value}
 }
 
-export function responseKO(value: {
-  error: string
+export function responseKO<T>(value: {
+  error: T
   statusCode: number
-}): KOResponse {
+  errorMessage?: string
+}): KOResponse<T> {
   return {...value, ok: false}
 }

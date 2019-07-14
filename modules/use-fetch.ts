@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from "react"
+import {useState, useEffect, useRef, useCallback} from "react"
 import {request} from "./http-client"
 
 type Options<T> = {
@@ -15,23 +15,28 @@ export const useFetch = <T>(
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    request<T>(url, {body, params}).then(response => {
-      setLoading(false)
-      isInitialFetch.current = false
-      if (response.ok) {
-        setData(response.value)
-      } else {
-        setError(response.error)
-      }
-    })
+  const fetch = useCallback(async () => {
+    const response = await request<T>(url, {body, params})
+    setLoading(false)
+    isInitialFetch.current = false
+
+    if (response.ok) {
+      setData(response.value)
+    } else {
+      setError(response.error)
+    }
   }, [url, body, params])
+
+  useEffect(() => {
+    fetch()
+  }, [fetch])
 
   return {
     data,
     loading,
     error,
     setData,
+    refetch: fetch,
     isInitialFetch: isInitialFetch.current,
   }
 }
