@@ -2,30 +2,43 @@ import React, {useState} from "react"
 import Modal from "antd/lib/modal"
 import Form from "antd/lib/form"
 import {FormComponentProps} from "antd/lib/form"
-import {AddUserPayload, UserDTO, AddUserError} from "./types"
+import {UserDTO, UserPayload, AddUserError} from "./types"
 import Input from "antd/lib/input"
 import Select from "antd/lib/select"
-import {ApiResponse} from "../api-types"
+import {request} from "../http-client"
+import {propOr} from "ramda"
 
-type ModalProps = {
+type UserFormProps = {
   visible: boolean
+  onSave: () => Promise<void>
   onCancel: () => void
-  onSave: (user: AddUserPayload) => Promise<ApiResponse<UserDTO, AddUserError>>
-  // user: UserDTO
+  afterClose: () => void
+  user?: UserDTO
 }
 
-type Props = ModalProps & FormComponentProps<AddUserPayload>
+type Props = UserFormProps & FormComponentProps<UserPayload>
 
 const formItemLayout = {
-  labelCol: {
-    span: 8,
-  },
-  wrapperCol: {
-    span: 12,
-  },
+  labelCol: {span: 8},
+  wrapperCol: {span: 12},
 }
 
-const {Option} = Select
+function updateUser(userId: number, values: UserPayload) {
+  return request<UserDTO, AddUserError>("/api/users/update", {
+    method: "POST",
+    body: {
+      userId,
+      values,
+    },
+  })
+}
+
+function createUser(values: UserPayload) {
+  return request<UserDTO, AddUserError>("/api/users/add", {
+    method: "POST",
+    body: values,
+  })
+}
 
 export const UserForm = Form.create<Props>({
   name: "user-form",
@@ -35,32 +48,43 @@ export const UserForm = Form.create<Props>({
   const {getFieldDecorator} = props.form
 
   const save = () => {
-    props.form.validateFields(async (err, values) => {
+    props.form.validateFields(async (err: any, values: UserPayload) => {
       if (!err) {
         setLoading(true)
 
-        const response = await props.onSave(values)
+        const response = props.user
+          ? await updateUser(props.user.id, values)
+          : await createUser(values)
+
         if (response.ok) {
           props.form.resetFields()
         } else if (response.error === "DuplicateUser") {
           props.form.setFields({
             username: {
-              value: values.username,
+              value: propOr("", "username", values),
               errors: [new Error("This username already exists")],
             },
           })
         }
+
+        await props.onSave()
 
         setLoading(false)
       }
     })
   }
 
+  const initialValue = (field: keyof UserDTO) =>
+    props.user ? props.user[field] : ""
+
+  const {Option} = Select
+
   return (
     <Modal
-      keyboard={false}
+      keyboard={true}
       visible={props.visible}
-      title="Add user"
+      title="Edit user"
+      afterClose={props.afterClose}
       confirmLoading={loading}
       onOk={save}
       onCancel={props.onCancel}
@@ -75,31 +99,32 @@ export const UserForm = Form.create<Props>({
         <Form.Item label="Username">
           {getFieldDecorator("username", {
             rules: [{required: true, message: "Please enter a username"}],
-            // initialValue: user.text,
+            initialValue: initialValue("username"),
           })(<Input autoFocus />)}
         </Form.Item>
-        <Form.Item label="Password">
-          {getFieldDecorator("password", {
-            rules: [{required: true, message: "Please enter a password"}],
-            // initialValue: user.date,
-          })(<Input />)}
-        </Form.Item>
+        {!props.user && (
+          <Form.Item label="Password">
+            {getFieldDecorator("password", {
+              rules: [{required: true, message: "Please enter a password"}],
+            })(<Input type="pasword" />)}
+          </Form.Item>
+        )}
         <Form.Item label="Firstname">
           {getFieldDecorator("firstname", {
             rules: [{required: true, message: "Please enter a firstname"}],
-            // initialValue: user.time,
+            initialValue: initialValue("firstname"),
           })(<Input />)}
         </Form.Item>
         <Form.Item label="Lastname">
           {getFieldDecorator("lastname", {
             rules: [{required: true, message: "Please enter a lastname"}],
-            // initialValue: user.time,
+            initialValue: initialValue("lastname"),
           })(<Input />)}
         </Form.Item>
         <Form.Item label="Role">
           {getFieldDecorator("role", {
             rules: [{required: true, message: "Please enter role"}],
-            initialValue: "regular",
+            initialValue: initialValue("role"),
           })(
             <Select>
               <Option value="regular">Regular</Option>

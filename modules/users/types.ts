@@ -2,7 +2,7 @@ import {Person} from "./person"
 
 export type UserDTO = Omit<Person, "password">
 
-export type AddUserPayload = {
+export type UserPayload = {
   username: string
   password: string
   firstname: string
@@ -14,3 +14,8 @@ export type AddUserError = "DuplicateUser"
 
 export type RemoveUserPayload = {userId: number}
 export type RemoveUserResponse = {userId: number}
+
+export type UpdateUser = {
+  userId: number
+  values?: Partial<UserPayload>
+}

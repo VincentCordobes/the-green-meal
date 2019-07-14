@@ -1,21 +1,24 @@
-import React, {FC, useState} from "react"
+import React, {FC, useState, useCallback} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
-
 import Button from "antd/lib/button"
 import Icon from "antd/lib/icon"
 import Row from "antd/lib/row"
-import {useFetch} from "../use-fetch"
-
+import message from "antd/lib/message"
+import Tooltip from "antd/lib/tooltip"
+import Popconfirm from "antd/lib/popconfirm"
 import Divider from "antd/lib/divider"
 
-import "./user-list.css"
-import {UserForm} from "./user-form"
-import {AddUserPayload, UserDTO} from "./types"
-import message from "antd/lib/message"
+import {useFetch} from "../use-fetch"
 import {request} from "../http-client"
+
+import {UserDTO} from "./types"
+import {UserForm} from "./user-form"
+
+import "./user-list.css"
 
 function buildColumns(params: {
   onDelete: (user: UserDTO) => any
+  onEdit: (user: UserDTO) => any
 }): ColumnProps<UserDTO>[] {
   return [
     {
@@ -46,13 +49,22 @@ function buildColumns(params: {
       width: 150,
       render: (_, user) => (
         <>
-          <Button type="link">
-            <Icon type="edit" />
-          </Button>
+          <Tooltip title="Edit" placement="bottom">
+            <Button type="link" onClick={() => params.onEdit(user)}>
+              <Icon type="edit" />
+            </Button>
+          </Tooltip>
           <Divider type="vertical" />
-          <Button type="link" onClick={() => params.onDelete(user)}>
-            <Icon type="delete" />
-          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this user ?"
+            onConfirm={() => params.onDelete(user)}
+          >
+            <Tooltip title="Delete" placement="bottom">
+              <a>
+                <Icon type="delete" />
+              </a>
+            </Tooltip>
+          </Popconfirm>
         </>
       ),
     },
@@ -65,29 +77,14 @@ type Props = {
 
 export const UserList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
-  // const [filter, setFilter] = useState<UsersFilter>()
-  const {data: users, setData: setUsers, refetch} = useFetch<UserDTO[]>(
-    "/api/users",
-    {
-      // params: filter,
-      initialData: props.users,
-    },
-  )
 
-  const addUser = async (user: AddUserPayload) => {
-    const response = await request<UserDTO>("/api/users/add", {
-      method: "POST",
-      body: user,
-    })
+  const [selectedUser, setSelectedUser] = useState<UserDTO>()
 
-    if (response.ok) {
-      setUsers(users => (users || []).concat(response.value))
-      closeModal()
-      message.success("User added")
-    }
+  const resetSelectedUser = useCallback(() => setSelectedUser(undefined), [])
 
-    return response
-  }
+  const {data: users, refetch} = useFetch<UserDTO[]>("/api/users", {
+    initialData: props.users,
+  })
 
   const columns = buildColumns({
     onDelete: async user => {
@@ -97,14 +94,31 @@ export const UserList: FC<Props> = props => {
       })
 
       refetch()
+      resetSelectedUser()
       message.success(`User successfully removed`)
     },
+    onEdit: user => {
+      setSelectedUser(user)
+      openModal()
+    },
   })
+
+  const handleSave = useCallback(async () => {
+    await refetch()
+    closeModal()
+    message.success("User added")
+  }, [closeModal, refetch])
 
   return (
     <>
       <Row type="flex" justify="end" className="table-actions">
-        <Button type="primary" onClick={openModal}>
+        <Button
+          type="primary"
+          onClick={() => {
+            resetSelectedUser()
+            openModal()
+          }}
+        >
           <Icon type="plus" />
           Add user
         </Button>
@@ -117,7 +131,13 @@ export const UserList: FC<Props> = props => {
           columns={columns}
         />
       </Row>
-      <UserForm onSave={addUser} visible={isOpen} onCancel={closeModal} />
+      <UserForm
+        visible={isOpen}
+        onSave={handleSave}
+        onCancel={closeModal}
+        afterClose={resetSelectedUser}
+        user={selectedUser}
+      />
     </>
   )
 }

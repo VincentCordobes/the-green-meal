@@ -1,5 +1,7 @@
 import {Pool} from "pg"
+import sql from "sql-template-strings"
 import {SQLStatement} from "sql-template-strings"
+import {IPGQueryConfig} from "@sequencework/sql/dist/utils"
 
 export const DB_NAME = "the_green_meal"
 
@@ -15,7 +17,9 @@ export function closeDb() {
   return pool.end()
 }
 
-export async function query<T>(sql: SQLStatement): Promise<T[]> {
+export async function query<T>(
+  sql: SQLStatement | IPGQueryConfig,
+): Promise<T[]> {
   try {
     const {rows} = await pool.query(sql)
     return rows
@@ -26,6 +30,20 @@ export async function query<T>(sql: SQLStatement): Promise<T[]> {
 
 export function execute(sql: string) {
   return pool.query(sql)
+}
+
+export function buildUpdateFields<T extends object>(record: T) {
+  const entries = Object.entries(record)
+
+  return entries.reduce((sqlQuery, [key, value], i) => {
+    sqlQuery.append(`${key} = `).append(sql`${value} `)
+
+    if (i < entries.length - 1) {
+      sqlQuery.append(", ")
+    }
+
+    return sqlQuery
+  }, sql` `)
 }
 
 export class DBError extends Error {

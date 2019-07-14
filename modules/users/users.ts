@@ -1,18 +1,20 @@
 import {ApiRequest, ApiResponse} from "../api-types"
-import {query, DBError, DB_ERROR} from "../database"
+import {query, DBError, DB_ERROR, buildUpdateFields} from "../database"
 import {responseOK, responseKO} from "../api"
 import {validate} from "../validate"
 import {dissoc, head} from "ramda"
-import SQL from "sql-template-strings"
-import {Person, findAll} from "./person"
+import sql from "sql-template-strings"
+import {Person, findAll, findById} from "./person"
 import Joi from "@hapi/joi"
 import {
   UserDTO,
-  AddUserPayload,
+  UserPayload,
   AddUserError,
   RemoveUserResponse,
   RemoveUserPayload,
+  UpdateUser,
 } from "./types"
+import {hashPassword} from "../auth/auth"
 
 export async function list(req: ApiRequest): Promise<ApiResponse<UserDTO[]>> {
   const persons = await findAll()
@@ -23,26 +25,26 @@ function toUserDTO(person: Person): UserDTO {
   return dissoc("password", person)
 }
 
+const roleSchema = Joi.string().valid("manager", "regular", "admin")
+
 export async function add(
   req: ApiRequest,
 ): Promise<ApiResponse<UserDTO, AddUserError>> {
   const {username, password, firstname, lastname, role = "regular"} = validate<
-    AddUserPayload
+    UserPayload
   >(
     Joi.object({
       username: Joi.string(),
       password: Joi.string(),
       firstname: Joi.string(),
       lastname: Joi.string(),
-      role: Joi.string()
-        .valid("manager", "regular", "admin")
-        .optional(),
+      role: roleSchema.optional(),
     }),
     req.body,
   )
 
   return query<Person>(
-    SQL`insert into person (username, password, firstname, lastname, role)
+    sql`insert into person (username, password, firstname, lastname, role)
         values (${username}, ${password}, ${firstname}, ${lastname}, ${role})
         returning *`,
   )
@@ -70,6 +72,41 @@ export async function remove(
   )
 
   return query<RemoveUserResponse>(
-    SQL`delete from person where id=${userId}`,
+    sql`delete from person where id=${userId}`,
   ).then(() => responseOK({userId}))
+}
+
+export async function update(
+  req: ApiRequest<UpdateUser>,
+): Promise<ApiResponse<UserDTO>> {
+  const {userId, values: fields} = validate<UpdateUser>(
+    Joi.object({
+      userId: Joi.number(),
+      values: Joi.object({
+        username: Joi.string().optional(),
+        password: Joi.string().optional(),
+        firstname: Joi.string().optional(),
+        lastname: Joi.string().optional(),
+        role: roleSchema.optional(),
+      }).optional(),
+    }).optional(),
+    req.body,
+  )
+  if (!fields || !Object.values(fields).length) {
+    const user = await findById(userId)
+    return responseOK(toUserDTO(user))
+  }
+
+  if (fields.password) {
+    fields.password = await hashPassword(fields.password)
+  }
+
+  return query<UserDTO>(
+    sql`update person set `
+      .append(buildUpdateFields(fields))
+      .append(` where id = ${userId} `)
+      .append(` returning * `),
+  )
+    .then(head)
+    .then(user => responseOK(toUserDTO(user)))
 }
