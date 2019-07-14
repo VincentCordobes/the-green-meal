@@ -1,10 +1,17 @@
 import SQL from "sql-template-strings"
-import {query} from "./database"
+import {query} from "../database"
 
 export type Person = {
   id: number
   username: string
   password: string
+  role: "regular" | "admin" | "manager"
+  firstname: string
+  lastname: string
+}
+
+export function findAll(): Promise<Person[]> {
+  return query<Person>(SQL`select * from person`)
 }
 
 export async function findById(personId: number): Promise<Person> {

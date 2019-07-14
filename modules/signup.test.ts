@@ -1,5 +1,5 @@
 import signup from "./signup"
-import Person from "./person"
+import Person from "./users/person"
 import {initTestDb} from "./test-helpers"
 import {closeDb} from "./database"
 

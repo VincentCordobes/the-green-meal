@@ -5,7 +5,7 @@ import {SQL} from "sql-template-strings"
 import {query} from "../database"
 import {ApiRequest, ApiResponse} from "../api-types"
 import {AuthPayload, AuthResponse} from "./auth-types"
-import {Person} from "../person"
+import {Person} from "../users/person"
 import {validate} from "../validate"
 
 process.on("unhandledRejection", e => {

@@ -36,3 +36,7 @@
 .footer {
   text-align: center;
 }
+
+#nprogress .bar {
+  background: #1890ff;
+}
