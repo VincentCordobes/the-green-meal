@@ -15,21 +15,18 @@ export const withAuth = (WrappedComponent: any) =>
 
       const componentProps =
         WrappedComponent.getInitialProps &&
-        (await WrappedComponent.getInitialProps(ctx))
+        (await WrappedComponent.getInitialProps(ctx, token))
 
       return {...componentProps, token}
     }
 
     render() {
-      console.log("RENDER=========")
       return <WrappedComponent {...this.props} />
     }
   }
 
 export const auth = (ctx: NextPageContext) => {
   const {token} = nextCookie(ctx)
-  console.log("token==========")
-  console.log(token)
 
   if (ctx.req && ctx.res && !token) {
     ctx.res.writeHead(302, {Location: "/login"})

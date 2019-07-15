@@ -1,22 +1,32 @@
-import SQL from "sql-template-strings"
+import sql from "sql-template-strings"
 import {query} from "../database"
+
+export type Role = "regular" | "admin" | "manager"
 
 export type Person = {
   id: number
   email: string
   password: string
-  role: "regular" | "admin" | "manager"
+  emailValidated: boolean
+  role: Role
   firstname: string
   lastname: string
 }
 
+export function findByManagerId(managerId: number): Promise<Person[]> {
+  return query<Person>(
+    sql`select * from person
+        where person.manager_id = ${managerId}`,
+  )
+}
+
 export function findAll(): Promise<Person[]> {
-  return query<Person>(SQL`select * from person`)
+  return query<Person>(sql`select * from person`)
 }
 
 export async function findById(personId: number): Promise<Person> {
   const [person] = await query<Person>(
-    SQL`select * from person where id = ${personId}`,
+    sql`select * from person where id = ${personId}`,
   )
   if (!person) {
     throw new Error(`Person ${personId} not found`)

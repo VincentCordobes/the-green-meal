@@ -5,6 +5,7 @@ import {FormComponentProps} from "antd/lib/form"
 import {UserDTO, UserPayload, AddUserError} from "./types"
 import Input from "antd/lib/input"
 import Select from "antd/lib/select"
+import message from "antd/lib/message"
 import {request} from "../http-client"
 import {propOr} from "ramda"
 
@@ -56,8 +57,11 @@ export const UserForm = Form.create<Props>({
           ? await updateUser(props.user.id, values)
           : await createUser(values)
 
+        await props.onSave()
+
         if (response.ok) {
           props.form.resetFields()
+          message.success("User added")
         } else if (response.error === "DuplicateUser") {
           props.form.setFields({
             email: {
@@ -65,9 +69,9 @@ export const UserForm = Form.create<Props>({
               errors: [new Error("This email already exists")],
             },
           })
+        } else {
+          message.error("Oops something went wrong :(")
         }
-
-        await props.onSave()
 
         setLoading(false)
       }
@@ -83,7 +87,7 @@ export const UserForm = Form.create<Props>({
     <Modal
       keyboard={true}
       visible={props.visible}
-      title="Edit user"
+      title={props.user ? "Edit user" : "Add user"}
       afterClose={props.afterClose}
       confirmLoading={loading}
       onOk={save}
@@ -105,6 +109,13 @@ export const UserForm = Form.create<Props>({
             initialValue: initialValue("email"),
           })(<Input autoFocus />)}
         </Form.Item>
+        {!props.user && (
+          <Form.Item label="Password">
+            {getFieldDecorator("password", {
+              rules: [{required: true, message: "Please enter a password"}],
+            })(<Input type="password" />)}
+          </Form.Item>
+        )}
         <Form.Item label="Firstname">
           {getFieldDecorator("firstname", {
             rules: [{required: true, message: "Please enter a firstname"}],

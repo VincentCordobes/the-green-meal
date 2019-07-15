@@ -1,9 +1,11 @@
-import {NextPage} from "next"
+import {NextPage, NextPageContext} from "next"
+import nextCookies from "next-cookies"
 import Layout from "../modules/app/layout"
 import {UserList} from "../modules/users/user-list"
 import React from "react"
 import {request} from "../modules/http-client"
 import {UserDTO} from "../modules/users/types"
+import Router from "next/router"
 
 type Props = {
   users: UserDTO[]
@@ -37,8 +39,25 @@ class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
   }
 }
 
-Index.getInitialProps = async (): Promise<Props> => {
-  const response = await request<UserDTO[]>("/api/users")
+Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
+  const {token} = nextCookies(ctx)
+
+  const redirectOnError = () =>
+    typeof window !== "undefined"
+      ? Router.push("/login")
+      : ctx.res && ctx.res.writeHead(302, {Location: "/login"}).end()
+
+  if (!token) {
+    redirectOnError()
+    return {users: []}
+  }
+
+  const response = await request<UserDTO[]>("/api/users", {
+    headers: {
+      Authorization: token,
+    },
+  })
+
   if (response.ok) {
     return {
       users: response.value,

@@ -2,10 +2,11 @@ import {ApiRequest, ApiResponse} from "../api-types"
 import {query, DBError, DB_ERROR, buildUpdateFields} from "../database"
 import {responseOK, responseKO} from "../api"
 import {validate} from "../validate"
-import {dissoc, head} from "ramda"
+import {head, pickBy, isNil} from "ramda"
 import sql from "sql-template-strings"
-import {Person, findAll, findById} from "./person"
+import {Person, findAll, findById, findByManagerId} from "./person"
 import Joi from "@hapi/joi"
+import uuid from "uuid"
 import {
   UserDTO,
   UserPayload,
@@ -15,14 +16,31 @@ import {
   UpdateUser,
 } from "./types"
 import {hashPassword} from "../auth/auth"
+import {confirmEmailTemplate, sendMail} from "../mailing"
+import {AccessResult, withACLs} from "../auth/with-auth-server"
 
-export async function list(req: ApiRequest): Promise<ApiResponse<UserDTO[]>> {
-  const persons = await findAll()
-  return responseOK(persons.map(toUserDTO))
-}
+export const list = withACLs(
+  ["admin", "manager"],
+  async (
+    _: ApiRequest,
+    params?: AccessResult,
+  ): Promise<ApiResponse<UserDTO[]>> => {
+    if (params && params.role === "manager") {
+      const persons = await findByManagerId(params.userId)
+      return responseOK(persons.map(toUserDTO))
+    }
+
+    const persons = await findAll()
+    return responseOK(persons.map(toUserDTO))
+  },
+)
 
 function toUserDTO(person: Person): UserDTO {
-  return dissoc("password", person)
+  return pickBy((val, key) => {
+    const fieldsToIgnore = ["password", "emailConfirmationToken", "managerId"]
+
+    return !fieldsToIgnore.includes(key) && !isNil(val)
+  }, person)
 }
 
 const roleSchema = Joi.string().valid("manager", "regular", "admin")
@@ -49,13 +67,20 @@ export async function add(
 
   const password: string = await hashPassword(plainPassword)
 
+  const emailValidationToken = uuid.v4()
+
   return query<Person>(
-    sql`insert into person (email, password, firstname, lastname, role)
-        values (${email}, ${password}, ${firstname}, ${lastname}, ${role})
+    sql`insert into 
+        person (email, email_confirmation_token, password, firstname, lastname, role)
+        values (${email}, ${emailValidationToken}, ${password}, ${firstname}, ${lastname}, ${role})
         returning *`,
   )
     .then(head)
     .then(user => responseOK(toUserDTO(user)))
+    .then(response => {
+      sendMail(email, confirmEmailTemplate(emailValidationToken))
+      return response
+    })
     .catch((e: DBError) => {
       if (e.code === DB_ERROR.uniqueViolation) {
         return responseKO({

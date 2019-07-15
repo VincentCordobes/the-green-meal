@@ -6,7 +6,31 @@ import path from "path"
 export function aRequest<T = any>(
   props: Partial<ApiRequest<T>> = {},
 ): ApiRequest<T> {
-  return props
+  return {
+    cookies: {
+      token: "regular",
+    },
+    headers: {},
+    ...props,
+  }
+}
+
+export function anAdminRequest<T = any>(props: Partial<ApiRequest<T>> = {}) {
+  return aRequest({
+    cookies: {
+      token: "admin",
+    },
+    ...props,
+  })
+}
+
+export function aManagerRequest<T = any>(props: Partial<ApiRequest<T>> = {}) {
+  return aRequest({
+    cookies: {
+      token: "manager",
+    },
+    ...props,
+  })
 }
 
 export async function initDbWithFixtures(fixturesPath: string) {

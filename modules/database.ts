@@ -1,4 +1,5 @@
 import {Pool} from "pg"
+import R from "ramda"
 import sql from "sql-template-strings"
 import {SQLStatement} from "sql-template-strings"
 import {IPGQueryConfig} from "@sequencework/sql/dist/utils"
@@ -22,7 +23,7 @@ export async function query<T>(
 ): Promise<T[]> {
   try {
     const {rows} = await pool.query(sql)
-    return rows
+    return rows.map(row => mapKeys(camelCase, row))
   } catch (e) {
     throw new DBError(e)
   }
@@ -58,4 +59,12 @@ export class DBError extends Error {
     this.code = e.code
     this.hint = e.hint
   }
+}
+
+function camelCase(value: string): string {
+  return value.replace(/_\w/g, (m: string) => m[1].toUpperCase())
+}
+
+const mapKeys = (fn: (key: string) => string, obj: any): any => {
+  return R.fromPairs(R.map(([key, value]) => [fn(key), value], R.toPairs(obj)))
 }

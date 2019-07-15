@@ -15,6 +15,7 @@ import {UserDTO} from "./types"
 import {UserForm} from "./user-form"
 
 import "./user-list.css"
+import Tag from "antd/lib/tag"
 
 function buildColumns(params: {
   onDelete: (user: UserDTO) => any
@@ -40,6 +41,12 @@ function buildColumns(params: {
       title: "Role",
       key: "role",
       dataIndex: "role",
+    },
+    {
+      title: "Status",
+      key: "emailValidated",
+      dataIndex: "emailValidated",
+      render: validated => (validated ? "" : <Tag color="orange">pending</Tag>),
     },
     {
       title: "Actions",
@@ -106,7 +113,6 @@ export const UserList: FC<Props> = props => {
   const handleSave = useCallback(async () => {
     await refetch()
     closeModal()
-    message.success("User added")
   }, [closeModal, refetch])
 
   return (

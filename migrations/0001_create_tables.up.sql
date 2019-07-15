@@ -3,10 +3,14 @@ create type role as ENUM ('manager', 'admin', 'regular');
 create table if not exists person (
   id serial primary key,
   email text unique not null,
+  email_validated boolean default false,
+  email_confirmation_token text,
   password text not null,
   role role default 'regular',
   firstname text,
-  lastname text 
+  lastname text,
+  manager_id integer,
+  foreign key (manager_id) references person(id) on delete set null
  );
 
 

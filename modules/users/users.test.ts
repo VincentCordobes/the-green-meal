@@ -1,17 +1,32 @@
-import {aRequest, initDbWithFixtures} from "../test-helpers"
+import {
+  aRequest,
+  initDbWithFixtures,
+  anAdminRequest,
+  aManagerRequest,
+} from "../test-helpers"
 import {list, add, remove, update} from "./users"
 import {findById} from "./person"
 import {closeDb} from "../database"
 import {dissoc} from "ramda"
 import {UserPayload, RemoveUserPayload, UpdateUser} from "./types"
 
+jest.mock("jsonwebtoken", () => {
+  const verify = jest.fn((token, _, cb) =>
+    ["regular", "manager", "admin"].includes(token)
+      ? cb(null, {userId: 1, role: token})
+      : cb("error"),
+  )
+
+  return {verify}
+})
+
 beforeEach(() => initDbWithFixtures("users/fixtures.sql"))
 afterAll(() => closeDb())
 
 describe("List users", () => {
-  test("should return all users", async () => {
+  test("should return all users for admin", async () => {
     // when
-    const response = await list(aRequest())
+    const response = await list(anAdminRequest())
 
     // then
     expect(response).toEqual({
@@ -20,13 +35,15 @@ describe("List users", () => {
         {
           id: 1,
           email: "user1",
-          role: "regular",
+          emailValidated: true,
+          role: "manager",
           firstname: "firstname1",
           lastname: "lastname1",
         },
         {
           id: 2,
           email: "user2",
+          emailValidated: true,
           role: "regular",
           firstname: "firstname2",
           lastname: "lastname2",
@@ -34,6 +51,7 @@ describe("List users", () => {
         {
           id: 3,
           email: "user3",
+          emailValidated: true,
           role: "regular",
           firstname: "firstname3",
           lastname: "lastname3",
@@ -41,6 +59,7 @@ describe("List users", () => {
         {
           id: 4,
           email: "user4",
+          emailValidated: true,
           role: "regular",
           firstname: "firstname4",
           lastname: "lastname4",
@@ -48,26 +67,107 @@ describe("List users", () => {
       ],
     })
   })
+
+  test("should return only the users managed by the manager", async () => {
+    // when
+    const response = await list(aManagerRequest())
+
+    // then
+    expect(response).toEqual({
+      ok: true,
+      value: [
+        {
+          id: 3,
+          email: "user3",
+          emailValidated: true,
+          role: "regular",
+          firstname: "firstname3",
+          lastname: "lastname3",
+        },
+        {
+          id: 4,
+          email: "user4",
+          emailValidated: true,
+          role: "regular",
+          firstname: "firstname4",
+          lastname: "lastname4",
+        },
+      ],
+    })
+  })
+
+  test("should return an error when the user is regular", async () => {
+    // when
+    expect.assertions(1)
+    try {
+      await list(
+        aRequest({
+          cookies: {
+            token: "regular",
+          },
+        }),
+      )
+    } catch (e) {
+      // then
+      expect(e).toBeTruthy()
+    }
+  })
+})
+
+describe("Add users", () => {
   test("should add a user", async () => {
     // given
     const user: UserPayload = {
-      lastname: "Cordobes",
-      firstname: "Vincent",
       email: "VincentCordobes",
       password: "pass",
+      lastname: "Cordobes",
+      firstname: "Vincent",
     }
 
     // when
     const response = await add(aRequest({body: user}))
 
     // then
-    expect(response).toEqual({
-      ok: true,
-      value: {
-        ...dissoc("password", user),
-        id: expect.any(Number),
-        role: "regular",
+    expect.assertions(2)
+    if (response.ok) {
+      expect(response).toEqual({
+        ok: true,
+        value: {
+          ...dissoc("password", user),
+          id: expect.any(Number),
+          emailValidated: false,
+          role: "regular",
+        },
+      })
+      const personInDb = await findById(response.value.id)
+      expect(personInDb).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          email: "VincentCordobes",
+          password: expect.not.stringContaining("pass"),
+        }),
+      )
+    }
+  })
+
+  test("should not create the user when the email exists", async () => {
+    const request = aRequest({
+      body: {
+        email: "VincentC@toto.com",
+        password: "toto",
+        lastname: "Cordobes",
+        firstname: "Vincent",
       },
+    })
+
+    // when
+    await add(request)
+    const response = await add(request)
+    expect(response).toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "DuplicateUser",
+      errorMessage: expect.any(String),
     })
   })
 
@@ -79,7 +179,7 @@ describe("List users", () => {
 
     // when
     await remove(aRequest({body: userToRemove}))
-    const response = await list(aRequest())
+    const response = await list(anAdminRequest())
 
     // then
     expect(
@@ -117,14 +217,16 @@ describe("Update user", () => {
     const response = await findById(user.userId)
 
     // then
-    expect(response).toEqual({
-      id: 2,
-      email: "user2",
-      password: expect.any(String),
-      role: "regular",
-      firstname: "firstname2",
-      lastname: "lastname2",
-    })
+    expect(response).toEqual(
+      expect.objectContaining({
+        id: 2,
+        email: "user2",
+        password: expect.any(String),
+        role: "regular",
+        firstname: "firstname2",
+        lastname: "lastname2",
+      }),
+    )
   })
 
   test("should update only provided fields only and returns the whole record", async () => {
@@ -143,6 +245,7 @@ describe("Update user", () => {
       value: {
         id: 2,
         email: "user2",
+        emailValidated: true,
         role: "regular",
         firstname: "Vincent",
         lastname: "lastname2",
@@ -175,6 +278,7 @@ describe("Update user", () => {
         lastname: "Cordobes",
         role: "admin",
         email: "actualemail",
+        emailValidated: true,
       },
     })
   })

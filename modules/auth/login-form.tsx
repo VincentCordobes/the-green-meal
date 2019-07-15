@@ -1,5 +1,6 @@
 import React, {useState} from "react"
 
+import qs from "query-string"
 import Checkbox from "antd/lib/checkbox"
 import Button from "antd/lib/button"
 import Input from "antd/lib/input"
@@ -16,6 +17,7 @@ import {AuthResponse, AuthPayload} from "./auth-types"
 
 import "./login-form.css"
 import {useRouter} from "next/router"
+import {pathOr} from "ramda"
 
 type Props = FormComponentProps<AuthPayload>
 
@@ -51,6 +53,7 @@ const LoginForm: React.FC<Props> = props => {
     })
   }
 
+  const emailConfirmed = pathOr(false, ["query", "confirmed"], router)
   const {getFieldDecorator} = props.form
 
   return (
@@ -60,6 +63,13 @@ const LoginForm: React.FC<Props> = props => {
           <Alert
             message={apiError}
             type="error"
+            style={inlineStyles.loginError}
+          />
+        )}
+        {emailConfirmed && (
+          <Alert
+            message="Email successfully confirmed."
+            type="info"
             style={inlineStyles.loginError}
           />
         )}
