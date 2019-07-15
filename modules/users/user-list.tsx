@@ -22,9 +22,9 @@ function buildColumns(params: {
 }): ColumnProps<UserDTO>[] {
   return [
     {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
+      title: "email",
+      dataIndex: "email",
+      key: "email",
     },
     {
       title: "Firstname",

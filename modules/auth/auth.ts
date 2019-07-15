@@ -14,7 +14,7 @@ process.on("unhandledRejection", e => {
 })
 
 const requestSchema = Joi.object({
-  username: Joi.string().required(),
+  email: Joi.string().required(),
   password: Joi.string().required(),
 })
 
@@ -23,11 +23,11 @@ export default auth
 async function auth(
   req: ApiRequest,
 ): Promise<ApiResponse<AuthResponse, AuthError>> {
-  const {username, password} = validate<AuthPayload>(requestSchema, req.body)
+  const {email, password} = validate<AuthPayload>(requestSchema, req.body)
 
   const [person] = await query<Person>(
     SQL`select id, password from person
-        where username=${username}`,
+        where email=${email}`,
   )
 
   if (person) {
@@ -46,7 +46,7 @@ async function auth(
   return responseKO({
     error: "InvalidCredentials",
     statusCode: 401,
-    errorMessage: "Wrong username or password",
+    errorMessage: "Wrong email or password",
   })
 }
 

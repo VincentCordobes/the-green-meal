@@ -19,28 +19,28 @@ describe("List users", () => {
       value: [
         {
           id: 1,
-          username: "user1",
+          email: "user1",
           role: "regular",
           firstname: "firstname1",
           lastname: "lastname1",
         },
         {
           id: 2,
-          username: "user2",
+          email: "user2",
           role: "regular",
           firstname: "firstname2",
           lastname: "lastname2",
         },
         {
           id: 3,
-          username: "user3",
+          email: "user3",
           role: "regular",
           firstname: "firstname3",
           lastname: "lastname3",
         },
         {
           id: 4,
-          username: "user4",
+          email: "user4",
           role: "regular",
           firstname: "firstname4",
           lastname: "lastname4",
@@ -53,7 +53,7 @@ describe("List users", () => {
     const user: UserPayload = {
       lastname: "Cordobes",
       firstname: "Vincent",
-      username: "VincentCordobes",
+      email: "VincentCordobes",
       password: "pass",
     }
 
@@ -119,7 +119,7 @@ describe("Update user", () => {
     // then
     expect(response).toEqual({
       id: 2,
-      username: "user2",
+      email: "user2",
       password: expect.any(String),
       role: "regular",
       firstname: "firstname2",
@@ -142,7 +142,7 @@ describe("Update user", () => {
       ok: true,
       value: {
         id: 2,
-        username: "user2",
+        email: "user2",
         role: "regular",
         firstname: "Vincent",
         lastname: "lastname2",
@@ -158,7 +158,7 @@ describe("Update user", () => {
         firstname: "Vincent",
         lastname: "Cordobes",
         role: "admin",
-        username: "actualUsername",
+        email: "actualemail",
         password: "titi",
       },
     }
@@ -174,7 +174,7 @@ describe("Update user", () => {
         firstname: "Vincent",
         lastname: "Cordobes",
         role: "admin",
-        username: "actualUsername",
+        email: "actualemail",
       },
     })
   })

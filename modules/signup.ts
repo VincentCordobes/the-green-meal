@@ -11,7 +11,7 @@ import {responseOK, responseKO} from "./api"
 export default signup
 
 type SignupRequest = {
-  username: string
+  email: string
   password: string
 }
 
@@ -20,9 +20,9 @@ type SignupResponse = {
 }
 
 async function signup(req: ApiRequest): Promise<ApiResponse<SignupResponse>> {
-  const {username, password} = validate<SignupRequest>(
+  const {email, password} = validate<SignupRequest>(
     Joi.object({
-      username: Joi.string(),
+      email: Joi.string(),
       password: Joi.string(),
     }),
     req.body,
@@ -30,8 +30,8 @@ async function signup(req: ApiRequest): Promise<ApiResponse<SignupResponse>> {
   const passwordHash = await hashPassword(password)
 
   return query<Person>(
-    SQL`insert into person (username, password) 
-        values (${username}, ${passwordHash}) returning id`,
+    SQL`insert into person (email, password) 
+        values (${email}, ${passwordHash}) returning id`,
   )
     .then(head)
     .then(person => responseOK({personId: person.id}))
@@ -39,7 +39,7 @@ async function signup(req: ApiRequest): Promise<ApiResponse<SignupResponse>> {
       if (e.code === DB_ERROR.uniqueViolation) {
         return responseKO({
           statusCode: 400,
-          error: "Username already exists",
+          error: "email already exists",
         })
       }
       throw e

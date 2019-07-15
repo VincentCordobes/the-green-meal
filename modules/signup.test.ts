@@ -11,7 +11,7 @@ describe("sign up a new user", () => {
     // given
     const request = {
       body: {
-        username: "VincentC",
+        email: "VincentC",
         password: "toto",
       },
     }
@@ -28,16 +28,16 @@ describe("sign up a new user", () => {
     expect(personInDb).toEqual(
       expect.objectContaining({
         id: expect.any(Number),
-        username: "VincentC",
+        email: "VincentC",
         password: expect.not.stringContaining("toto"),
       }),
     )
   })
 
-  test("should not create the user when the username exists", async () => {
+  test("should not create the user when the email exists", async () => {
     const request = {
       body: {
-        username: "VincentC",
+        email: "VincentC",
         password: "toto",
       },
     }
@@ -48,7 +48,7 @@ describe("sign up a new user", () => {
     expect(response).toEqual({
       ok: false,
       statusCode: 400,
-      error: "Username already exists",
+      error: "email already exists",
     })
   })
 })

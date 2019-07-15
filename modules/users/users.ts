@@ -31,14 +31,14 @@ export async function add(
   req: ApiRequest,
 ): Promise<ApiResponse<UserDTO, AddUserError>> {
   const {
-    username,
+    email,
     password: plainPassword,
     firstname,
     lastname,
     role = "regular",
   } = validate<UserPayload>(
     Joi.object({
-      username: Joi.string(),
+      email: Joi.string(),
       password: Joi.string(),
       firstname: Joi.string(),
       lastname: Joi.string(),
@@ -50,8 +50,8 @@ export async function add(
   const password: string = await hashPassword(plainPassword)
 
   return query<Person>(
-    sql`insert into person (username, password, firstname, lastname, role)
-        values (${username}, ${password}, ${firstname}, ${lastname}, ${role})
+    sql`insert into person (email, password, firstname, lastname, role)
+        values (${email}, ${password}, ${firstname}, ${lastname}, ${role})
         returning *`,
   )
     .then(head)
@@ -60,7 +60,7 @@ export async function add(
       if (e.code === DB_ERROR.uniqueViolation) {
         return responseKO({
           error: "DuplicateUser",
-          errorMessage: "Username must be unique",
+          errorMessage: "email must be unique",
           statusCode: 400,
         })
       } else {
@@ -89,7 +89,7 @@ export async function update(
     Joi.object({
       userId: Joi.number(),
       values: Joi.object({
-        username: Joi.string().optional(),
+        email: Joi.string().optional(),
         password: Joi.string().optional(),
         firstname: Joi.string().optional(),
         lastname: Joi.string().optional(),

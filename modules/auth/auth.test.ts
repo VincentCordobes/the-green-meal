@@ -14,7 +14,7 @@ describe("Auth endpoint", () => {
     // given
     const req: ApiRequest<AuthPayload> = aRequest({
       body: {
-        username: "Vincent",
+        email: "Vincent",
         password: "toto",
       },
     })
@@ -41,7 +41,7 @@ describe("Auth endpoint", () => {
     // given
     const req: ApiRequest<AuthPayload> = {
       body: {
-        username: "Vincent",
+        email: "Vincent",
         password: "totoo",
       },
     }
@@ -54,7 +54,7 @@ describe("Auth endpoint", () => {
       ok: false,
       statusCode: 401,
       error: "InvalidCredentials",
-      errorMessage: "Wrong username or password",
+      errorMessage: "Wrong email or password",
     })
   })
 
@@ -64,7 +64,7 @@ describe("Auth endpoint", () => {
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",
-          username: "VincentCordobes",
+          email: "VincentCordobes",
           password: "pass",
         },
       }),
@@ -72,7 +72,7 @@ describe("Auth endpoint", () => {
     const response = await auth(
       aRequest({
         body: {
-          username: "VincentCordobes",
+          email: "VincentCordobes",
           password: "pass",
         },
       }),

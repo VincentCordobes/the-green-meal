@@ -3,7 +3,7 @@ import {query} from "../database"
 
 export type Person = {
   id: number
-  username: string
+  email: string
   password: string
   role: "regular" | "admin" | "manager"
   firstname: string

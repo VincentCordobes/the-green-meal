@@ -3,7 +3,7 @@ import {Person} from "./person"
 export type UserDTO = Omit<Person, "password">
 
 export type UserPayload = {
-  username: string
+  email: string
   password: string
   firstname: string
   lastname: string

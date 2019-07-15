@@ -43,7 +43,7 @@ const LoginForm: React.FC<Props> = props => {
               router.replace("/")
             } else {
               setLoading(false)
-              setApiError("Invalid username or password")
+              setApiError("Invalid email or password")
             }
           },
         )
@@ -65,12 +65,12 @@ const LoginForm: React.FC<Props> = props => {
         )}
         <Form onSubmit={handleSubmit} className="login-form">
           <Form.Item>
-            {getFieldDecorator("username", {
-              rules: [{required: true, message: "Please input your username!"}],
+            {getFieldDecorator("email", {
+              rules: [{required: true, message: "Please input your email!"}],
             })(
               <Input
                 prefix={<Icon type="user" style={{color: "rgba(0,0,0,.25)"}} />}
-                placeholder="Username"
+                placeholder="email"
               />,
             )}
           </Form.Item>

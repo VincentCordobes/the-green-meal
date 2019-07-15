@@ -60,9 +60,9 @@ export const UserForm = Form.create<Props>({
           props.form.resetFields()
         } else if (response.error === "DuplicateUser") {
           props.form.setFields({
-            username: {
-              value: propOr("", "username", values),
-              errors: [new Error("This username already exists")],
+            email: {
+              value: propOr("", "email", values),
+              errors: [new Error("This email already exists")],
             },
           })
         }
@@ -96,19 +96,15 @@ export const UserForm = Form.create<Props>({
           save()
         }}
       >
-        <Form.Item label="Username">
-          {getFieldDecorator("username", {
-            rules: [{required: true, message: "Please enter a username"}],
-            initialValue: initialValue("username"),
+        <Form.Item label="email">
+          {getFieldDecorator("email", {
+            rules: [
+              {required: true, message: "Please enter a email"},
+              {type: "email", message: "Please enter a valid email"},
+            ],
+            initialValue: initialValue("email"),
           })(<Input autoFocus />)}
         </Form.Item>
-        {!props.user && (
-          <Form.Item label="Password">
-            {getFieldDecorator("password", {
-              rules: [{required: true, message: "Please enter a password"}],
-            })(<Input type="password" />)}
-          </Form.Item>
-        )}
         <Form.Item label="Firstname">
           {getFieldDecorator("firstname", {
             rules: [{required: true, message: "Please enter a firstname"}],
