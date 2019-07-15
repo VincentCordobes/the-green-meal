@@ -4,6 +4,7 @@ import {ApiRequest} from "../api-types"
 import signup from "../signup"
 import {aRequest, initTestDb} from "../test-helpers"
 import {closeDb} from "../database"
+import {add} from "../users/users"
 
 beforeEach(() => initTestDb())
 afterAll(() => closeDb())
@@ -54,6 +55,40 @@ describe("Auth endpoint", () => {
       statusCode: 401,
       error: "InvalidCredentials",
       errorMessage: "Wrong username or password",
+    })
+  })
+
+  test("should authenticate a newly added user", async () => {
+    await add(
+      aRequest({
+        body: {
+          lastname: "Cordobes",
+          firstname: "Vincent",
+          username: "VincentCordobes",
+          password: "pass",
+        },
+      }),
+    )
+    const response = await auth(
+      aRequest({
+        body: {
+          username: "VincentCordobes",
+          password: "pass",
+        },
+      }),
+    )
+
+    // then
+    if (!response.ok) {
+      expect(response.ok).toBe(true)
+      return
+    }
+    expect(response).toEqual({
+      ok: true,
+      value: {
+        personId: expect.any(Number),
+        token: expect.any(String),
+      },
     })
   })
 })

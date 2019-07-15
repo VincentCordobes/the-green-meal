@@ -4,6 +4,7 @@ import {MealList} from "../modules/meals/meals-list.view"
 import React from "react"
 import {MealDTO} from "../modules/meals/meals-types"
 import {request} from "../modules/http-client"
+import {withAuth} from "../modules/auth/with-auth-client"
 
 type Props = {
   meals: MealDTO[]
@@ -48,4 +49,4 @@ Index.getInitialProps = async (): Promise<Props> => {
   }
 }
 
-export default Index
+export default withAuth(Index)

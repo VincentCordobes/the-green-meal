@@ -9,11 +9,13 @@ import message from "antd/lib/message"
 import Card from "antd/lib/card"
 import Alert from "antd/lib/alert"
 import {FormComponentProps} from "antd/lib/form/Form"
+import cookie from "js-cookie"
 
 import {request} from "../http-client"
 import {AuthResponse, AuthPayload} from "./auth-types"
 
 import "./login-form.css"
+import {useRouter} from "next/router"
 
 type Props = FormComponentProps<AuthPayload>
 
@@ -27,6 +29,8 @@ const LoginForm: React.FC<Props> = props => {
   const [apiError, setApiError] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
 
+  const router = useRouter()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     props.form.validateFields((err, body) => {
@@ -34,10 +38,11 @@ const LoginForm: React.FC<Props> = props => {
         setLoading(true)
         request<AuthResponse>("/api/auth", {method: "POST", body}).then(
           response => {
-            setLoading(false)
             if (response.ok) {
-              message.info("UserId: " + response.value.personId)
+              cookie.set("token", response.value.token, {expires: 7})
+              router.replace("/")
             } else {
+              setLoading(false)
               setApiError("Invalid username or password")
             }
           },

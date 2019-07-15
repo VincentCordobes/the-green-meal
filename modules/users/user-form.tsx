@@ -106,7 +106,7 @@ export const UserForm = Form.create<Props>({
           <Form.Item label="Password">
             {getFieldDecorator("password", {
               rules: [{required: true, message: "Please enter a password"}],
-            })(<Input type="pasword" />)}
+            })(<Input type="password" />)}
           </Form.Item>
         )}
         <Form.Item label="Firstname">
@@ -124,7 +124,7 @@ export const UserForm = Form.create<Props>({
         <Form.Item label="Role">
           {getFieldDecorator("role", {
             rules: [{required: true, message: "Please enter role"}],
-            initialValue: initialValue("role"),
+            initialValue: initialValue("role") || "regular",
           })(
             <Select>
               <Option value="regular">Regular</Option>

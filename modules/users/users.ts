@@ -30,9 +30,13 @@ const roleSchema = Joi.string().valid("manager", "regular", "admin")
 export async function add(
   req: ApiRequest,
 ): Promise<ApiResponse<UserDTO, AddUserError>> {
-  const {username, password, firstname, lastname, role = "regular"} = validate<
-    UserPayload
-  >(
+  const {
+    username,
+    password: plainPassword,
+    firstname,
+    lastname,
+    role = "regular",
+  } = validate<UserPayload>(
     Joi.object({
       username: Joi.string(),
       password: Joi.string(),
@@ -42,6 +46,8 @@ export async function add(
     }),
     req.body,
   )
+
+  const password: string = await hashPassword(plainPassword)
 
   return query<Person>(
     sql`insert into person (username, password, firstname, lastname, role)
