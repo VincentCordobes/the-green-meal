@@ -8,7 +8,7 @@ const API_URL = process.env.API_URL
 export type RequestOptions<T = any> = {
   method: "GET" | "POST" | "PUT"
   body: T
-  params: Record<string, string>
+  params: Record<string, any>
   headers: Record<string, string>
 }
 export async function request<T, E = any>(

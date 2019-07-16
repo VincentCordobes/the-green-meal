@@ -16,17 +16,22 @@ export type Person = {
 export function findByManagerId(managerId: number): Promise<Person[]> {
   return query<Person>(
     sql`select * from person
-        where person.manager_id = ${managerId}`,
+        where person.manager_id = ${managerId}
+        order by lower(email) asc`,
   )
 }
 
 export function findAll(): Promise<Person[]> {
-  return query<Person>(sql`select * from person`)
+  return query<Person>(
+    sql`select * from person
+        order by lower(email) asc`,
+  )
 }
 
 export async function findById(personId: number): Promise<Person> {
   const [person] = await query<Person>(
-    sql`select * from person where id = ${personId}`,
+    sql`select * from person where id = ${personId}
+        order by lower(email) asc`,
   )
   if (!person) {
     throw new Error(`Person ${personId} not found`)

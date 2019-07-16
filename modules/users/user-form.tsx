@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import Modal from "antd/lib/modal"
 import Form from "antd/lib/form"
 import {FormComponentProps} from "antd/lib/form"
@@ -8,6 +8,7 @@ import Select from "antd/lib/select"
 import message from "antd/lib/message"
 import {request} from "../http-client"
 import {propOr} from "ramda"
+import {UserSelect, fullName} from "./select-user"
 
 type UserFormProps = {
   visible: boolean
@@ -15,9 +16,16 @@ type UserFormProps = {
   onCancel: () => void
   afterClose: () => void
   user?: UserDTO
+  users: UserDTO[]
 }
 
-type Props = UserFormProps & FormComponentProps<UserPayload>
+type UserSelectItem = {key: string; label: string}
+
+type FormValues = Omit<UserPayload, "managedUserIds"> & {
+  managedUser: UserSelectItem[]
+}
+
+type Props = UserFormProps & FormComponentProps<FormValues>
 
 const formItemLayout = {
   labelCol: {span: 8},
@@ -45,17 +53,48 @@ export const UserForm = Form.create<Props>({
   name: "user-form",
 })((props: Props) => {
   const [loading, setLoading] = useState(false)
+  const [managedUsers, setManagedUsers] = useState<UserSelectItem[]>([])
+  const clearManagedUsers = () => setManagedUsers([])
+
+  useEffect(() => {
+    if (props.user && props.user.role === "manager") {
+      request<UserDTO[]>("/api/users/managed", {
+        params: {
+          managerId: props.user.id,
+        },
+      }).then(response => {
+        if (response.ok) {
+          setManagedUsers(
+            response.value.map(user => ({
+              key: String(user.id),
+              label: fullName(user),
+            })),
+          )
+        }
+      })
+    } else {
+      clearManagedUsers()
+    }
+  }, [props.user])
 
   const {getFieldDecorator} = props.form
 
   const save = () => {
-    props.form.validateFields(async (err: any, values: UserPayload) => {
+    props.form.validateFields(async (err: any, values: FormValues) => {
       if (!err) {
         setLoading(true)
 
+        const {managedUser, ...fields} = values
+        const userPayload: UserPayload = managedUser
+          ? {
+              ...fields,
+              managedUserIds: values.managedUser.map(({key}) => Number(key)),
+            }
+          : fields
+
         const response = props.user
-          ? await updateUser(props.user.id, values)
-          : await createUser(values)
+          ? await updateUser(props.user.id, userPayload)
+          : await createUser(userPayload)
 
         await props.onSave()
 
@@ -88,9 +127,14 @@ export const UserForm = Form.create<Props>({
       keyboard={true}
       visible={props.visible}
       title={props.user ? "Edit user" : "Add user"}
-      afterClose={props.afterClose}
+      afterClose={() => {
+        props.form.resetFields()
+        clearManagedUsers()
+        props.afterClose()
+      }}
       confirmLoading={loading}
       onOk={save}
+      width={600}
       onCancel={props.onCancel}
     >
       <Form
@@ -130,7 +174,6 @@ export const UserForm = Form.create<Props>({
         </Form.Item>
         <Form.Item label="Role">
           {getFieldDecorator("role", {
-            rules: [{required: true, message: "Please enter role"}],
             initialValue: initialValue("role") || "regular",
           })(
             <Select>
@@ -140,6 +183,13 @@ export const UserForm = Form.create<Props>({
             </Select>,
           )}
         </Form.Item>
+        {props.form.getFieldValue("role") === "manager" && (
+          <Form.Item label="Managed users">
+            {getFieldDecorator("managedUser", {
+              initialValue: managedUsers,
+            })(<UserSelect users={props.users} />)}
+          </Form.Item>
+        )}
         <button hidden />
       </Form>
     </Modal>

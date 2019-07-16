@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken"
 import {Role} from "../users/person"
 import {HTTPError} from "../error-handler"
-import {RequestHandler, ApiError} from "../api-types"
+import {RequestHandler, ApiError, ApiRequest, ApiResponse} from "../api-types"
 
-export function withACLs<T>(
+export function withACLs<T, E>(
   acls: Role[],
-  fn: RequestHandler<T>,
-): RequestHandler<T, ApiError> {
+  fn: (req: ApiRequest, params: AccessResult) => Promise<ApiResponse<T, E>>,
+): RequestHandler<T, E | ApiError> {
   return async req => {
     const user = await checkAccess(
       req.cookies.token || req.headers.authorization,

@@ -4,7 +4,7 @@ import {
   anAdminRequest,
   aManagerRequest,
 } from "../test-helpers"
-import {list, add, remove, update} from "./users"
+import {list, add, remove, update, listManagedUsers} from "./users"
 import {findById} from "./person"
 import {closeDb} from "../database"
 import {dissoc} from "ramda"
@@ -34,7 +34,7 @@ describe("List users", () => {
       value: [
         {
           id: 1,
-          email: "user1",
+          email: "user1@toto.com",
           emailValidated: true,
           role: "manager",
           firstname: "firstname1",
@@ -42,7 +42,7 @@ describe("List users", () => {
         },
         {
           id: 2,
-          email: "user2",
+          email: "user2@toto.com",
           emailValidated: true,
           role: "regular",
           firstname: "firstname2",
@@ -50,7 +50,7 @@ describe("List users", () => {
         },
         {
           id: 3,
-          email: "user3",
+          email: "user3@toto.com",
           emailValidated: true,
           role: "regular",
           firstname: "firstname3",
@@ -58,7 +58,7 @@ describe("List users", () => {
         },
         {
           id: 4,
-          email: "user4",
+          email: "user4@toto.com",
           emailValidated: true,
           role: "regular",
           firstname: "firstname4",
@@ -78,7 +78,7 @@ describe("List users", () => {
       value: [
         {
           id: 3,
-          email: "user3",
+          email: "user3@toto.com",
           emailValidated: true,
           role: "regular",
           firstname: "firstname3",
@@ -86,7 +86,7 @@ describe("List users", () => {
         },
         {
           id: 4,
-          email: "user4",
+          email: "user4@toto.com",
           emailValidated: true,
           role: "regular",
           firstname: "firstname4",
@@ -220,7 +220,7 @@ describe("Update user", () => {
     expect(response).toEqual(
       expect.objectContaining({
         id: 2,
-        email: "user2",
+        email: "user2@toto.com",
         password: expect.any(String),
         role: "regular",
         firstname: "firstname2",
@@ -244,7 +244,7 @@ describe("Update user", () => {
       ok: true,
       value: {
         id: 2,
-        email: "user2",
+        email: "user2@toto.com",
         emailValidated: true,
         role: "regular",
         firstname: "Vincent",
@@ -280,6 +280,47 @@ describe("Update user", () => {
         email: "actualemail",
         emailValidated: true,
       },
+    })
+  })
+})
+
+describe("manager", () => {
+  test("should add and delete managers", async () => {
+    // when
+    await update(
+      aManagerRequest({
+        body: {
+          userId: 2,
+          values: {
+            managedUserIds: [3, 4],
+          },
+        },
+      }),
+    )
+    await update(
+      aManagerRequest({
+        body: {
+          userId: 2,
+          values: {
+            managedUserIds: [2],
+          },
+        },
+      }),
+    )
+    const response = await listManagedUsers(
+      aManagerRequest({query: {managerId: 2}}),
+    )
+
+    // then
+    expect(response).toEqual({
+      ok: true,
+      value: [
+        expect.objectContaining({
+          id: 2,
+          firstname: "firstname2",
+          lastname: "lastname2",
+        }),
+      ],
     })
   })
 })

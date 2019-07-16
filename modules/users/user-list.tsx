@@ -26,11 +26,13 @@ function buildColumns(params: {
       title: "email",
       dataIndex: "email",
       key: "email",
+      // sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "Firstname",
       key: "firstname",
       dataIndex: "firstname",
+      // sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "Lastname",
@@ -143,6 +145,7 @@ export const UserList: FC<Props> = props => {
         onCancel={closeModal}
         afterClose={resetSelectedUser}
         user={selectedUser}
+        users={users || props.users}
       />
     </>
   )

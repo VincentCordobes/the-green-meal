@@ -1,6 +1,5 @@
 import {NextApiRequest, NextApiResponse} from "next"
 import {IncomingHttpHeaders} from "http"
-import {Role} from "./users/person"
 
 export type NextHandler = (
   req: NextApiRequest,

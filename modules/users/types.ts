@@ -8,6 +8,7 @@ export type UserPayload = {
   firstname: string
   lastname: string
   role?: string
+  managedUserIds?: number[]
 }
 
 export type AddUserError = "DuplicateUser"

@@ -17,15 +17,12 @@ import {
 } from "./types"
 import {hashPassword} from "../auth/auth"
 import {confirmEmailTemplate, sendMail} from "../mailing"
-import {AccessResult, withACLs} from "../auth/with-auth-server"
+import {withACLs} from "../auth/with-auth-server"
 
 export const list = withACLs(
   ["admin", "manager"],
-  async (
-    _: ApiRequest,
-    params?: AccessResult,
-  ): Promise<ApiResponse<UserDTO[]>> => {
-    if (params && params.role === "manager") {
+  async (_, params): Promise<ApiResponse<UserDTO[]>> => {
+    if (params.role === "manager") {
       const persons = await findByManagerId(params.userId)
       return responseOK(persons.map(toUserDTO))
     }
@@ -107,23 +104,49 @@ export async function remove(
   ).then(() => responseOK({userId}))
 }
 
+const updateUserSchema = Joi.object({
+  userId: Joi.number(),
+  values: Joi.object({
+    email: Joi.string().optional(),
+    password: Joi.string().optional(),
+    firstname: Joi.string().optional(),
+    lastname: Joi.string().optional(),
+    role: roleSchema.optional(),
+    managedUserIds: Joi.array()
+      .items(Joi.number())
+      .optional(),
+  }).optional(),
+}).optional()
+
 export async function update(
   req: ApiRequest<UpdateUser>,
 ): Promise<ApiResponse<UserDTO>> {
-  const {userId, values: fields} = validate<UpdateUser>(
-    Joi.object({
-      userId: Joi.number(),
-      values: Joi.object({
-        email: Joi.string().optional(),
-        password: Joi.string().optional(),
-        firstname: Joi.string().optional(),
-        lastname: Joi.string().optional(),
-        role: roleSchema.optional(),
-      }).optional(),
-    }).optional(),
-    req.body,
-  )
-  if (!fields || !Object.values(fields).length) {
+  const {userId, values} = validate<UpdateUser>(updateUserSchema, req.body)
+
+  if (!values) {
+    const user = await findById(userId)
+    return responseOK(toUserDTO(user))
+  }
+
+  const {managedUserIds, ...fields} = values
+
+  if (managedUserIds) {
+    await query(
+      sql`update person set 
+          manager_id = null 
+          where manager_id = ${userId}`,
+    )
+  }
+
+  if (managedUserIds && managedUserIds.length) {
+    await query(
+      sql`update person set 
+          manager_id = ${userId}
+          where person.id = any(${managedUserIds})`,
+    )
+  }
+
+  if (!Object.values(fields).length) {
     const user = await findById(userId)
     return responseOK(toUserDTO(user))
   }
@@ -141,3 +164,22 @@ export async function update(
     .then(head)
     .then(user => responseOK(toUserDTO(user)))
 }
+
+export const listManagedUsers = withACLs(
+  ["admin", "manager"],
+  async (req): Promise<ApiResponse<UserDTO[]>> => {
+    const {managerId} = validate<{managerId: number}>(
+      Joi.object({
+        managerId: Joi.number(),
+      }),
+      req.query,
+    )
+    const users = await query<Person>(
+      sql`select *
+          from person
+          where person.manager_id = ${managerId}`,
+    )
+
+    return responseOK(users.map(toUserDTO))
+  },
+)
