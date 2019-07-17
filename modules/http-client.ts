@@ -10,6 +10,7 @@ export type RequestOptions<T = any> = {
   body: T
   params: Record<string, any>
   headers: Record<string, string>
+  token: string
 }
 export async function request<T, E = any>(
   path: string,
@@ -19,6 +20,7 @@ export async function request<T, E = any>(
     method: "GET",
     headers: {
       Accept: "application/json",
+      ...(options.token ? {Authorization: options.token} : {}),
       ...(options.body ? {"Content-Type": "application/json"} : {}),
     },
   }

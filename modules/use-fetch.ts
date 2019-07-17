@@ -8,7 +8,7 @@ type Options<T> = {
 }
 export const useFetch = <T>(
   url: string,
-  {body, initialData, params}: Options<T>,
+  {body, initialData, params}: Options<T> = {},
 ) => {
   const isInitialFetch = useRef(true)
   const [data, setData] = useState<T | undefined>(initialData)

@@ -6,38 +6,21 @@ import React from "react"
 import {request} from "../modules/http-client"
 import {UserDTO} from "../modules/users/types"
 import Router from "next/router"
+import {ErrorBoundary} from "../modules/app/error-boundary"
+import {withAuth} from "../modules/auth/with-auth-client"
 
 type Props = {
   users: UserDTO[]
+  currentUser?: UserDTO
 }
 
 const Index: NextPage<Props> = props => (
-  <Layout>
-    <ErrorBoundary>
+  <ErrorBoundary>
+    <Layout currentUser={props.currentUser}>
       <UserList users={props.users} />
-    </ErrorBoundary>
-  </Layout>
+    </Layout>
+  </ErrorBoundary>
 )
-
-type ErrorBoundaryState = {
-  error: any
-}
-class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
-  state = {error: null}
-
-  componentDidCatch(error: any) {
-    this.setState({error})
-    console.log(error)
-  }
-
-  render() {
-    if (this.state.error) {
-      return <h1>Something went wrong.</h1>
-    }
-
-    return this.props.children
-  }
-}
 
 Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
   const {token} = nextCookies(ctx)
@@ -71,4 +54,4 @@ Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
   }
 }
 
-export default Index
+export default withAuth(Index)

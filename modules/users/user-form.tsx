@@ -12,7 +12,7 @@ import {UserSelect, fullName} from "./select-user"
 
 type UserFormProps = {
   visible: boolean
-  onSave: () => Promise<void>
+  onSave?: () => Promise<void>
   onCancel: () => void
   afterClose: () => void
   user?: UserDTO
@@ -96,7 +96,9 @@ export const UserForm = Form.create<Props>({
           ? await updateUser(props.user.id, userPayload)
           : await createUser(userPayload)
 
-        await props.onSave()
+        if (props.onSave) {
+          await props.onSave()
+        }
 
         if (response.ok) {
           props.form.resetFields()

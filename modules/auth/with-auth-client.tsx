@@ -2,6 +2,8 @@ import React, {Component} from "react"
 import Router from "next/router"
 import nextCookie from "next-cookies"
 import {NextPageContext} from "next"
+import {request} from "../http-client"
+import {UserDTO} from "../users/types"
 
 const getDisplayName = (Component: any) =>
   Component.displayName || Component.name || "Component"
@@ -13,11 +15,22 @@ export const withAuth = (WrappedComponent: any) =>
     static async getInitialProps(ctx: NextPageContext) {
       const token = auth(ctx)
 
-      const componentProps =
-        WrappedComponent.getInitialProps &&
-        (await WrappedComponent.getInitialProps(ctx, token))
+      const getInitialWrappedComponentProps = WrappedComponent.getInitialProps
+        ? WrappedComponent.getInitialProps(ctx, token)
+        : Promise.resolve()
 
-      return {...componentProps, token}
+      const [componentProps, currentUserResponse] = await Promise.all([
+        getInitialWrappedComponentProps,
+        // TODO: fetch fullname only if not in localStorage
+        // no need to make a request every time ;)
+        request<UserDTO>("/api/users/current", {token}),
+      ])
+
+      const currentUser = currentUserResponse.ok
+        ? currentUserResponse.value
+        : undefined
+
+      return {...componentProps, currentUser}
     }
 
     render() {

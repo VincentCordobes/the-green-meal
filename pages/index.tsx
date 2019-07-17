@@ -1,45 +1,30 @@
-import {NextPage} from "next"
+import {NextPage, NextPageContext} from "next"
 import Layout from "../modules/app/layout"
 import {MealList} from "../modules/meals/meals-list.view"
 import React from "react"
 import {MealDTO} from "../modules/meals/meals-types"
 import {request} from "../modules/http-client"
 import {withAuth} from "../modules/auth/with-auth-client"
+import {ErrorBoundary} from "../modules/app/error-boundary"
+import {UserDTO} from "../modules/users/types"
+import nextCookies from "next-cookies"
 
 type Props = {
   meals: MealDTO[]
+  currentUser?: UserDTO
 }
 
 const Index: NextPage<Props> = props => (
-  <Layout>
+  <Layout currentUser={props.currentUser}>
     <ErrorBoundary>
       <MealList meals={props.meals} />
     </ErrorBoundary>
   </Layout>
 )
 
-type ErrorBoundaryState = {
-  error: any
-}
-class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
-  state = {error: null}
-
-  componentDidCatch(error: any) {
-    this.setState({error})
-    console.log(error)
-  }
-
-  render() {
-    if (this.state.error) {
-      return <h1>Something went wrong.</h1>
-    }
-
-    return this.props.children
-  }
-}
-
-Index.getInitialProps = async (): Promise<Props> => {
-  const response = await request<MealDTO[]>("/api/meals")
+Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
+  const {token} = nextCookies(ctx)
+  const response = await request<MealDTO[]>("/api/meals", {token})
   if (response.ok) {
     return {
       meals: response.value,

@@ -1,0 +1,15 @@
+.logout-menu {
+  top: 0;
+  margin-left: auto;
+  line-height: 64px;
+  height: 64px;
+}
+
+.avatar-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.current-user {
+  margin-left: 8px;
+}

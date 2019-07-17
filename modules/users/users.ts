@@ -33,6 +33,21 @@ export const list = withACLs(
   },
 )
 
+export const getCurrent = withACLs(
+  ["admin", "manager", "regular"],
+  async (_, params): Promise<ApiResponse<UserDTO>> => {
+    const [user] = await query<Person>(
+      sql`select * from person
+          where id = ${params.userId}`,
+    )
+    if (!user) {
+      throw new HTTPError(401)
+    }
+
+    return responseOK(toUserDTO(user))
+  },
+)
+
 function toUserDTO(person: Person): UserDTO {
   return pickBy((val, key) => {
     const fieldsToIgnore = ["password", "emailConfirmationToken", "managerId"]

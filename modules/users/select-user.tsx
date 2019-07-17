@@ -1,11 +1,9 @@
-import React, {FC, useState, useRef} from "react"
-import {Select, Spin} from "antd"
+import React, {FC, useState} from "react"
+import {Select} from "antd"
 import {UserDTO} from "./types"
 import {SelectProps} from "antd/lib/select"
 
 const {Option} = Select
-
-export const fullName = (user: UserDTO) => user.firstname + " " + user.lastname
 
 type Props = {
   users: UserDTO[]
@@ -38,3 +36,5 @@ export const UserSelect: FC<Props> = React.forwardRef(
     )
   },
 )
+
+export const fullName = (user: UserDTO) => user.firstname + " " + user.lastname
