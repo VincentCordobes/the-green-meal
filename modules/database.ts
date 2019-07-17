@@ -2,7 +2,6 @@ import {Pool} from "pg"
 import R from "ramda"
 import sql from "sql-template-strings"
 import {SQLStatement} from "sql-template-strings"
-import {IPGQueryConfig} from "@sequencework/sql/dist/utils"
 
 export const DB_NAME = "the_green_meal"
 
@@ -18,9 +17,7 @@ export function closeDb() {
   return pool.end()
 }
 
-export async function query<T>(
-  sql: SQLStatement | IPGQueryConfig,
-): Promise<T[]> {
+export async function query<T>(sql: SQLStatement): Promise<T[]> {
   try {
     const {rows} = await pool.query(sql)
     return rows.map(row => mapKeys(camelCase, row))
@@ -29,7 +26,7 @@ export async function query<T>(
   }
 }
 
-export function execute(sql: string) {
+export function execute(sql: string | SQLStatement) {
   return pool.query(sql)
 }
 

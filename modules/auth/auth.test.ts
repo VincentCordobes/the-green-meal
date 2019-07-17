@@ -1,7 +1,7 @@
 import {AuthPayload} from "./auth-types"
 import auth from "./auth"
 import {ApiRequest} from "../api-types"
-import {aRequest, initTestDb} from "../test-helpers"
+import {aRequest, initTestDb, anAdminRequest} from "../test-helpers"
 import {closeDb} from "../database"
 import {add} from "../users/users"
 import {confirmEmail} from "./confirm-email"
@@ -18,10 +18,20 @@ afterAll(() => closeDb())
 
 jest.mock("uuid", () => ({v4: () => "token"}))
 
+jest.mock("jsonwebtoken", () => {
+  const verify = jest.fn((token, _, cb) =>
+    ["regular", "manager", "admin"].includes(token)
+      ? cb(null, {userId: 1, role: token})
+      : cb("error"),
+  )
+
+  return {verify, sign: jest.fn().mockReturnValue("token")}
+})
+
 describe("Auth endpoint", () => {
   test("should authenticate a user and returns an access token", async () => {
     // given
-    const req: ApiRequest<AuthPayload> = aRequest({
+    const req: ApiRequest<AuthPayload> = anAdminRequest({
       body: {
         email: "Vincent",
         password: "toto",
@@ -51,7 +61,7 @@ describe("Auth endpoint", () => {
 
   test("should not authenticate the user when the password is wrong", async () => {
     // given
-    const req: ApiRequest<AuthPayload> = aRequest({
+    const req: ApiRequest<AuthPayload> = anAdminRequest({
       body: {
         email: "Vincent",
         password: "totoo",
@@ -72,7 +82,7 @@ describe("Auth endpoint", () => {
 
   test("should not authenticate the user when the email is not confirmed", async () => {
     await add(
-      aRequest({
+      anAdminRequest({
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",
@@ -101,7 +111,7 @@ describe("Auth endpoint", () => {
 
   test("should authenticate a newly added and confirmed user", async () => {
     await add(
-      aRequest({
+      anAdminRequest({
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",

@@ -125,7 +125,7 @@ describe("Add users", () => {
     }
 
     // when
-    const response = await add(aRequest({body: user}))
+    const response = await add(anAdminRequest({body: user}))
 
     // then
     expect.assertions(2)
@@ -151,7 +151,7 @@ describe("Add users", () => {
   })
 
   test("should not create the user when the email exists", async () => {
-    const request = aRequest({
+    const request = anAdminRequest({
       body: {
         email: "VincentC@toto.com",
         password: "toto",
@@ -178,7 +178,7 @@ describe("Add users", () => {
     }
 
     // when
-    await remove(aRequest({body: userToRemove}))
+    await remove(anAdminRequest({body: userToRemove}))
     const response = await list(anAdminRequest())
 
     // then
@@ -188,20 +188,54 @@ describe("Add users", () => {
     ).toBeFalsy()
   })
 
-  test("should return the removed userId", async () => {
+  test("should return the removed userId when asked by an admin", async () => {
     // given
     const user: RemoveUserPayload = {
       userId: 1,
     }
 
     // when
-    const response = await remove(aRequest({body: user}))
+    const response = await remove(anAdminRequest({body: user}))
 
     // then
     expect(response).toEqual({
       ok: true,
       value: {userId: 1},
     })
+  })
+
+  test("should not remove anything when the user is not a managed", async () => {
+    expect.assertions(1)
+    // when
+    try {
+      await remove(
+        aManagerRequest({
+          body: {
+            userId: 2,
+          },
+        }),
+      )
+    } catch (e) {
+      // then
+      expect(e).toBeTruthy()
+    }
+  })
+
+  test("should throw if the user is not an admin or a manager", async () => {
+    expect.assertions(1)
+    // when
+    try {
+      await remove(
+        aRequest({
+          body: {
+            userId: 1,
+          },
+        }),
+      )
+    } catch (e) {
+      // then
+      expect(e).toBeTruthy()
+    }
   })
 })
 

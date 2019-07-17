@@ -1,9 +1,9 @@
 import {ApiRequest, ApiResponse} from "../api-types"
-import {query, DBError, DB_ERROR, buildUpdateFields} from "../database"
+import {query, DBError, DB_ERROR, buildUpdateFields, execute} from "../database"
 import {responseOK, responseKO} from "../api"
 import {validate} from "../validate"
 import {head, pickBy, isNil} from "ramda"
-import sql from "sql-template-strings"
+import sql, {SQLStatement} from "sql-template-strings"
 import {Person, findAll, findById, findByManagerId} from "./person"
 import Joi from "@hapi/joi"
 import uuid from "uuid"
@@ -18,6 +18,7 @@ import {
 import {hashPassword} from "../auth/auth"
 import {confirmEmailTemplate, sendMail} from "../mailing"
 import {withACLs} from "../auth/with-auth-server"
+import {HTTPError} from "../error-handler"
 
 export const list = withACLs(
   ["admin", "manager"],
@@ -42,67 +43,85 @@ function toUserDTO(person: Person): UserDTO {
 
 const roleSchema = Joi.string().valid("manager", "regular", "admin")
 
-export async function add(
-  req: ApiRequest,
-): Promise<ApiResponse<UserDTO, AddUserError>> {
-  const {
-    email,
-    password: plainPassword,
-    firstname,
-    lastname,
-    role = "regular",
-  } = validate<UserPayload>(
-    Joi.object({
-      email: Joi.string(),
-      password: Joi.string(),
-      firstname: Joi.string(),
-      lastname: Joi.string(),
-      role: roleSchema.optional(),
-    }),
-    req.body,
-  )
+export const add = withACLs(
+  ["admin", "manager"],
+  async (req, params): Promise<ApiResponse<UserDTO, AddUserError>> => {
+    const {
+      email,
+      password: plainPassword,
+      firstname,
+      lastname,
+      role = "regular",
+    } = validate<UserPayload>(
+      Joi.object({
+        email: Joi.string(),
+        password: Joi.string(),
+        firstname: Joi.string(),
+        lastname: Joi.string(),
+        role: roleSchema.optional(),
+      }),
+      req.body,
+    )
 
-  const password: string = await hashPassword(plainPassword)
+    const password: string = await hashPassword(plainPassword)
 
-  const emailValidationToken = uuid.v4()
+    const emailValidationToken = uuid.v4()
 
-  return query<Person>(
-    sql`insert into 
-        person (email, email_confirmation_token, password, firstname, lastname, role)
-        values (${email}, ${emailValidationToken}, ${password}, ${firstname}, ${lastname}, ${role})
+    const managerId = params.role === "manager" ? params.userId : null
+
+    return query<Person>(
+      sql`insert into 
+        person (email, email_confirmation_token, password, firstname, lastname, role, manager_id)
+        values (${email}, ${emailValidationToken}, ${password}, ${firstname}, ${lastname}, ${role}, ${managerId})
         returning *`,
-  )
-    .then(head)
-    .then(user => responseOK(toUserDTO(user)))
-    .then(response => {
-      sendMail(email, confirmEmailTemplate(emailValidationToken))
-      return response
-    })
-    .catch((e: DBError) => {
-      if (e.code === DB_ERROR.uniqueViolation) {
-        return responseKO({
-          error: "DuplicateUser",
-          errorMessage: "email must be unique",
-          statusCode: 400,
-        })
-      } else {
-        throw e
-      }
-    })
-}
+    )
+      .then(head)
+      .then(user => responseOK(toUserDTO(user)))
+      .then(response => {
+        sendMail(email, confirmEmailTemplate(emailValidationToken))
+        return response
+      })
+      .catch((e: DBError) => {
+        if (e.code === DB_ERROR.uniqueViolation) {
+          return responseKO({
+            error: "DuplicateUser",
+            errorMessage: "email must be unique",
+            statusCode: 400,
+          })
+        } else {
+          throw e
+        }
+      })
+  },
+)
 
-export async function remove(
-  req: ApiRequest,
-): Promise<ApiResponse<RemoveUserResponse>> {
-  const {userId} = validate<RemoveUserPayload>(
-    Joi.object({userId: Joi.number()}),
-    req.body,
-  )
+export const remove = withACLs(
+  ["admin", "manager"],
+  async (req, {userId, role}): Promise<ApiResponse<RemoveUserResponse>> => {
+    const {userId: userIdToRemove} = validate<RemoveUserPayload>(
+      Joi.object({userId: Joi.number()}),
+      req.body,
+    )
 
-  return query<RemoveUserResponse>(
-    sql`delete from person where id=${userId}`,
-  ).then(() => responseOK({userId}))
-}
+    let sqlQuery: SQLStatement
+    if (role === "admin") {
+      sqlQuery = sql`delete from person 
+                     where id=${userIdToRemove}`
+    } else {
+      sqlQuery = sql`delete from person
+                     where id=${userIdToRemove}
+                     and manager_id = ${userId}`
+    }
+
+    const {rowCount} = await execute(sqlQuery)
+
+    if (rowCount === 0) {
+      throw new HTTPError(401)
+    }
+
+    return responseOK({userId: userIdToRemove})
+  },
+)
 
 const updateUserSchema = Joi.object({
   userId: Joi.number(),
@@ -130,6 +149,7 @@ export async function update(
 
   const {managedUserIds, ...fields} = values
 
+  // Set new managed users
   if (managedUserIds) {
     await query(
       sql`update person set 

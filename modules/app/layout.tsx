@@ -33,7 +33,7 @@ const AppLayout: FC = props => {
   return (
     <Layout className="layout">
       <Header className="app-header">
-        <div className="container">
+        <div className="container menu-container">
           <div className="logo">🍒</div>
           <Menu
             theme="light"
@@ -56,6 +56,11 @@ const AppLayout: FC = props => {
                   Users
                 </div>
               </Link>
+            </Menu.Item>
+          </Menu>
+          <Menu theme="light" mode="horizontal" className="logout-menu">
+            <Menu.Item style={{top: 0, height: 64}} key="logout">
+              <Link href="/logout">Logout</Link>
             </Menu.Item>
           </Menu>
         </div>

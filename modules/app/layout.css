@@ -10,7 +10,18 @@
   border-bottom: 1px solid #e8e8e8;
 }
 
+.menu-container {
+  display: flex;
+}
+
 .app-header-menu {
+  line-height: 64px;
+  height: 64px;
+}
+
+.logout-menu {
+  top: 0;
+  margin-left: auto;
   line-height: 64px;
   height: 64px;
 }

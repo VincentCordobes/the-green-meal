@@ -43,6 +43,14 @@ function buildColumns(params: {
       title: "Role",
       key: "role",
       dataIndex: "role",
+      render: role =>
+        role === "regular" ? (
+          ""
+        ) : role === "admin" ? (
+          <Tag color="red">Admin</Tag>
+        ) : (
+          <Tag color="blue">Manager</Tag>
+        ),
     },
     {
       title: "Status",
@@ -88,7 +96,6 @@ export const UserList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
 
   const [selectedUser, setSelectedUser] = useState<UserDTO>()
-
   const resetSelectedUser = useCallback(() => setSelectedUser(undefined), [])
 
   const {data: users, refetch} = useFetch<UserDTO[]>("/api/users", {
@@ -102,7 +109,7 @@ export const UserList: FC<Props> = props => {
         body: {userId: user.id},
       })
 
-      refetch()
+      await refetch()
       resetSelectedUser()
       message.success(`User successfully removed`)
     },

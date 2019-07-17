@@ -42,14 +42,18 @@ class ErrorBoundary extends React.Component<{}, ErrorBoundaryState> {
 Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
   const {token} = nextCookies(ctx)
 
-  const redirectOnError = () =>
-    typeof window !== "undefined"
-      ? Router.push("/login")
-      : ctx.res && ctx.res.writeHead(302, {Location: "/login"}).end()
+  const redirectOnError = () => {
+    if (ctx.res) {
+      ctx.res.writeHead(302, {Location: "/login"})
+      ctx.res.end()
+    } else {
+      Router.push("/login")
+    }
+    return {users: []}
+  }
 
   if (!token) {
-    redirectOnError()
-    return {users: []}
+    return redirectOnError()
   }
 
   const response = await request<UserDTO[]>("/api/users", {
@@ -63,7 +67,7 @@ Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
       users: response.value,
     }
   } else {
-    return {users: []}
+    return redirectOnError()
   }
 }
 
