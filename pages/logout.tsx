@@ -1,17 +1,17 @@
 import cookie from "js-cookie"
 import Router from "next/router"
 import {useEffect} from "react"
-import {NextPageContext} from "next"
+import {NextPageContext, NextPage} from "next"
 
 function logout() {
   cookie.remove("token")
   Router.push("/login")
 }
 
-export const Logout = () => {
+export const Logout: NextPage = () => {
   useEffect(() => logout, [])
 
-  return null
+  return <div>Logging out...</div>
 }
 
 Logout.getInitialProps = (ctx: NextPageContext) => {
@@ -25,6 +25,7 @@ Logout.getInitialProps = (ctx: NextPageContext) => {
   } else {
     logout()
   }
+  return Promise.resolve({})
 }
 
 export default Logout

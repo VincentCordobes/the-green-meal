@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from "react"
-import Modal from "antd/lib/modal"
 import Form from "antd/lib/form"
 import {FormComponentProps} from "antd/lib/form"
 import {UserDTO, UserPayload, AddUserError} from "./types"
@@ -9,14 +8,14 @@ import message from "antd/lib/message"
 import {request} from "../http-client"
 import {propOr} from "ramda"
 import {UserSelect, fullName} from "./select-user"
+import Button from "antd/lib/button"
 
 type UserFormProps = {
-  visible: boolean
-  onSave?: () => Promise<void>
-  onCancel: () => void
-  afterClose: () => void
+  onSave?: () => any
+  okText?: string
   user?: UserDTO
   users: UserDTO[]
+  withRole?: boolean
 }
 
 type UserSelectItem = {key: string; label: string}
@@ -26,11 +25,6 @@ type FormValues = Omit<UserPayload, "managedUserIds"> & {
 }
 
 type Props = UserFormProps & FormComponentProps<FormValues>
-
-const formItemLayout = {
-  labelCol: {span: 8},
-  wrapperCol: {span: 12},
-}
 
 function updateUser(userId: number, values: UserPayload) {
   return request<UserDTO, AddUserError>("/api/users/update", {
@@ -102,7 +96,7 @@ export const UserForm = Form.create<Props>({
 
         if (response.ok) {
           props.form.resetFields()
-          message.success("User added")
+          message.success(props.user ? "Successfully updated" : "User added")
         } else if (response.error === "DuplicateUser") {
           props.form.setFields({
             email: {
@@ -125,55 +119,43 @@ export const UserForm = Form.create<Props>({
   const {Option} = Select
 
   return (
-    <Modal
-      keyboard={true}
-      visible={props.visible}
-      title={props.user ? "Edit user" : "Add user"}
-      afterClose={() => {
-        props.form.resetFields()
-        clearManagedUsers()
-        props.afterClose()
+    <Form
+      labelCol={{sm: {span: 6}}}
+      wrapperCol={{sm: {span: 16}}}
+      onSubmit={e => {
+        e.preventDefault()
+        save()
       }}
-      confirmLoading={loading}
-      onOk={save}
-      width={600}
-      onCancel={props.onCancel}
     >
-      <Form
-        {...formItemLayout}
-        onSubmit={e => {
-          e.preventDefault()
-          save()
-        }}
-      >
-        <Form.Item label="email">
-          {getFieldDecorator("email", {
-            rules: [
-              {required: true, message: "Please enter a email"},
-              {type: "email", message: "Please enter a valid email"},
-            ],
-            initialValue: initialValue("email"),
-          })(<Input autoFocus />)}
+      <Form.Item label="email">
+        {getFieldDecorator("email", {
+          rules: [
+            {required: true, message: "Please enter a email"},
+            {type: "email", message: "Please enter a valid email"},
+          ],
+          initialValue: initialValue("email"),
+        })(<Input autoFocus />)}
+      </Form.Item>
+      {!props.user && (
+        <Form.Item label="Password">
+          {getFieldDecorator("password", {
+            rules: [{required: true, message: "Please enter a password"}],
+          })(<Input type="password" />)}
         </Form.Item>
-        {!props.user && (
-          <Form.Item label="Password">
-            {getFieldDecorator("password", {
-              rules: [{required: true, message: "Please enter a password"}],
-            })(<Input type="password" />)}
-          </Form.Item>
-        )}
-        <Form.Item label="Firstname">
-          {getFieldDecorator("firstname", {
-            rules: [{required: true, message: "Please enter a firstname"}],
-            initialValue: initialValue("firstname"),
-          })(<Input />)}
-        </Form.Item>
-        <Form.Item label="Lastname">
-          {getFieldDecorator("lastname", {
-            rules: [{required: true, message: "Please enter a lastname"}],
-            initialValue: initialValue("lastname"),
-          })(<Input />)}
-        </Form.Item>
+      )}
+      <Form.Item label="Firstname">
+        {getFieldDecorator("firstname", {
+          rules: [{required: true, message: "Please enter a firstname"}],
+          initialValue: initialValue("firstname"),
+        })(<Input />)}
+      </Form.Item>
+      <Form.Item label="Lastname">
+        {getFieldDecorator("lastname", {
+          rules: [{required: true, message: "Please enter a lastname"}],
+          initialValue: initialValue("lastname"),
+        })(<Input />)}
+      </Form.Item>
+      {props.withRole && (
         <Form.Item label="Role">
           {getFieldDecorator("role", {
             initialValue: initialValue("role") || "regular",
@@ -185,15 +167,24 @@ export const UserForm = Form.create<Props>({
             </Select>,
           )}
         </Form.Item>
-        {props.form.getFieldValue("role") === "manager" && (
-          <Form.Item label="Managed users">
-            {getFieldDecorator("managedUser", {
-              initialValue: managedUsers,
-            })(<UserSelect users={props.users} />)}
-          </Form.Item>
-        )}
-        <button hidden />
-      </Form>
-    </Modal>
+      )}
+      {props.form.getFieldValue("role") === "manager" && (
+        <Form.Item label="Managed users">
+          {getFieldDecorator("managedUser", {
+            initialValue: managedUsers,
+          })(<UserSelect users={props.users} />)}
+        </Form.Item>
+      )}
+      <Form.Item wrapperCol={{sm: {span: 24, offset: 6}}}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          disabled={!props.form.isFieldsTouched()}
+        >
+          {props.okText || "Save"}
+        </Button>
+      </Form.Item>
+    </Form>
   )
 })

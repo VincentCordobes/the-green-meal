@@ -4,12 +4,13 @@ create table if not exists person (
   id serial primary key,
   email text unique not null,
   email_validated boolean default false,
-  email_confirmation_token text,
+  email_validation_token text,
   password text not null,
   role role default 'regular',
   firstname text,
   lastname text,
   manager_id integer,
+  expected_calories_per_day integer,
   foreign key (manager_id) references person(id) on delete set null
  );
 

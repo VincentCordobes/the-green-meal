@@ -29,6 +29,7 @@ export const useFetch = <T>(
 
   useEffect(() => {
     fetch()
+    return () => {}
   }, [fetch])
 
   return {

@@ -30,7 +30,7 @@ export function execute(sql: string | SQLStatement) {
   return pool.query(sql)
 }
 
-export function buildUpdateFields<T extends object>(record: T) {
+export function buildUpdateFields<T extends object>(record: T): SQLStatement {
   const entries = Object.entries(record)
 
   return entries.reduce((sqlQuery, [key, value], i) => {
@@ -42,6 +42,33 @@ export function buildUpdateFields<T extends object>(record: T) {
 
     return sqlQuery
   }, sql` `)
+}
+
+export function buildValues<T extends object>(record: T): SQLStatement {
+  type ColumnsValues = [SQLStatement, SQLStatement]
+  const entries = Object.entries(record)
+
+  const [columns, values] = entries.reduce<ColumnsValues>(
+    (acc, [key, value], i) => {
+      acc[0].append(snakeCase(key))
+      acc[1].append(sql`${value}`)
+
+      if (i < entries.length - 1) {
+        acc[0].append(", ")
+        acc[1].append(", ")
+      }
+      return acc
+    },
+    [sql``, sql``],
+  )
+
+  return sql` (`
+    .append(columns)
+    .append(` ) `)
+    .append(` values `)
+    .append(` ( `)
+    .append(values)
+    .append(` ) `)
 }
 
 export class DBError extends Error {
@@ -60,6 +87,12 @@ export class DBError extends Error {
 
 function camelCase(value: string): string {
   return value.replace(/_\w/g, (m: string) => m[1].toUpperCase())
+}
+
+function snakeCase(text: string) {
+  return text
+    .replace(/[\w]([A-Z])/g, (m: string) => m[0] + "_" + m[1])
+    .toLowerCase()
 }
 
 const mapKeys = (fn: (key: string) => string, obj: any): any => {

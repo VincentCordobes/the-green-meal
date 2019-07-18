@@ -10,23 +10,12 @@ type Props = {
   currentUser?: UserDTO
 }
 
-const Index: NextPage<Props> = props => (
+const Index: NextPage<Props> = ({currentUser}) => (
   <ErrorBoundary>
-    <Layout currentUser={props.currentUser}>
+    <Layout currentUser={currentUser}>
       <UserSettings />
     </Layout>
   </ErrorBoundary>
 )
-
-// Index.getInitialProps = async (): Promise<Props> => {
-//   const response = await request<MealDTO[]>("/api/meals")
-//   if (response.ok) {
-//     return {
-//       meals: response.value,
-//     }
-//   } else {
-//     return {meals: []}
-//   }
-// }
 
 export default withAuth(Index)

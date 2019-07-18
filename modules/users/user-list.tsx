@@ -12,10 +12,10 @@ import {useFetch} from "../use-fetch"
 import {request} from "../http-client"
 
 import {UserDTO} from "./types"
-import {UserForm} from "./user-form"
 
 import "./user-list.css"
 import Tag from "antd/lib/tag"
+import Link from "next/link"
 
 function buildColumns(params: {
   onDelete: (user: UserDTO) => any
@@ -66,11 +66,13 @@ function buildColumns(params: {
       width: 150,
       render: (_, user) => (
         <>
-          <Tooltip title="Edit" placement="bottom">
-            <Button type="link" onClick={() => params.onEdit(user)}>
-              <Icon type="edit" />
-            </Button>
-          </Tooltip>
+          <Link href="/users/edit/[userId]" as={`/users/edit/${user.id}`}>
+            <a>
+              <Tooltip title="Edit" placement="bottom">
+                <Icon type="edit" />
+              </Tooltip>
+            </a>
+          </Link>
           <Divider type="vertical" />
           <Popconfirm
             title="Are you sure you want to delete this user ?"
@@ -146,14 +148,6 @@ export const UserList: FC<Props> = props => {
           columns={columns}
         />
       </Row>
-      <UserForm
-        visible={isOpen}
-        onSave={handleSave}
-        onCancel={closeModal}
-        afterClose={resetSelectedUser}
-        user={selectedUser}
-        users={users || props.users}
-      />
     </>
   )
 }

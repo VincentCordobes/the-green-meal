@@ -9,6 +9,7 @@ export type UserPayload = {
   lastname: string
   role?: string
   managedUserIds?: number[]
+  expectedCaloriesPerDay?: number | null
 }
 
 export type AddUserError = "DuplicateUser"

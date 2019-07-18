@@ -18,12 +18,14 @@ import {AuthResponse, AuthPayload} from "./auth-types"
 import "./login-form.css"
 import {useRouter} from "next/router"
 import {pathOr} from "ramda"
+import Link from "next/link"
 
 type Props = FormComponentProps<AuthPayload>
 
 const inlineStyles = {
   loginError: {
     marginBottom: 16,
+    width: 300,
   },
 }
 
@@ -54,6 +56,7 @@ const LoginForm: React.FC<Props> = props => {
   }
 
   const emailConfirmed = pathOr(false, ["query", "confirmed"], router)
+  const pendingEmail = pathOr(false, ["query", "pending"], router)
   const {getFieldDecorator} = props.form
 
   return (
@@ -69,6 +72,13 @@ const LoginForm: React.FC<Props> = props => {
         {emailConfirmed && (
           <Alert
             message="Email successfully confirmed."
+            type="info"
+            style={inlineStyles.loginError}
+          />
+        )}
+        {pendingEmail && (
+          <Alert
+            message="Please confirm your email address before logging in"
             type="info"
             style={inlineStyles.loginError}
           />
@@ -112,7 +122,10 @@ const LoginForm: React.FC<Props> = props => {
             >
               Log in
             </Button>
-            Or <a href="">register now!</a>
+            Or{" "}
+            <Link href="/signup">
+              <a>register now!</a>
+            </Link>
           </Form.Item>
         </Form>
       </Card>

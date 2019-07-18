@@ -8,9 +8,12 @@ export type Person = {
   email: string
   password: string
   emailValidated: boolean
+  emailValidationToken: string
+  managerId: number | null
   role: Role
   firstname: string
   lastname: string
+  expectedCaloriesPerDay: number | null
 }
 
 export function findByManagerId(managerId: number): Promise<Person[]> {
@@ -41,4 +44,6 @@ export async function findById(personId: number): Promise<Person> {
 
 export default {
   findById,
+  findByManagerId,
+  findAll,
 }

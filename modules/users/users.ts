@@ -1,5 +1,12 @@
 import {ApiRequest, ApiResponse} from "../api-types"
-import {query, DBError, DB_ERROR, buildUpdateFields, execute} from "../database"
+import {
+  query,
+  DBError,
+  DB_ERROR,
+  buildUpdateFields,
+  execute,
+  buildValues,
+} from "../database"
 import {responseOK, responseKO} from "../api"
 import {validate} from "../validate"
 import {head, pickBy, isNil} from "ramda"
@@ -17,7 +24,7 @@ import {
 } from "./types"
 import {hashPassword} from "../auth/auth"
 import {confirmEmailTemplate, sendMail} from "../mailing"
-import {withACLs} from "../auth/with-auth-server"
+import {withACLs, checkAccess} from "../auth/with-auth-server"
 import {HTTPError} from "../error-handler"
 
 export const list = withACLs(
@@ -48,9 +55,33 @@ export const getCurrent = withACLs(
   },
 )
 
+export const getById = withACLs(
+  ["admin", "manager"],
+  async (req, params): Promise<ApiResponse<UserDTO>> => {
+    const {id} = validate<{id: number}>(
+      Joi.object({id: Joi.number()}),
+      req.query,
+    )
+
+    const sqlQuery: SQLStatement = sql`select * from person where id = ${id}`
+
+    if (params.role === "manager") {
+      sqlQuery.append(sql` and manager_id = ${params.userId}`)
+    }
+
+    const [user] = await query<Person>(sqlQuery)
+
+    if (!user) {
+      throw new HTTPError(401)
+    }
+
+    return responseOK(toUserDTO(user))
+  },
+)
+
 function toUserDTO(person: Person): UserDTO {
   return pickBy((val, key) => {
-    const fieldsToIgnore = ["password", "emailConfirmationToken", "managerId"]
+    const fieldsToIgnore = ["password", "emailValidationToken", "managerId"]
 
     return !fieldsToIgnore.includes(key) && !isNil(val)
   }, person)
@@ -58,57 +89,65 @@ function toUserDTO(person: Person): UserDTO {
 
 const roleSchema = Joi.string().valid("manager", "regular", "admin")
 
-export const add = withACLs(
-  ["admin", "manager"],
-  async (req, params): Promise<ApiResponse<UserDTO, AddUserError>> => {
-    const {
-      email,
-      password: plainPassword,
-      firstname,
-      lastname,
-      role = "regular",
-    } = validate<UserPayload>(
-      Joi.object({
-        email: Joi.string(),
-        password: Joi.string(),
-        firstname: Joi.string(),
-        lastname: Joi.string(),
-        role: roleSchema.optional(),
-      }),
-      req.body,
-    )
+const addSchema = Joi.object({
+  email: Joi.string(),
+  password: Joi.string(),
+  firstname: Joi.string(),
+  lastname: Joi.string(),
+  role: roleSchema.optional(),
+  expectedCaloriesPerDay: Joi.number().optional(),
+})
 
-    const password: string = await hashPassword(plainPassword)
+export const add = async (
+  req: ApiRequest,
+): Promise<ApiResponse<UserDTO, AddUserError>> => {
+  const {
+    email,
+    password: plainPassword,
+    firstname,
+    lastname,
+    role = "regular",
+  } = validate<UserPayload>(addSchema, req.body)
 
-    const emailValidationToken = uuid.v4()
+  const user = await checkAccess(
+    req.cookies.token || req.headers.authorization,
+  ).catch(_ => null)
 
-    const managerId = params.role === "manager" ? params.userId : null
+  const password: string = await hashPassword(plainPassword)
+  const managerId = user && user.role === "manager" ? user.userId : null
+  const emailValidationToken = uuid.v4()
 
-    return query<Person>(
-      sql`insert into 
-        person (email, email_confirmation_token, password, firstname, lastname, role, manager_id)
-        values (${email}, ${emailValidationToken}, ${password}, ${firstname}, ${lastname}, ${role}, ${managerId})
-        returning *`,
-    )
-      .then(head)
-      .then(user => responseOK(toUserDTO(user)))
-      .then(response => {
-        sendMail(email, confirmEmailTemplate(emailValidationToken))
-        return response
-      })
-      .catch((e: DBError) => {
-        if (e.code === DB_ERROR.uniqueViolation) {
-          return responseKO({
-            error: "DuplicateUser",
-            errorMessage: "email must be unique",
-            statusCode: 400,
-          })
-        } else {
-          throw e
-        }
-      })
-  },
-)
+  const values = buildValues({
+    email,
+    firstname,
+    lastname,
+    role,
+    emailValidationToken,
+    password,
+    managerId,
+  })
+
+  return query<Person>(
+    sql`insert into person`.append(values).append(` returning *`),
+  )
+    .then(head)
+    .then(user => responseOK(toUserDTO(user)))
+    .then(response => {
+      sendMail(email, confirmEmailTemplate(emailValidationToken))
+      return response
+    })
+    .catch((e: DBError) => {
+      if (e.code === DB_ERROR.uniqueViolation) {
+        return responseKO({
+          error: "DuplicateUser",
+          errorMessage: "email must be unique",
+          statusCode: 400,
+        })
+      } else {
+        throw e
+      }
+    })
+}
 
 export const remove = withACLs(
   ["admin", "manager"],

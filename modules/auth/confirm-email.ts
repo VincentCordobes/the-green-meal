@@ -29,7 +29,7 @@ export async function confirmEmail(
   const [person] = await query<Person>(
     SQL`update person 
         set email_validated = true
-        where email_confirmation_token=${token}
+        where email_validation_token=${token}
         returning email_validated`,
   )
 

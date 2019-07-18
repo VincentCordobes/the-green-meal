@@ -6,14 +6,13 @@ import Icon from "antd/lib/icon"
 import Avatar from "antd/lib/avatar"
 
 import {fullName} from "../users/select-user"
-import {UserDTO} from "../users/types"
 
 import "./avatar-dropdown.css"
+import {useCurrentUser} from "../session-context"
 
-type Props = {
-  currentUser?: UserDTO
-}
-export const AvatarDropDown: FC<Props> = ({currentUser}) => {
+type Props = {}
+export const AvatarDropDown: FC<Props> = () => {
+  const {currentUser} = useCurrentUser()
   const menu = (
     <Menu>
       <Menu.Item key="settings">

@@ -15,6 +15,10 @@ body {
   padding-right: 24px;
 }
 
+h3 {
+  margin-bottom: 24px;
+}
+
 @media (min-width: 576px) {
   .container {
     max-width: 540px;
