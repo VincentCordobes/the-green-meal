@@ -9,6 +9,7 @@ import {request} from "../http-client"
 import {propOr} from "ramda"
 import {UserSelect, fullName} from "./select-user"
 import Button from "antd/lib/button"
+import InputNumber from "antd/lib/input-number"
 
 type UserFormProps = {
   onSave?: () => any
@@ -16,6 +17,8 @@ type UserFormProps = {
   user?: UserDTO
   users: UserDTO[]
   withRole?: boolean
+  withPassword?: boolean
+  withExpectCalories?: boolean
 }
 
 type UserSelectItem = {key: string; label: string}
@@ -95,6 +98,7 @@ export const UserForm = Form.create<Props>({
         }
 
         if (response.ok) {
+          setManagedUsers(managedUser)
           props.form.resetFields()
           message.success(props.user ? "Successfully updated" : "User added")
         } else if (response.error === "DuplicateUser") {
@@ -118,10 +122,14 @@ export const UserForm = Form.create<Props>({
 
   const {Option} = Select
 
+  const users = props.users.filter(
+    user => user.id !== (props.user && props.user.id),
+  )
+
   return (
     <Form
-      labelCol={{sm: {span: 6}}}
-      wrapperCol={{sm: {span: 16}}}
+      labelCol={{sm: {span: 7}}}
+      wrapperCol={{sm: {span: 15}}}
       onSubmit={e => {
         e.preventDefault()
         save()
@@ -136,7 +144,7 @@ export const UserForm = Form.create<Props>({
           initialValue: initialValue("email"),
         })(<Input autoFocus />)}
       </Form.Item>
-      {!props.user && (
+      {props.withPassword && (
         <Form.Item label="Password">
           {getFieldDecorator("password", {
             rules: [{required: true, message: "Please enter a password"}],
@@ -155,6 +163,13 @@ export const UserForm = Form.create<Props>({
           initialValue: initialValue("lastname"),
         })(<Input />)}
       </Form.Item>
+      {props.withExpectCalories && (
+        <Form.Item label="Expected kCal/day">
+          {getFieldDecorator("expectedCaloriesPerDay", {
+            initialValue: initialValue("expectedCaloriesPerDay"),
+          })(<InputNumber style={{width: "100%"}} />)}
+        </Form.Item>
+      )}
       {props.withRole && (
         <Form.Item label="Role">
           {getFieldDecorator("role", {
@@ -172,10 +187,10 @@ export const UserForm = Form.create<Props>({
         <Form.Item label="Managed users">
           {getFieldDecorator("managedUser", {
             initialValue: managedUsers,
-          })(<UserSelect users={props.users} />)}
+          })(<UserSelect users={users} />)}
         </Form.Item>
       )}
-      <Form.Item wrapperCol={{sm: {span: 24, offset: 6}}}>
+      <Form.Item wrapperCol={{sm: {span: 24, offset: 7}}}>
         <Button
           type="primary"
           htmlType="submit"

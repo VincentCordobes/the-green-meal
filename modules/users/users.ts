@@ -36,7 +36,9 @@ export const list = withACLs(
     }
 
     const persons = await findAll()
-    return responseOK(persons.map(toUserDTO))
+    return responseOK(
+      persons.filter(user => user.id !== params.userId).map(toUserDTO),
+    )
   },
 )
 
@@ -184,6 +186,9 @@ const updateUserSchema = Joi.object({
     password: Joi.string().optional(),
     firstname: Joi.string().optional(),
     lastname: Joi.string().optional(),
+    expectedCaloriesPerDay: Joi.number()
+      .allow(null)
+      .optional(),
     role: roleSchema.optional(),
     managedUserIds: Joi.array()
       .items(Joi.number())

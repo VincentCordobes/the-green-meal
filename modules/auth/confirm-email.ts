@@ -1,6 +1,6 @@
 import Joi from "@hapi/joi"
 import bcrypt from "bcrypt"
-import {SQL} from "sql-template-strings"
+import sql from "sql-template-strings"
 
 import {query} from "../database"
 import {ApiRequest, ApiResponse, ApiError} from "../api-types"
@@ -27,7 +27,7 @@ export async function confirmEmail(
   )
 
   const [person] = await query<Person>(
-    SQL`update person 
+    sql`update person 
         set email_validated = true
         where email_validation_token=${token}
         returning email_validated`,

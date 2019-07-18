@@ -8,11 +8,11 @@ import {
 } from "../../../modules/auth/with-auth-client"
 import {ErrorBoundary} from "../../../modules/app/error-boundary"
 import {UserDTO} from "../../../modules/users/types"
-import Card from "antd/lib/card"
 import {UserForm} from "../../../modules/users/user-form"
-import Router from "next/router"
+import Router, {useRouter} from "next/router"
 import {useFetch} from "../../../modules/use-fetch"
 import {request} from "../../../modules/http-client"
+import {UserFormLayout} from "../../../modules/users/user-form-layout"
 
 type Props = {
   users: UserDTO[]
@@ -21,22 +21,29 @@ type Props = {
 }
 
 const Index: NextPage<Props> = props => {
+  const router = useRouter()
+
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
     initialData: props.users,
   })
 
+  const {data: selectedUser, refetch} = useFetch<UserDTO>(
+    `/api/users/${router.query.userId}`,
+    {initialData: props.selectedUser},
+  )
+
   return (
     <ErrorBoundary>
       <Layout currentUser={props.currentUser}>
-        <Card>
-          <h3>Edit</h3>
+        <UserFormLayout title="Edit">
           <UserForm
             okText="Save"
+            onSave={refetch}
             users={users || props.users}
-            user={props.selectedUser}
+            user={selectedUser || props.selectedUser}
             withRole
           />
-        </Card>
+        </UserFormLayout>
       </Layout>
     </ErrorBoundary>
   )

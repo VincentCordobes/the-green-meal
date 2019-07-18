@@ -5,6 +5,7 @@ import Card from "antd/lib/card"
 import {useFetch} from "../use-fetch"
 import {UserDTO} from "./types"
 import {Row, Col} from "antd"
+import {UserFormLayout} from "./user-form-layout"
 
 type Props = {
   user?: UserDTO
@@ -17,18 +18,14 @@ export const UserSettings: FC<Props> = () => {
   })
 
   return (
-    <Row>
-      <Col md={{span: 24}} lg={{span: 16, offset: 4}}>
-        <Card>
-          <h3>Account Settings</h3>
-          <UserForm
-            onSave={refresh}
-            users={users || []}
-            user={currentUser}
-            withRole
-          />
-        </Card>
-      </Col>
-    </Row>
+    <UserFormLayout title="Account Settings">
+      <UserForm
+        onSave={refresh}
+        users={users || []}
+        user={currentUser}
+        withRole
+        withExpectCalories
+      />
+    </UserFormLayout>
   )
 }

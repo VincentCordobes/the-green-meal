@@ -1,4 +1,4 @@
-import React, {FC, useState, useCallback} from "react"
+import React, {FC} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Button from "antd/lib/button"
 import Icon from "antd/lib/icon"
@@ -19,7 +19,6 @@ import Link from "next/link"
 
 function buildColumns(params: {
   onDelete: (user: UserDTO) => any
-  onEdit: (user: UserDTO) => any
 }): ColumnProps<UserDTO>[] {
   return [
     {
@@ -42,21 +41,19 @@ function buildColumns(params: {
     {
       title: "Role",
       key: "role",
-      dataIndex: "role",
-      render: role =>
-        role === "regular" ? (
-          ""
-        ) : role === "admin" ? (
-          <Tag color="red">Admin</Tag>
-        ) : (
-          <Tag color="blue">Manager</Tag>
-        ),
-    },
-    {
-      title: "Status",
-      key: "emailValidated",
-      dataIndex: "emailValidated",
-      render: validated => (validated ? "" : <Tag color="orange">pending</Tag>),
+      render: ({role, emailValidated}) => {
+        if (!emailValidated) {
+          return <Tag color="orange">pending</Tag>
+        }
+        if (role === "admin") {
+          return <Tag color="red">Admin</Tag>
+        }
+
+        if (role === "manager") {
+          return <Tag color="blue">Manager</Tag>
+        }
+        return ""
+      },
     },
     {
       title: "Actions",
@@ -95,11 +92,6 @@ type Props = {
 }
 
 export const UserList: FC<Props> = props => {
-  const {isOpen, openModal, closeModal} = useModal()
-
-  const [selectedUser, setSelectedUser] = useState<UserDTO>()
-  const resetSelectedUser = useCallback(() => setSelectedUser(undefined), [])
-
   const {data: users, refetch} = useFetch<UserDTO[]>("/api/users", {
     initialData: props.users,
   })
@@ -112,33 +104,19 @@ export const UserList: FC<Props> = props => {
       })
 
       await refetch()
-      resetSelectedUser()
       message.success(`User successfully removed`)
     },
-    onEdit: user => {
-      setSelectedUser(user)
-      openModal()
-    },
   })
-
-  const handleSave = useCallback(async () => {
-    await refetch()
-    closeModal()
-  }, [closeModal, refetch])
 
   return (
     <>
       <Row type="flex" justify="end" className="table-actions">
-        <Button
-          type="primary"
-          onClick={() => {
-            resetSelectedUser()
-            openModal()
-          }}
-        >
-          <Icon type="plus" />
-          Add user
-        </Button>
+        <Link href="/users/add">
+          <Button type="primary">
+            <Icon type="plus" />
+            Add user
+          </Button>
+        </Link>
       </Row>
       <Row>
         <Table
@@ -150,18 +128,4 @@ export const UserList: FC<Props> = props => {
       </Row>
     </>
   )
-}
-
-const useModal = () => {
-  const [isOpen, setVisible] = useState(false)
-
-  return {
-    isOpen,
-    openModal() {
-      setVisible(true)
-    },
-    closeModal() {
-      setVisible(false)
-    },
-  }
 }

@@ -34,7 +34,7 @@ export function buildUpdateFields<T extends object>(record: T): SQLStatement {
   const entries = Object.entries(record)
 
   return entries.reduce((sqlQuery, [key, value], i) => {
-    sqlQuery.append(`${key} = `).append(sql`${value} `)
+    sqlQuery.append(`${snakeCase(key)} = `).append(sql`${value} `)
 
     if (i < entries.length - 1) {
       sqlQuery.append(", ")

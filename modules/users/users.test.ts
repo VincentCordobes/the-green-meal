@@ -11,11 +11,22 @@ import {dissoc} from "ramda"
 import {UserPayload, RemoveUserPayload, UpdateUser} from "./types"
 
 jest.mock("jsonwebtoken", () => {
-  const verify = jest.fn((token, _, cb) =>
-    ["regular", "manager", "admin"].includes(token)
-      ? cb(null, {userId: 1, role: token})
-      : cb("error"),
-  )
+  const verify = jest.fn((token, _, cb) => {
+    let userId
+    if (token === "manager") {
+      userId = 1
+    } else if (token === "admin") {
+      userId = 5
+    } else if (token === "regular") {
+      userId = 2
+    }
+
+    if (userId) {
+      cb(null, {userId, role: token})
+    } else {
+      cb("error")
+    }
+  })
 
   return {verify}
 })
@@ -24,7 +35,7 @@ beforeEach(() => initDbWithFixtures("users/fixtures.sql"))
 afterAll(() => closeDb())
 
 describe("List users", () => {
-  test("should return all users for admin", async () => {
+  test("should return all users but admin", async () => {
     // when
     const response = await list(anAdminRequest())
 
@@ -34,7 +45,7 @@ describe("List users", () => {
       value: [
         {
           id: 1,
-          email: "user1@toto.com",
+          email: "manager@toto.com",
           emailValidated: true,
           role: "manager",
           firstname: "firstname1",

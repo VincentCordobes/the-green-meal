@@ -1,7 +1,5 @@
 import {NextPage, NextPageContext} from "next"
-import Router from "next/router"
 import React from "react"
-import nextCookies from "next-cookies"
 
 import Layout from "../../modules/app/layout"
 import {UserList} from "../../modules/users/user-list"

@@ -1,6 +1,6 @@
 import {Person} from "./person"
 
-export type UserDTO = Omit<Person, "password" | "emailValidated">
+export type UserDTO = Omit<Person, "password">
 
 export type UserPayload = {
   email: string

@@ -30,6 +30,7 @@ const Index: NextPage<Props> = () => (
             okText="Signup"
             onSave={() => Router.push("/login?pending=true")}
             users={[]}
+            withPassword
           />
           <Form.Item
             wrapperCol={{

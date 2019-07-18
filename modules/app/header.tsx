@@ -25,7 +25,7 @@ export const AppHeader: FC<Props> = () => {
           theme="light"
           mode="horizontal"
           defaultSelectedKeys={[
-            startsWith("/users", router.route) ? "/users" : "/",
+            startsWith("/users", router.route) ? "/users" : router.route,
           ]}
           className="app-header-menu"
         >
