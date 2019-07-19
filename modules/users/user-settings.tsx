@@ -1,10 +1,8 @@
 import {FC} from "react"
 import {UserForm} from "./user-form"
 import {useCurrentUser} from "../session-context"
-import Card from "antd/lib/card"
 import {useFetch} from "../use-fetch"
 import {UserDTO} from "./types"
-import {Row, Col} from "antd"
 import {UserFormLayout} from "./user-form-layout"
 
 type Props = {

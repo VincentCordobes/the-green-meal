@@ -1,7 +1,7 @@
 import React, {FC, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Tag from "antd/lib/tag"
-import {MealDTO, MealsFilter} from "./meals-types"
+import {MealDTO, MealsFilter, MealListResponse, MealItem} from "./meals-types"
 import {request} from "../http-client"
 
 import "./meals-list.view.css"
@@ -31,7 +31,17 @@ function buildColumns(
     onEdit: (meal: MealDTO) => any
   },
 ): ColumnProps<MealDTO>[] {
+  const displayUserCol = user.role === "admin"
+  const userCol = [
+    {
+      title: "User",
+      dataIndex: "fullname",
+      key: "fullname",
+    },
+  ]
+
   return [
+    ...(displayUserCol ? userCol : []),
     {
       title: "Meal",
       dataIndex: "text",
@@ -51,12 +61,11 @@ function buildColumns(
     },
     {
       title: "Calories",
-      dataIndex: "calories",
       key: "calories",
-      render: (calories: number) => {
+      render: ({calories, expectedCaloriesPerDay}: MealItem) => {
         let color
-        if (user.expectedCaloriesPerDay) {
-          if (user.expectedCaloriesPerDay < calories) {
+        if (expectedCaloriesPerDay) {
+          if (expectedCaloriesPerDay < calories) {
             color = "#f5222d"
           } else {
             color = "#7cb305"
@@ -100,22 +109,19 @@ function buildColumns(
 }
 
 type Props = {
-  meals: MealDTO[]
+  meals: MealListResponse
 }
 
 export const MealList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
   const [filter, setFilter] = useState<MealsFilter>()
   const [selectedMeal, setSelectedMeal] = useState<MealDTO>()
-  const {data: meals, refetch} = useFetch<MealDTO[]>("/api/meals", {
+  const {data: meals, refetch} = useFetch("/api/meals", {
     params: filter,
     initialData: props.meals,
   })
 
   const {currentUser} = useCurrentUser()
-  if (!currentUser) {
-    return null
-  }
 
   const onSave = async () => {
     await refetch()

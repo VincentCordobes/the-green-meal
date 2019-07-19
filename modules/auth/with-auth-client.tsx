@@ -10,6 +10,10 @@ import nextCookies from "next-cookies"
 const getDisplayName = (Component: any) =>
   Component.displayName || Component.name || "Component"
 
+export type AuthProps = {
+  currentUser: UserDTO
+}
+
 export const withAuth = (WrappedComponent: any) =>
   class extends Component {
     static displayName = `withAuthSync(${getDisplayName(WrappedComponent)})`
@@ -23,16 +27,14 @@ export const withAuth = (WrappedComponent: any) =>
 
       const [componentProps, currentUserResponse] = await Promise.all([
         getInitialWrappedComponentProps,
-        // TODO: fetch fullname only if not in localStorage
-        // no need to make a request every time ;)
         request<UserDTO>("/api/users/current", {token}),
       ])
 
-      const currentUser = currentUserResponse.ok
-        ? currentUserResponse.value
-        : undefined
+      if (!currentUserResponse.ok) {
+        return redirectToLogin(ctx)
+      }
 
-      return {...componentProps, currentUser}
+      return {...componentProps, currentUser: currentUserResponse.value}
     }
 
     render() {
@@ -40,18 +42,20 @@ export const withAuth = (WrappedComponent: any) =>
     }
   }
 
+const redirectToLogin = (ctx: NextPageContext) => {
+  if (ctx.res) {
+    ctx.res.writeHead(302, {Location: "/login"})
+    ctx.res.end()
+  } else {
+    Router.push("/login")
+  }
+}
+
 export const auth = (ctx: NextPageContext) => {
   const {token} = nextCookie(ctx)
 
-  if (ctx.req && ctx.res && !token) {
-    ctx.res.writeHead(302, {Location: "/login"})
-    ctx.res.end()
-    return
-  }
-
-  // We already checked for server. This should only happen on client.
   if (!token) {
-    Router.push("/login")
+    redirectToLogin(ctx)
   }
 
   return token

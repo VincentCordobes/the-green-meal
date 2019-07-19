@@ -16,7 +16,7 @@ import {UserFormLayout} from "../../modules/users/user-form-layout"
 
 type Props = {
   users: UserDTO[]
-  currentUser?: UserDTO
+  currentUser: UserDTO
 }
 
 const Index: NextPage<Props> = props => {
@@ -41,7 +41,7 @@ const Index: NextPage<Props> = props => {
   )
 }
 
-Index.getInitialProps = (ctx: NextPageContext): Promise<Props> => {
+Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   return requestInitialProps(
     ctx,
     token => request<UserDTO[]>("/api/users", {token}),

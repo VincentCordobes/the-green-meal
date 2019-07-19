@@ -15,7 +15,7 @@ const {Header} = Layout
 export const AppHeader: FC<Props> = () => {
   const router = useRouter()
   const {currentUser} = useCurrentUser()
-  const role = currentUser ? currentUser.role : ""
+  const role = currentUser.role
 
   return (
     <Header className="app-header">

@@ -20,6 +20,6 @@ create table if not exists meal (
   text text not null,
   calories int constraint positive_calories check (calories > 0),
   at timestamptz not null,
-  owner_id integer,
-  foreign key (owner_id) references person(id) on delete set null
+  owner_id integer not null,
+  foreign key (owner_id) references person(id) on delete cascade
 );

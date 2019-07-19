@@ -29,7 +29,7 @@ Router.events.on("routeChangeComplete", () => NProgress.done())
 Router.events.on("routeChangeError", () => NProgress.done())
 
 type Props = {
-  currentUser?: UserDTO
+  currentUser: UserDTO
 }
 
 const AppLayout: FC<Props> = props => {

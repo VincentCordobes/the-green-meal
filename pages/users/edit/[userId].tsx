@@ -16,7 +16,7 @@ import {UserFormLayout} from "../../../modules/users/user-form-layout"
 
 type Props = {
   users: UserDTO[]
-  currentUser?: UserDTO
+  currentUser: UserDTO
   selectedUser?: UserDTO
 }
 
@@ -49,7 +49,7 @@ const Index: NextPage<Props> = props => {
   )
 }
 
-Index.getInitialProps = (ctx: NextPageContext): Promise<Props> => {
+Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   const {userId} = ctx ? ctx.query : Router.query
   return requestInitialProps(
     ctx,

@@ -7,7 +7,7 @@ import {UserSettings} from "../modules/users/user-settings"
 import {UserDTO} from "../modules/users/types"
 
 type Props = {
-  currentUser?: UserDTO
+  currentUser: UserDTO
 }
 
 const Index: NextPage<Props> = ({currentUser}) => (

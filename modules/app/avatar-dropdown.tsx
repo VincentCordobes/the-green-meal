@@ -36,9 +36,7 @@ export const AvatarDropDown: FC<Props> = () => {
     <Dropdown overlay={menu} trigger={["click"]} className="logout-menu">
       <span className="avatar-header">
         <Avatar size="small" />
-        {currentUser && (
-          <span className="current-user">{fullName(currentUser)}</span>
-        )}
+        <span className="current-user">{fullName(currentUser)}</span>
       </span>
     </Dropdown>
   )

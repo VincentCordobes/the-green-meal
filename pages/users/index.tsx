@@ -13,7 +13,7 @@ import {
 
 type Props = {
   users: UserDTO[]
-  currentUser?: UserDTO
+  currentUser: UserDTO
 }
 
 const Index: NextPage<Props> = props => (
@@ -24,7 +24,7 @@ const Index: NextPage<Props> = props => (
   </ErrorBoundary>
 )
 
-Index.getInitialProps = (ctx: NextPageContext): Promise<Props> => {
+Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   return requestInitialProps(
     ctx,
     token => request<UserDTO[]>("/api/users", {token}),

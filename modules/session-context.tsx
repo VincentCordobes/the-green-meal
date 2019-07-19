@@ -3,14 +3,10 @@ import {UserDTO} from "./users/types"
 import {useFetch} from "./use-fetch"
 
 export const CurrentUserContext = React.createContext<
-  | {
-      currentUser?: UserDTO
-      refresh: () => void
-    }
-  | undefined
+  {currentUser: UserDTO; refresh: () => void} | undefined
 >(undefined)
 
-export const CurrentUserProvider: FC<{initialData?: UserDTO}> = ({
+export const CurrentUserProvider: FC<{initialData: UserDTO}> = ({
   initialData,
   children,
 }) => {
@@ -20,7 +16,9 @@ export const CurrentUserProvider: FC<{initialData?: UserDTO}> = ({
   )
 
   return (
-    <CurrentUserContext.Provider value={{currentUser, refresh}}>
+    <CurrentUserContext.Provider
+      value={{currentUser: currentUser || initialData, refresh}}
+    >
       {children}
     </CurrentUserContext.Provider>
   )

@@ -2,8 +2,8 @@
 insert into person (email, password, firstname, lastname, email_validated, role)
 values ('manager@toto.com', 'pass', 'firstname1', 'lastname1', true, 'manager');
 
-insert into person (email, password, firstname, lastname, email_validated)
-values ('user2@toto.com', 'pass', 'firstname2', 'lastname2', true);
+insert into person (email, password, firstname, lastname, email_validated, expected_calories_per_day)
+values ('user2@toto.com', 'pass', 'firstname2', 'lastname2', true, 600);
 
 insert into person (email, password, firstname, lastname, email_validated, manager_id)
 values ('user3@toto.com', 'pass', 'firstname3', 'lastname3', true, 1);

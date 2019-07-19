@@ -2,7 +2,7 @@ import {NextPage, NextPageContext} from "next"
 import Layout from "../modules/app/layout"
 import {MealList} from "../modules/meals/meals-list.view"
 import React from "react"
-import {MealDTO} from "../modules/meals/meals-types"
+import {MealListResponse} from "../modules/meals/meals-types"
 import {request} from "../modules/http-client"
 import {withAuth} from "../modules/auth/with-auth-client"
 import {ErrorBoundary} from "../modules/app/error-boundary"
@@ -10,8 +10,8 @@ import {UserDTO} from "../modules/users/types"
 import nextCookies from "next-cookies"
 
 type Props = {
-  meals: MealDTO[]
-  currentUser?: UserDTO
+  meals: MealListResponse
+  currentUser: UserDTO
 }
 
 const Index: NextPage<Props> = props => (
@@ -22,13 +22,11 @@ const Index: NextPage<Props> = props => (
   </Layout>
 )
 
-Index.getInitialProps = async (ctx: NextPageContext): Promise<Props> => {
+Index.getInitialProps = async (ctx: NextPageContext): Promise<any> => {
   const {token} = nextCookies(ctx)
-  const response = await request<MealDTO[]>("/api/meals", {token})
+  const response = await request<MealListResponse>("/api/meals", {token})
   if (response.ok) {
-    return {
-      meals: response.value,
-    }
+    return {meals: response.value}
   } else {
     return {meals: []}
   }

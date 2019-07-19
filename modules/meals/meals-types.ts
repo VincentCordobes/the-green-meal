@@ -1,9 +1,11 @@
+import {Person} from "../users/person"
+
 export type Meal = {
   id: number
   at: Date
   text: string
   calories: number
-  ownerId: number | null
+  ownerId: number
 }
 
 export type MealDTO = {
@@ -12,6 +14,13 @@ export type MealDTO = {
   at: string
   calories: number
 }
+
+export type ExpectedMealCalories = {
+  fullname: string
+} & Pick<Person, "expectedCaloriesPerDay">
+
+export type MealItem = MealDTO & ExpectedMealCalories
+export type MealListResponse = MealItem[]
 
 export type AddMealDTO = {
   text: string

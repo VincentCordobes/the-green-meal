@@ -10,10 +10,12 @@ import {
   MealsFilter,
   RemoveMealPayload,
   UpdateMealDTO,
+  MealListResponse,
+  ExpectedMealCalories,
 } from "./meals-types"
 import {DateTime} from "luxon"
 import {validate} from "../validate"
-import {propOr, pickBy, isNil} from "ramda"
+import {propOr, pick, pickBy, isNil} from "ramda"
 import {withACLs} from "../auth/with-auth-server"
 import {HTTPError} from "../error-handler"
 
@@ -32,7 +34,7 @@ const MealsFilterSchema = Joi.object({
 
 export const list = withACLs(
   ["regular", "admin", "manager"],
-  async (req: ApiRequest, params): Promise<ApiResponse<MealDTO[]>> => {
+  async (req: ApiRequest, params): Promise<ApiResponse<MealListResponse>> => {
     const mealsFilter = validate<MealsFilter>(MealsFilterSchema, req.query)
 
     const dateFrom = propOr("-infinity", "fromDate", mealsFilter)
@@ -41,18 +43,30 @@ export const list = withACLs(
     const timeFrom = propOr("00:00", "fromTime", mealsFilter)
     const timeTo = propOr("24:00", "toTime", mealsFilter)
 
-    const sqlQuery = sql`select * from meal 
-          where (meal.at::date between ${dateFrom} and ${dateTo})
-            and (meal.at::time between ${timeFrom} and ${timeTo})`
+    const sqlQuery = sql`
+      select meal.id, meal.at, meal.text, meal.calories,
+             concat(p.firstname, ' ', p.lastname) as fullname,
+             p.expected_calories_per_day
+        from meal join person p on p.id = meal.owner_id
+       where (meal.at::date between ${dateFrom} and ${dateTo})
+         and (meal.at::time between ${timeFrom} and ${timeTo})`
 
     if (params.role !== "admin") {
       sqlQuery.append(sql` and owner_id = ${params.userId}`)
     }
+
     sqlQuery.append("order by meal.at desc")
 
-    const meals = await query<Meal>(sqlQuery)
+    type DbQueryResult = Meal & ExpectedMealCalories
+    const meals = await query<DbQueryResult>(sqlQuery)
 
-    return responseOK(meals.map(toMealDTO))
+    return {
+      ok: true,
+      value: meals.map(meal => ({
+        ...meal,
+        at: formatDate(meal.at),
+      })),
+    }
   },
 )
 
@@ -135,7 +149,7 @@ export const remove = withACLs(
 
     const [meal] = await query<Meal>(
       sql`delete from meal
-        where id =  ${mealId}`
+          where id =  ${mealId}`
         .append(ownerFilter)
         .append(` returning *`),
     )
@@ -149,12 +163,14 @@ export const remove = withACLs(
 )
 
 function toMealDTO(meal: Meal): MealDTO {
-  const fieldsToIgnore = ["ownerId"]
-
   return {
-    ...pickBy((val, key) => !fieldsToIgnore.includes(key) && !isNil(val), meal),
-    at: DateTime.fromJSDate(meal.at)
-      .toUTC()
-      .toISO(),
+    ...pick(["id", "text", "calories"], meal),
+    at: formatDate(meal.at),
   }
+}
+
+function formatDate(date: Date) {
+  return DateTime.fromJSDate(date)
+    .toUTC()
+    .toISO()
 }

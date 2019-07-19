@@ -40,12 +40,16 @@ describe("List meals", () => {
       value: [
         {
           id: 2,
+          fullname: "firstname2 lastname2",
+          expectedCaloriesPerDay: 600,
           at: "2019-01-01T19:00:00.000Z",
           text: "Banana with ice",
           calories: 400,
         },
         {
           id: 1,
+          fullname: "firstname2 lastname2",
+          expectedCaloriesPerDay: 600,
           at: "2018-01-01T12:00:00.000Z",
           text: "Fried chicken with rice",
           calories: 500,
@@ -198,7 +202,7 @@ describe("Add a meal", () => {
     })
     expect(listResponse).toEqual({
       ok: true,
-      value: expect.arrayContaining([addedMeal]),
+      value: expect.arrayContaining([expect.objectContaining(addedMeal)]),
     })
   })
 })
