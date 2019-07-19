@@ -1,7 +1,7 @@
 import React, {FC, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import Tag from "antd/lib/tag"
-import {MealDTO, AddMealDTO, MealsFilter} from "./meals-types"
+import {MealDTO, MealsFilter} from "./meals-types"
 import {request} from "../http-client"
 
 import "./meals-list.view.css"
@@ -19,13 +19,18 @@ import Divider from "antd/lib/divider"
 import {dissoc} from "ramda"
 import Tooltip from "antd/lib/tooltip"
 import Popconfirm from "antd/lib/popconfirm"
+import {useCurrentUser} from "../session-context"
+import {UserDTO} from "../users/types"
 
 const {RangePicker} = DatePicker
 
-function buildColumns(params: {
-  onDelete: (meal: MealDTO) => any
-  onEdit: (meal: MealDTO) => any
-}): ColumnProps<MealDTO>[] {
+function buildColumns(
+  user: UserDTO,
+  params: {
+    onDelete: (meal: MealDTO) => any
+    onEdit: (meal: MealDTO) => any
+  },
+): ColumnProps<MealDTO>[] {
   return [
     {
       title: "Meal",
@@ -48,11 +53,21 @@ function buildColumns(params: {
       title: "Calories",
       dataIndex: "calories",
       key: "calories",
-      render: (calories: number) => (
-        <Tag color={calories > 400 ? "#f5222d" : "#7cb305"}>
-          <span className="meal-calories">{calories} kCal</span>
-        </Tag>
-      ),
+      render: (calories: number) => {
+        let color
+        if (user.expectedCaloriesPerDay) {
+          if (user.expectedCaloriesPerDay < calories) {
+            color = "#f5222d"
+          } else {
+            color = "#7cb305"
+          }
+        }
+        return (
+          <Tag color={color}>
+            <span className="meal-calories">{calories} kCal</span>
+          </Tag>
+        )
+      },
     },
     {
       title: "Actions",
@@ -97,12 +112,17 @@ export const MealList: FC<Props> = props => {
     initialData: props.meals,
   })
 
+  const {currentUser} = useCurrentUser()
+  if (!currentUser) {
+    return null
+  }
+
   const onSave = async () => {
     await refetch()
     closeModal()
   }
 
-  const columns = buildColumns({
+  const columns = buildColumns(currentUser, {
     onDelete: async meal => {
       await request("/api/meals/remove", {
         method: "POST",
