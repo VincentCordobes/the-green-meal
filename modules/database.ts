@@ -1,7 +1,8 @@
 import {Pool} from "pg"
-import R from "ramda"
+import R, {head} from "ramda"
 import sql from "sql-template-strings"
 import {SQLStatement} from "sql-template-strings"
+import {HTTPError} from "./error-handler"
 
 export const DB_NAME = "the_green_meal"
 
@@ -28,6 +29,14 @@ export async function query<T>(sql: SQLStatement): Promise<T[]> {
 
 export function execute(sql: string | SQLStatement) {
   return pool.query(sql)
+}
+
+export async function queryOne<T>(sqlQuery: SQLStatement): Promise<T> {
+  const [result] = await query<T>(sqlQuery)
+  if (!result) {
+    throw new HTTPError(400)
+  }
+  return result
 }
 
 export function buildUpdateFields<T extends object>(record: T): SQLStatement {

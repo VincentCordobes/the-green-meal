@@ -1,13 +1,21 @@
-import SQL from "sql-template-strings"
+import sql from "sql-template-strings"
 import Joi from "@hapi/joi"
 
 import {ApiRequest, ApiResponse} from "../api-types"
-import {query} from "../database"
+import {query, buildUpdateFields, queryOne, buildValues} from "../database"
 import {responseOK} from "../api"
-import {Meal, MealDTO, MealsFilter} from "./meals-types"
+import {
+  Meal,
+  MealDTO,
+  MealsFilter,
+  RemoveMealPayload,
+  UpdateMealDTO,
+} from "./meals-types"
 import {DateTime} from "luxon"
 import {validate} from "../validate"
-import {propOr} from "ramda"
+import {propOr, pickBy, isNil} from "ramda"
+import {withACLs} from "../auth/with-auth-server"
+import {HTTPError} from "../error-handler"
 
 const timeSchema = Joi.string().regex(
   /^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$/,
@@ -22,23 +30,31 @@ const MealsFilterSchema = Joi.object({
   toDate: dateSchema.optional(),
 }).optional()
 
-export async function list(req: ApiRequest): Promise<ApiResponse<MealDTO[]>> {
-  const mealsFilter = validate<MealsFilter>(MealsFilterSchema, req.query)
+export const list = withACLs(
+  ["regular", "admin", "manager"],
+  async (req: ApiRequest, params): Promise<ApiResponse<MealDTO[]>> => {
+    const mealsFilter = validate<MealsFilter>(MealsFilterSchema, req.query)
 
-  const dateFrom = propOr("-infinity", "fromDate", mealsFilter)
-  const dateTo = propOr("infinity", "toDate", mealsFilter)
+    const dateFrom = propOr("-infinity", "fromDate", mealsFilter)
+    const dateTo = propOr("infinity", "toDate", mealsFilter)
 
-  const timeFrom = propOr("00:00", "fromTime", mealsFilter)
-  const timeTo = propOr("24:00", "toTime", mealsFilter)
+    const timeFrom = propOr("00:00", "fromTime", mealsFilter)
+    const timeTo = propOr("24:00", "toTime", mealsFilter)
 
-  const meals = await query<Meal>(
-    SQL`select * from meal 
-        where (meal.at::date between ${dateFrom} and ${dateTo})
-          and (meal.at::time between ${timeFrom} and ${timeTo})`,
-  )
+    const sqlQuery = sql`select * from meal 
+          where (meal.at::date between ${dateFrom} and ${dateTo})
+            and (meal.at::time between ${timeFrom} and ${timeTo})`
 
-  return responseOK(meals.map(toMealDTO))
-}
+    if (params.role !== "admin") {
+      sqlQuery.append(sql` and owner_id = ${params.userId}`)
+    }
+    sqlQuery.append("order by meal.at desc")
+
+    const meals = await query<Meal>(sqlQuery)
+
+    return responseOK(meals.map(toMealDTO))
+  },
+)
 
 type AddMealPayload = {
   at: Date
@@ -46,27 +62,97 @@ type AddMealPayload = {
   calories: number
 }
 
-export async function add(req: ApiRequest): Promise<ApiResponse<MealDTO>> {
-  const {at, text, calories} = validate<AddMealPayload>(
-    Joi.object({
-      at: Joi.date(),
-      text: Joi.string(),
-      calories: Joi.number().positive(),
-    }),
-    req.body,
-  )
+export const add = withACLs(
+  ["regular", "admin", "manager"],
+  async (req: ApiRequest, {userId: ownerId}): Promise<ApiResponse<MealDTO>> => {
+    type DbMealInsert = Omit<Meal, "id">
 
-  const [meal] = await query<Meal>(
-    SQL`insert into meal (at, text, calories) 
-        values (${at}, ${text}, ${calories}) returning *`,
-  )
+    const {at, text, calories} = validate<AddMealPayload>(
+      Joi.object({
+        at: Joi.date(),
+        text: Joi.string(),
+        calories: Joi.number().positive(),
+      }),
+      req.body,
+    )
 
-  return responseOK(toMealDTO(meal))
-}
+    const [meal] = await query<Meal>(
+      sql`insert into meal`
+        .append(buildValues<DbMealInsert>({at, text, calories, ownerId}))
+        .append(` returning * `),
+    )
+
+    return responseOK(toMealDTO(meal))
+  },
+)
+
+export const update = withACLs(
+  ["regular", "admin", "manager"],
+  async (req, {userId, role}): Promise<ApiResponse<MealDTO>> => {
+    const {mealId, values} = validate<UpdateMealDTO>(
+      Joi.object({
+        mealId: Joi.number(),
+        values: Joi.object({
+          at: Joi.date().optional(),
+          text: Joi.string().optional(),
+          calories: Joi.number()
+            .positive()
+            .optional(),
+        }).optional(),
+      }).optional(),
+      req.body,
+    )
+
+    if (!values || !Object.keys(values).length) {
+      const meal = await queryOne<Meal>(
+        sql`select * from meal`.append(
+          role !== "admin" ? sql`where owner_id = ${userId}` : "",
+        ),
+      )
+      return responseOK(toMealDTO(meal))
+    }
+
+    const meal = await queryOne<Meal>(
+      sql`update meal set `
+        .append(buildUpdateFields(values))
+        .append(sql` where meal.id = ${mealId}`)
+        .append(role !== "admin" ? sql` and owner_id = ${userId}` : "")
+        .append(` returning * `),
+    )
+    return responseOK(toMealDTO(meal))
+  },
+)
+
+export const remove = withACLs(
+  ["regular", "admin", "manager"],
+  async (req, {userId, role}) => {
+    const {mealId} = validate<RemoveMealPayload>(
+      Joi.object({mealId: Joi.number()}),
+      req.body,
+    )
+
+    const ownerFilter = role !== "admin" ? sql` and owner_id = ${userId}` : ""
+
+    const [meal] = await query<Meal>(
+      sql`delete from meal
+        where id =  ${mealId}`
+        .append(ownerFilter)
+        .append(` returning *`),
+    )
+
+    if (!meal) {
+      throw new HTTPError(401)
+    }
+
+    return responseOK(toMealDTO(meal))
+  },
+)
 
 function toMealDTO(meal: Meal): MealDTO {
+  const fieldsToIgnore = ["ownerId"]
+
   return {
-    ...meal,
+    ...pickBy((val, key) => !fieldsToIgnore.includes(key) && !isNil(val), meal),
     at: DateTime.fromJSDate(meal.at)
       .toUTC()
       .toISO(),

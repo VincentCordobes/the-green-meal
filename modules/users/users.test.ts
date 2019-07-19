@@ -31,7 +31,7 @@ jest.mock("jsonwebtoken", () => {
   return {verify}
 })
 
-beforeEach(() => initDbWithFixtures("users/fixtures.sql"))
+beforeEach(() => initDbWithFixtures("test-fixtures.sql"))
 afterAll(() => closeDb())
 
 describe("List users", () => {

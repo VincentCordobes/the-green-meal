@@ -41,7 +41,7 @@ function buildColumns(params: {
     {
       title: "Role",
       key: "role",
-      render: ({role, emailValidated}) => {
+      render: ({role, emailValidated}: UserDTO) => {
         if (!emailValidated) {
           return <Tag color="orange">pending</Tag>
         }

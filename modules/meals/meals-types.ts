@@ -3,6 +3,7 @@ export type Meal = {
   at: Date
   text: string
   calories: number
+  ownerId: number | null
 }
 
 export type MealDTO = {
@@ -18,9 +19,18 @@ export type AddMealDTO = {
   calories: number
 }
 
+export type RemoveMealPayload = {
+  mealId: number
+}
+
 export type MealsFilter = {
   fromTime?: string
   toTime?: string
   fromDate?: string
   toDate?: string
+}
+
+export type UpdateMealDTO = {
+  mealId: number
+  values?: Partial<AddMealDTO>
 }

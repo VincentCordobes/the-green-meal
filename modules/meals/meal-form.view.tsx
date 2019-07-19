@@ -7,14 +7,17 @@ import InputNumber from "antd/lib/input-number"
 import TimePicker from "antd/lib/time-picker"
 import {FormComponentProps} from "antd/lib/form"
 import TextArea from "antd/lib/input/TextArea"
+import message from "antd/lib/message"
 
-import {AddMealDTO} from "./meals-types"
+import {AddMealDTO, MealDTO, UpdateMealDTO} from "./meals-types"
+import {request} from "../http-client"
+import {ApiError} from "../api-types"
 
 type ModalProps = {
   visible: boolean
   onCancel: () => void
   onSave: (meal: AddMealDTO) => any
-  // meal: MealDTO
+  meal?: MealDTO
 }
 
 type Props = ModalProps & FormComponentProps<FormValue>
@@ -34,6 +37,41 @@ type FormValue = {
   time: Moment
   calories: number
 }
+
+function updateMeal(mealId: number, meal: Partial<AddMealDTO>) {
+  return request<MealDTO, ApiError, UpdateMealDTO>("/api/meals/edit", {
+    method: "POST",
+    body: {
+      mealId,
+      values: meal,
+    },
+  })
+}
+
+function createMeal(meal: AddMealDTO) {
+  return request<MealDTO, ApiError, AddMealDTO>("/api/meals/add", {
+    method: "POST",
+    body: meal,
+  })
+}
+
+function formatFormValues(values: FormValue): AddMealDTO {
+  const {date, time, calories, text} = values
+  const at = moment(date).set({
+    hour: time.get("hour"),
+    minute: time.get("minute"),
+    second: time.get("second"),
+  })
+
+  const meal: AddMealDTO = {
+    at: at.toISOString(),
+    calories,
+    text,
+  }
+
+  return meal
+}
+
 export const MealForm = Form.create<Props>({
   name: "meal-form",
 })((props: Props) => {
@@ -45,26 +83,29 @@ export const MealForm = Form.create<Props>({
     props.form.validateFields(async (err, values) => {
       if (!err) {
         setLoading(true)
-        const {date, time, calories, text} = values
-        const at = moment(date).set({
-          hour: time.get("hour"),
-          minute: time.get("minute"),
-          second: time.get("second"),
-        })
 
-        const meal: AddMealDTO = {
-          at: at.toISOString(),
-          calories,
-          text,
+        const meal = formatFormValues(values)
+
+        const response = props.meal
+          ? await updateMeal(props.meal.id, meal)
+          : await createMeal(meal)
+
+        if (response.ok) {
+          await props.onSave(meal)
+          props.form.resetFields()
+          message.success("Meal saved")
+        } else {
+          message.error("An error occurred while serving the meal :(")
         }
-
-        await props.onSave(meal)
-
-        props.form.resetFields()
         setLoading(false)
       }
     })
   }
+
+  const initialValue = (field: keyof MealDTO) =>
+    props.meal ? props.meal[field] : ""
+
+  const initialDateTime = props.meal ? moment(props.meal.at) : null
 
   return (
     <Modal
@@ -85,19 +126,19 @@ export const MealForm = Form.create<Props>({
         <Form.Item label="Meal">
           {getFieldDecorator("text", {
             rules: [{required: true, message: "Please enter a text"}],
-            // initialValue: meal.text,
+            initialValue: initialValue("text"),
           })(<TextArea autosize autoFocus placeholder="Banana with apple" />)}
         </Form.Item>
         <Form.Item label="Date">
           {getFieldDecorator("date", {
             rules: [{required: true, message: "Please enter a date"}],
-            // initialValue: meal.date,
+            initialValue: initialDateTime,
           })(<DatePicker style={{width: "100%"}} />)}
         </Form.Item>
         <Form.Item label="Time">
           {getFieldDecorator("time", {
             rules: [{required: true, message: "Please enter a time"}],
-            // initialValue: meal.time,
+            initialValue: initialDateTime,
           })(<TimePicker style={{width: "100%"}} />)}
         </Form.Item>
         <Form.Item label="Calories (kCal)">
@@ -106,7 +147,7 @@ export const MealForm = Form.create<Props>({
               {required: true, message: "Please enter the calories count"},
               {validator: validateCalorieCount},
             ],
-            // initialValue: meal.calories,
+            initialValue: initialValue("calories"),
           })(<InputNumber style={{width: "100%"}} />)}
         </Form.Item>
         <button hidden />

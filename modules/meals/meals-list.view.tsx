@@ -17,38 +17,72 @@ import {useFetch} from "../use-fetch"
 import TimePicker from "antd/lib/time-picker"
 import Divider from "antd/lib/divider"
 import {dissoc} from "ramda"
+import Tooltip from "antd/lib/tooltip"
+import Popconfirm from "antd/lib/popconfirm"
 
 const {RangePicker} = DatePicker
 
-const columns: ColumnProps<MealDTO>[] = [
-  {
-    title: "Meal",
-    dataIndex: "text",
-    key: "text",
-  },
-  {
-    title: "Date",
-    key: "date",
-    dataIndex: "at",
-    render: (at: string) => DateTime.fromISO(at).toFormat("MM-dd-yyyy"),
-  },
-  {
-    title: "Time",
-    key: "time",
-    dataIndex: "at",
-    render: (at: string) => DateTime.fromISO(at).toFormat("HH:mm"),
-  },
-  {
-    title: "Calories",
-    dataIndex: "calories",
-    key: "calories",
-    render: (calories: number) => (
-      <Tag color={calories > 400 ? "#f5222d" : "#7cb305"}>
-        <span className="meal-calories">{calories} kCal</span>
-      </Tag>
-    ),
-  },
-]
+function buildColumns(params: {
+  onDelete: (meal: MealDTO) => any
+  onEdit: (meal: MealDTO) => any
+}): ColumnProps<MealDTO>[] {
+  return [
+    {
+      title: "Meal",
+      dataIndex: "text",
+      key: "text",
+    },
+    {
+      title: "Date",
+      key: "date",
+      dataIndex: "at",
+      render: (at: string) => DateTime.fromISO(at).toFormat("MM-dd-yyyy"),
+    },
+    {
+      title: "Time",
+      key: "time",
+      dataIndex: "at",
+      render: (at: string) => DateTime.fromISO(at).toFormat("HH:mm"),
+    },
+    {
+      title: "Calories",
+      dataIndex: "calories",
+      key: "calories",
+      render: (calories: number) => (
+        <Tag color={calories > 400 ? "#f5222d" : "#7cb305"}>
+          <span className="meal-calories">{calories} kCal</span>
+        </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: "center",
+      fixed: "right",
+      width: 150,
+      render: (_, user) => (
+        <>
+          <Tooltip title="Edit" placement="bottom">
+            <Button type="link" onClick={() => params.onEdit(user)}>
+              <Icon type="edit" />
+            </Button>
+          </Tooltip>
+          <Divider type="vertical" />
+          <Popconfirm
+            title="Are you sure you want to delete this meal?"
+            onConfirm={() => params.onDelete(user)}
+          >
+            <Tooltip title="Delete" placement="bottom">
+              <a>
+                <Icon type="delete" />
+              </a>
+            </Tooltip>
+          </Popconfirm>
+        </>
+      ),
+    },
+  ]
+}
 
 type Props = {
   meals: MealDTO[]
@@ -57,26 +91,32 @@ type Props = {
 export const MealList: FC<Props> = props => {
   const {isOpen, openModal, closeModal} = useModal()
   const [filter, setFilter] = useState<MealsFilter>()
-  const {data: meals, setData: setMeals} = useFetch<MealDTO[]>("/api/meals", {
+  const [selectedMeal, setSelectedMeal] = useState<MealDTO>()
+  const {data: meals, refetch} = useFetch<MealDTO[]>("/api/meals", {
     params: filter,
     initialData: props.meals,
   })
 
-  const addMeal = async (meal: AddMealDTO) => {
-    const response = await request<MealDTO>("/api/meals/add", {
-      method: "POST",
-      body: meal,
-    })
-
-    if (response.ok) {
-      setMeals(meals => (meals || []).concat(response.value))
-      message.success("Meal added")
-    } else {
-      message.error("Could not add the meal :(")
-    }
-
+  const onSave = async () => {
+    await refetch()
     closeModal()
   }
+
+  const columns = buildColumns({
+    onDelete: async meal => {
+      await request("/api/meals/remove", {
+        method: "POST",
+        body: {mealId: meal.id},
+      })
+
+      await refetch()
+      message.success(`Meal successfully removed`)
+    },
+    onEdit: meal => {
+      setSelectedMeal(meal)
+      openModal()
+    },
+  })
 
   const PICKER_FORMAT = "MM-DD-YYYY"
 
@@ -139,7 +179,12 @@ export const MealList: FC<Props> = props => {
           columns={columns}
         />
       </Row>
-      <MealForm onSave={addMeal} visible={isOpen} onCancel={closeModal} />
+      <MealForm
+        onSave={onSave}
+        visible={isOpen}
+        onCancel={closeModal}
+        meal={selectedMeal}
+      />
     </>
   )
 }

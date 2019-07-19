@@ -1,14 +1,36 @@
-import {list, add} from "./meals"
-import {aRequest, initDbWithFixtures} from "../test-helpers"
+import {list, add, remove, update} from "./meals"
+import {aRequest, initDbWithFixtures, anAdminRequest} from "../test-helpers"
 import {closeDb} from "../database"
-import {AddMealDTO, MealsFilter} from "./meals-types"
+import {AddMealDTO, MealsFilter, UpdateMealDTO, MealDTO} from "./meals-types"
 import {withErrorHandler} from "../error-handler"
+import {OKResponse} from "../api-types"
 
-beforeEach(() => initDbWithFixtures("meals/meals.fixtures.sql"))
+beforeEach(() => initDbWithFixtures("test-fixtures.sql"))
 afterAll(() => closeDb())
 
+jest.mock("jsonwebtoken", () => {
+  const verify = jest.fn((token, _, cb) => {
+    let userId
+    if (token === "manager") {
+      userId = 1
+    } else if (token === "admin") {
+      userId = 5
+    } else if (token === "regular") {
+      userId = 2
+    }
+
+    if (userId) {
+      cb(null, {userId, role: token})
+    } else {
+      cb("error")
+    }
+  })
+
+  return {verify}
+})
+
 describe("List meals", () => {
-  test("should return all user meals", async () => {
+  test("should return all user meals ordered by date desc", async () => {
     // when
     const response = await list(aRequest())
 
@@ -17,20 +39,25 @@ describe("List meals", () => {
       ok: true,
       value: [
         {
-          id: 1,
-          at: "2018-01-01T12:00:00.000Z",
-          text: "Fried chicken with rice",
-          calories: 500,
-        },
-        {
           id: 2,
           at: "2019-01-01T19:00:00.000Z",
           text: "Banana with ice",
           calories: 400,
         },
+        {
+          id: 1,
+          at: "2018-01-01T12:00:00.000Z",
+          text: "Fried chicken with rice",
+          calories: 500,
+        },
       ],
     })
   })
+})
+
+describe("Filter meals", () => {
+  const getIds = (response: OKResponse<MealDTO[]>) =>
+    response.value.map(meal => meal.id).sort()
 
   test("should return KO when the meal filter is invalid", async () => {
     // when
@@ -48,7 +75,6 @@ describe("List meals", () => {
       errorMessage: expect.any(String),
     })
   })
-
   test.each([
     ["2017-05-21", "2019-02-11", [1, 2]],
     ["2018-05-21", "2019-02-11", [2]],
@@ -63,7 +89,7 @@ describe("List meals", () => {
         expect(response.ok).toBe(true)
         return
       }
-      expect(response.value.map(meal => meal.id)).toEqual(ids)
+      expect(getIds(response)).toEqual(ids)
     },
   )
 
@@ -79,7 +105,7 @@ describe("List meals", () => {
       expect(response.ok).toBe(true)
       return
     }
-    expect(response.value.map(meal => meal.id)).toEqual(ids)
+    expect(getIds(response)).toEqual(ids)
   })
 
   test.each([
@@ -93,7 +119,7 @@ describe("List meals", () => {
       expect(response.ok).toBe(true)
       return
     }
-    expect(response.value.map(meal => meal.id)).toEqual(ids)
+    expect(getIds(response)).toEqual(ids)
   })
 
   test.each([
@@ -108,7 +134,7 @@ describe("List meals", () => {
         expect(response.ok).toBe(true)
         return
       }
-      expect(response.value.map(meal => meal.id)).toEqual(ids)
+      expect(getIds(response)).toEqual(ids)
     },
   )
   test.each([
@@ -125,7 +151,7 @@ describe("List meals", () => {
         expect(response.ok).toBe(true)
         return
       }
-      expect(response.value.map(meal => meal.id)).toEqual(ids)
+      expect(getIds(response)).toEqual(ids)
     },
   )
   test.each([
@@ -141,7 +167,7 @@ describe("List meals", () => {
         expect(response.ok).toBe(true)
         return
       }
-      expect(response.value.map(meal => meal.id)).toEqual(ids)
+      expect(getIds(response)).toEqual(ids)
     },
   )
 })
@@ -156,17 +182,164 @@ describe("Add a meal", () => {
     }
 
     // when
-    const response = await add(aRequest({body: meal}))
+    const addResponse = await add(aRequest({body: meal}))
+    const listResponse = await list(aRequest({body: meal}))
+
+    // then
+    const addedMeal = {
+      id: expect.any(Number),
+      at: "2018-07-12T00:00:00.000Z",
+      text: "Pasta",
+      calories: 350,
+    }
+    expect(addResponse).toEqual({
+      ok: true,
+      value: addedMeal,
+    })
+    expect(listResponse).toEqual({
+      ok: true,
+      value: expect.arrayContaining([addedMeal]),
+    })
+  })
+})
+
+describe("Update a meal", () => {
+  test("should update all meal fields", async () => {
+    // given
+    const meal: UpdateMealDTO = {
+      mealId: 1,
+      values: {
+        calories: 350,
+        text: "Pasta",
+        at: "2018-07-12T00:00:00.000Z",
+      },
+    }
+
+    // when
+    const response = await update(aRequest({body: meal}))
 
     // then
     expect(response).toEqual({
       ok: true,
       value: {
-        id: expect.any(Number),
+        id: 1,
         at: "2018-07-12T00:00:00.000Z",
         text: "Pasta",
         calories: 350,
       },
     })
+  })
+
+  test("should update partially a meal fields", async () => {
+    // given
+    const meal: UpdateMealDTO = {
+      mealId: 1,
+      values: {
+        calories: 350,
+      },
+    }
+
+    // when
+    const response = await update(aRequest({body: meal}))
+
+    // then
+    expect(response).toEqual({
+      ok: true,
+      value: {
+        id: 1,
+        at: "2018-01-01T12:00:00.000Z",
+        text: "Fried chicken with rice",
+        calories: 350,
+      },
+    })
+  })
+
+  test("should not update a meal that belongs to an other user", async () => {
+    // given
+    expect.assertions(1)
+    const meal: UpdateMealDTO = {
+      mealId: 3, // An admin meal
+      values: {
+        calories: 350,
+      },
+    }
+
+    // when
+    try {
+      await update(aRequest({body: meal}))
+    } catch (e) {
+      expect(e).toBeTruthy()
+    }
+  })
+
+  test("Admin can update all meals", async () => {
+    // given
+    const meal: UpdateMealDTO = {
+      mealId: 1,
+      values: {
+        calories: 350,
+      },
+    }
+
+    // when
+    const response = await update(anAdminRequest({body: meal}))
+
+    // then
+    expect(response).toEqual({
+      ok: true,
+      value: {
+        id: 1,
+        at: "2018-01-01T12:00:00.000Z",
+        text: "Fried chicken with rice",
+        calories: 350,
+      },
+    })
+  })
+})
+
+describe("Remove a meal", () => {
+  test("should remove a meal by its id", async () => {
+    // given
+    const mealToRemove = {
+      mealId: 2,
+    }
+
+    // when
+    await remove(aRequest({body: mealToRemove}))
+    const response = await list(aRequest())
+
+    // then
+    expect(
+      response.ok &&
+        response.value.find(user => user.id === mealToRemove.mealId),
+    ).toBeFalsy()
+  })
+
+  test("should not remove anything when the meal is not owned", async () => {
+    expect.assertions(1)
+    // when
+    try {
+      await remove(aRequest({body: {mealId: 5}}))
+    } catch (e) {
+      // then
+      expect(e).toBeTruthy()
+    }
+  })
+
+  test("should remove an UNowned meal when it's asked by an admin", async () => {
+    // given
+    const mealToRemove = {
+      mealId: 2,
+    }
+
+    // when
+    await remove(anAdminRequest({body: mealToRemove}))
+    const response = await list(aRequest())
+
+    // then
+    expect(
+      response.ok &&
+        response.value.find(user => user.id === mealToRemove.mealId),
+    ).toBeFalsy()
   })
 })

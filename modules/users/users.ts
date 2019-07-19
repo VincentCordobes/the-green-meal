@@ -237,7 +237,7 @@ export async function update(
   return query<UserDTO>(
     sql`update person set `
       .append(buildUpdateFields(fields))
-      .append(` where id = ${userId} `)
+      .append(sql` where id = ${userId} `)
       .append(` returning * `),
   )
     .then(head)
