@@ -9,7 +9,7 @@ export const UserSettings: FC = () => {
   const {currentUser, refresh} = useCurrentUser()
 
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
-    ignore: currentUser.role === "regular",
+    skip: currentUser.role === "regular",
     initialData: [],
   })
 

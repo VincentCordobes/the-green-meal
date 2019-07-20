@@ -5,11 +5,11 @@ type Options<T> = {
   body?: any
   params?: any
   initialData?: T
-  ignore?: boolean
+  skip?: boolean
 }
 export const useFetch = <T>(
   url: string,
-  {body, initialData, params, ignore}: Options<T> = {},
+  {body, initialData, params, skip}: Options<T> = {},
 ) => {
   const isInitialFetch = useRef(true)
   const [data, setData] = useState<T | undefined>(initialData)
@@ -29,11 +29,11 @@ export const useFetch = <T>(
   }, [url, body, params])
 
   useEffect(() => {
-    if (!ignore) {
+    if (!skip) {
       fetch()
     }
     return () => {}
-  }, [fetch, ignore])
+  }, [fetch, skip])
 
   return {
     data,
