@@ -1,7 +1,7 @@
-import {ApiRequest} from "./api-types"
-import {execute} from "./database"
 import fs from "fs"
 import path from "path"
+import {ApiRequest} from "./api-types"
+import {execute} from "./database"
 
 export function aRequest<T = any>(
   props: Partial<ApiRequest<T>> = {},
@@ -51,7 +51,7 @@ export async function initTestDb() {
   }
 }
 
-async function execSqlFile(filePath: string) {
+export async function execSqlFile(filePath: string) {
   const sqlContent = fs.readFileSync(filePath, "utf8")
   const queries = sqlContent.split(";")
 

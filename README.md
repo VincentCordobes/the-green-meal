@@ -54,9 +54,9 @@ npm test
 ### Login
 
 You can login, by default with:
-- An admin user → login: `admin@meals.com`, password: `meal`
-- A regular user →  login: `regular@meals.com`, password: `meal`
-- A manager →  login: `manager@meals.com`, password: `meal`
+- An admin user → login: `admin@meals.com`, password: `meals`
+- A regular user →  login: `regular@meals.com`, password: `meals`
+- A manager →  login: `manager@meals.com`, password: `meals`
 
 ### Signup
 

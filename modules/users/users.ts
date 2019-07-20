@@ -198,53 +198,53 @@ const updateUserSchema = Joi.object({
   }).optional(),
 }).optional()
 
-export async function update(
-  req: ApiRequest<UpdateUser>,
-): Promise<ApiResponse<UserDTO>> {
-  const {userId, values} = validate<UpdateUser>(updateUserSchema, req.body)
+export const update = withACLs(
+  ["regular", "admin", "manager"],
+  async (req: ApiRequest<UpdateUser>): Promise<ApiResponse<UserDTO>> => {
+    const {userId, values} = validate<UpdateUser>(updateUserSchema, req.body)
 
-  if (!values) {
-    const user = await findById(userId)
-    return responseOK(toUserDTO(user))
-  }
+    if (!values) {
+      const user = await findById(userId)
+      return responseOK(toUserDTO(user))
+    }
 
-  const {managedUserIds, ...fields} = values
+    const {managedUserIds, ...fields} = values
 
-  // Set new managed users
-  if (managedUserIds) {
-    await query(
-      sql`update person set 
-          manager_id = null 
-          where manager_id = ${userId}`,
+    if (managedUserIds) {
+      await updateManagedUsers(userId, managedUserIds)
+    }
+
+    if (!Object.values(fields).length) {
+      const user = await findById(userId)
+      return responseOK(toUserDTO(user))
+    }
+
+    if (fields.password) {
+      fields.password = await hashPassword(fields.password)
+    }
+
+    return query<UserDTO>(
+      sql`update person set `
+        .append(buildUpdateFields(fields))
+        .append(sql` where id = ${userId} `)
+        .append(` returning * `),
     )
-  }
+      .then(head)
+      .then(user => responseOK(toUserDTO(user)))
+      .catch(handleDuplicateUser)
+  },
+)
 
-  if (managedUserIds && managedUserIds.length) {
-    await query(
-      sql`update person set 
-          manager_id = ${userId}
-          where person.id = any(${managedUserIds})`,
-    )
-  }
+async function updateManagedUsers(managerId: number, managedUserIds: number[]) {
+  await query(sql`update person 
+                  set manager_id = null 
+                  where manager_id = ${managerId}`)
 
-  if (!Object.values(fields).length) {
-    const user = await findById(userId)
-    return responseOK(toUserDTO(user))
+  if (managedUserIds.length) {
+    await query(sql`update person 
+                    set manager_id = ${managerId}
+                    where person.id = any(${managedUserIds})`)
   }
-
-  if (fields.password) {
-    fields.password = await hashPassword(fields.password)
-  }
-
-  return query<UserDTO>(
-    sql`update person set `
-      .append(buildUpdateFields(fields))
-      .append(sql` where id = ${userId} `)
-      .append(` returning * `),
-  )
-    .then(head)
-    .then(user => responseOK(toUserDTO(user)))
-    .catch(handleDuplicateUser)
 }
 
 export const listManagedUsers = withACLs(

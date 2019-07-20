@@ -10,6 +10,7 @@
     "lint": "eslint './{pages,modules}/**/*.{ts,tsx}' && tsc --noEmit",
     "test": "jest --runInBand",
     "test:watch": "yarn test --watch",
+    "db:init": "./scripts/init-db.sh",
     "format": "prettier --write ./pages/**",
     "format:check": "prettier --check ./pages/**"
   },

@@ -1,7 +1,6 @@
 import {Pool} from "pg"
-import R, {head} from "ramda"
-import sql from "sql-template-strings"
-import {SQLStatement} from "sql-template-strings"
+import R from "ramda"
+import sql, {SQLStatement} from "sql-template-strings"
 import {HTTPError} from "./error-handler"
 
 export const DB_NAME = "the_green_meal"
