@@ -301,6 +301,25 @@ describe("Update user", () => {
     })
   })
 
+  test("should not update when the email already exists", async () => {
+    // given
+    const user: UpdateUser = {
+      userId: 2,
+      values: {email: "admin@toto.com"},
+    }
+
+    // when
+    const response = await update(aRequest({body: user}))
+
+    // then
+    expect(response).toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "DuplicateUser",
+      errorMessage: expect.any(String),
+    })
+  })
+
   test("should update all fields", async () => {
     // given
     const user: UpdateUser = {

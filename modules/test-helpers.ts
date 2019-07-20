@@ -43,10 +43,7 @@ export async function initDbWithFixtures(fixturesPath: string) {
 export async function initTestDb() {
   const migrationPath = "migrations"
 
-  const migrations = fs
-    .readdirSync(migrationPath)
-    .filter(file => file.indexOf("down") === -1)
-    .sort()
+  const migrations = ["0000_clean.sql", "0001_create_tables.up.sql"]
 
   for (let i = 0; i < migrations.length; i++) {
     const file = migrations[i]

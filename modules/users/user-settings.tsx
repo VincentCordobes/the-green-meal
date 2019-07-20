@@ -5,13 +5,11 @@ import {useFetch} from "../use-fetch"
 import {UserDTO} from "./types"
 import {UserFormLayout} from "./user-form-layout"
 
-type Props = {
-  user?: UserDTO
-}
-export const UserSettings: FC<Props> = () => {
+export const UserSettings: FC = () => {
   const {currentUser, refresh} = useCurrentUser()
 
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
+    ignore: currentUser.role === "regular",
     initialData: [],
   })
 
@@ -21,8 +19,9 @@ export const UserSettings: FC<Props> = () => {
         onSave={refresh}
         users={users || []}
         user={currentUser}
-        withRole
         withExpectCalories
+        withRole
+        readOnlyRole
       />
     </UserFormLayout>
   )

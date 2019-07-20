@@ -17,6 +17,7 @@ type UserFormProps = {
   user?: UserDTO
   users: UserDTO[]
   withRole?: boolean
+  readOnlyRole?: boolean
   withPassword?: boolean
   withExpectCalories?: boolean
 }
@@ -175,7 +176,7 @@ export const UserForm = Form.create<Props>({
           {getFieldDecorator("role", {
             initialValue: initialValue("role") || "regular",
           })(
-            <Select>
+            <Select disabled={props.readOnlyRole}>
               <Option value="regular">Regular</Option>
               <Option value="manager">Manager</Option>
               <Option value="admin">Admin</Option>

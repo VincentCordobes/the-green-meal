@@ -1,4 +1,4 @@
-import {ApiRequest, ApiResponse} from "../api-types"
+import {ApiRequest, ApiResponse, KOResponse} from "../api-types"
 import {
   query,
   DBError,
@@ -138,17 +138,19 @@ export const add = async (
       sendMail(email, confirmEmailTemplate(emailValidationToken))
       return response
     })
-    .catch((e: DBError) => {
-      if (e.code === DB_ERROR.uniqueViolation) {
-        return responseKO({
-          error: "DuplicateUser",
-          errorMessage: "email must be unique",
-          statusCode: 400,
-        })
-      } else {
-        throw e
-      }
+    .catch(handleDuplicateUser)
+}
+
+function handleDuplicateUser(e: DBError): KOResponse<AddUserError> {
+  if (e.code === DB_ERROR.uniqueViolation) {
+    return responseKO({
+      error: "DuplicateUser",
+      errorMessage: "email must be unique",
+      statusCode: 400,
     })
+  } else {
+    throw e
+  }
 }
 
 export const remove = withACLs(
@@ -242,6 +244,7 @@ export async function update(
   )
     .then(head)
     .then(user => responseOK(toUserDTO(user)))
+    .catch(handleDuplicateUser)
 }
 
 export const listManagedUsers = withACLs(
