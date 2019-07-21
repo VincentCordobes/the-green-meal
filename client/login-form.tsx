@@ -9,7 +9,7 @@ import Alert from "antd/lib/alert"
 import {FormComponentProps} from "antd/lib/form/Form"
 import cookie from "js-cookie"
 
-import {AuthResponse, AuthPayload} from "../shared/auth-types"
+import {AuthResponse, AuthPayload} from "../shared/auth"
 import {request} from "./http-client"
 
 import "./login-form.css"

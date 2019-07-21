@@ -17,7 +17,7 @@ export type UserPayload = {
   password: string
   firstname: string
   lastname: string
-  role?: string
+  role?: Role
   managedUserIds?: number[]
   expectedCaloriesPerDay?: number | null
 }

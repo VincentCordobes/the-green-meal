@@ -8,10 +8,12 @@ import {propOr} from "ramda"
 import Button from "antd/lib/button"
 import InputNumber from "antd/lib/input-number"
 
-import {UserDTO, UserPayload, AddUserError} from "../shared/user-types"
+import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 
 import {request} from "./http-client"
 import {UserSelect, fullName} from "./select-user"
+import {useCurrentUser} from "./session-context"
+import {getRoles} from "../shared/auth"
 
 type UserFormProps = {
   onSave?: () => any
@@ -55,6 +57,8 @@ export const UserForm = Form.create<Props>({
   const [loading, setLoading] = useState(false)
   const [managedUsers, setManagedUsers] = useState<UserSelectItem[]>([])
   const clearManagedUsers = () => setManagedUsers([])
+
+  const {currentUser} = useCurrentUser()
 
   useEffect(() => {
     if (props.user && props.user.role === "manager") {
@@ -179,9 +183,11 @@ export const UserForm = Form.create<Props>({
             initialValue: initialValue("role") || "regular",
           })(
             <Select disabled={props.readOnlyRole}>
-              <Option value="regular">Regular</Option>
-              <Option value="manager">Manager</Option>
-              <Option value="admin">Admin</Option>
+              {getRoles(currentUser.role).map(role => (
+                <Option key={role} value={role}>
+                  {formatRole(role)}
+                </Option>
+              ))}
             </Select>,
           )}
         </Form.Item>
@@ -206,3 +212,7 @@ export const UserForm = Form.create<Props>({
     </Form>
   )
 })
+
+function formatRole(role: Role): string {
+  return role.charAt(0).toLocaleUpperCase() + role.slice(1)
+}

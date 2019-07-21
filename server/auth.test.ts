@@ -1,4 +1,4 @@
-import {AuthPayload} from "../shared/auth-types"
+import {AuthPayload} from "../shared/auth"
 
 import {auth} from "./auth"
 import {aRequest, initTestDb, anAdminRequest} from "./test-helpers"

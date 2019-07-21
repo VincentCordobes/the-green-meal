@@ -335,7 +335,7 @@ describe("Update user", () => {
     }
 
     // when
-    const response = await update(aRequest({body: user}))
+    const response = await update(anAdminRequest({body: user}))
 
     // then
     expect(response).toEqual({
@@ -350,6 +350,24 @@ describe("Update user", () => {
         emailValidated: true,
       },
     })
+  })
+
+  test("a manager should not be able to set admin role", async () => {
+    expect.assertions(1)
+    // given
+    const user: UpdateUser = {
+      userId: 1,
+      values: {
+        role: "admin",
+      },
+    }
+
+    // when
+    try {
+      await update(aManagerRequest({body: user}))
+    } catch (e) {
+      expect(e.statusCode).toBe(401)
+    }
   })
 })
 

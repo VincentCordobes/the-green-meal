@@ -4,7 +4,7 @@ import {SQL} from "sql-template-strings"
 import jwt from "jsonwebtoken"
 
 import {ApiResponse} from "../shared/api-types"
-import {AuthPayload, AuthResponse, AuthError} from "../shared/auth-types"
+import {AuthPayload, AuthResponse, AuthError} from "../shared/auth"
 
 import {query} from "./database"
 import {responseKO, responseOK, ApiRequest} from "./api"

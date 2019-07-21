@@ -28,6 +28,7 @@ import {hashPassword} from "./auth"
 import {confirmEmailTemplate, sendMail} from "./mailing"
 import {withACLs, checkAccess} from "./with-auth"
 import {HTTPError} from "./error-handler"
+import {getRoles} from "../shared/auth"
 
 export const list = withACLs(
   ["admin", "manager"],
@@ -202,12 +203,22 @@ const updateUserSchema = Joi.object({
 
 export const update = withACLs(
   ["regular", "admin", "manager"],
-  async (req: ApiRequest<UpdateUser>): Promise<ApiResponse<UserDTO>> => {
+  async (
+    req: ApiRequest<UpdateUser>,
+    params,
+  ): Promise<ApiResponse<UserDTO>> => {
     const {userId, values} = validate<UpdateUser>(updateUserSchema, req.body)
 
     if (!values) {
       const user = await findById(userId)
       return responseOK(toUserDTO(user))
+    }
+
+    if (values.role) {
+      const permissions = getRoles(params.role)
+      if (!permissions.includes(values.role)) {
+        throw new HTTPError(401)
+      }
     }
 
     const {managedUserIds, ...fields} = values
