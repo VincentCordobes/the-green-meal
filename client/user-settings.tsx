@@ -21,6 +21,7 @@ export const UserSettings: FC = () => {
         onSave={refresh}
         users={users || []}
         user={currentUser}
+        currentUser={currentUser}
         withExpectCalories
         withRole
         readOnlyRole

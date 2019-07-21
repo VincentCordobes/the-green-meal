@@ -29,6 +29,7 @@ const Index: NextPage<Props> = props => {
             okText="Save"
             onSave={() => Router.push("/users")}
             users={users || props.users}
+            currentUser={props.currentUser}
             withPassword
             withRole
           />

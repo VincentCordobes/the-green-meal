@@ -38,6 +38,7 @@ const Index: NextPage<Props> = props => {
             onSave={refetch}
             users={users || props.users}
             user={selectedUser || props.selectedUser}
+            currentUser={props.currentUser}
             withRole
           />
         </UserFormLayout>

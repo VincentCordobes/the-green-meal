@@ -12,13 +12,16 @@ import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 
 import {request} from "./http-client"
 import {UserSelect, fullName} from "./select-user"
-import {useCurrentUser} from "./session-context"
 import {getRoles} from "../shared/auth"
 
 type UserFormProps = {
   onSave?: () => any
   okText?: string
+  /** The form initial data */
   user?: UserDTO
+  /** The logged in user */
+  currentUser?: UserDTO
+  /** User list the current user has permissions on*/
   users: UserDTO[]
   withRole?: boolean
   readOnlyRole?: boolean
@@ -57,8 +60,6 @@ export const UserForm = Form.create<Props>({
   const [loading, setLoading] = useState(false)
   const [managedUsers, setManagedUsers] = useState<UserSelectItem[]>([])
   const clearManagedUsers = () => setManagedUsers([])
-
-  const {currentUser} = useCurrentUser()
 
   useEffect(() => {
     if (props.user && props.user.role === "manager") {
@@ -177,13 +178,13 @@ export const UserForm = Form.create<Props>({
           })(<InputNumber style={{width: "100%"}} />)}
         </Form.Item>
       )}
-      {props.withRole && (
+      {props.withRole && props.currentUser && (
         <Form.Item label="Role">
           {getFieldDecorator("role", {
             initialValue: initialValue("role") || "regular",
           })(
             <Select disabled={props.readOnlyRole}>
-              {getRoles(currentUser.role).map(role => (
+              {getRoles(props.currentUser.role).map(role => (
                 <Option key={role} value={role}>
                   {formatRole(role)}
                 </Option>
