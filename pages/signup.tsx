@@ -1,18 +1,18 @@
 import {NextPage} from "next"
 import React from "react"
-import {ErrorBoundary} from "../modules/app/error-boundary"
 import Row from "antd/lib/row"
 import Col from "antd/lib/col"
 import Card from "antd/lib/card"
 import Form from "antd/lib/form"
 import Router from "next/router"
-
-import {UserForm} from "../modules/users/user-form"
 import Link from "next/link"
+
+import {ErrorBoundary} from "../client/error-boundary"
+import {UserForm} from "../client/user-form"
 
 import "antd/dist/antd.css"
 import "./signup.css"
-import "../modules/app/style.css"
+import "../client/style.css"
 
 type Props = {}
 

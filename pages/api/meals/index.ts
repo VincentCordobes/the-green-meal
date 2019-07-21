@@ -1,4 +1,4 @@
-import {list} from "../../../modules/meals/meals"
-import {handle} from "../../../modules/api"
+import {list} from "../../../server/meals"
+import {handle} from "../../../server/api"
 
 export default handle(list)

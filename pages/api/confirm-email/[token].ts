@@ -1,6 +1,7 @@
-import {confirmEmail} from "../../../modules/auth/confirm-email"
 import {NextApiResponse, NextApiRequest} from "next"
-import {withErrorHandler} from "../../../modules/error-handler"
+
+import {confirmEmail} from "../../../server/confirm-email"
+import {withErrorHandler} from "../../../server/error-handler"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const result = await withErrorHandler(confirmEmail)(req)

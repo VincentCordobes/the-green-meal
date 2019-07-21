@@ -1,15 +1,13 @@
 import {NextPage, NextPageContext} from "next"
 import React from "react"
 
-import Layout from "../../modules/app/layout"
-import {UserList} from "../../modules/users/user-list"
-import {request} from "../../modules/http-client"
-import {UserDTO} from "../../modules/users/types"
-import {ErrorBoundary} from "../../modules/app/error-boundary"
-import {
-  withAuth,
-  requestInitialProps,
-} from "../../modules/auth/with-auth-client"
+import {UserDTO} from "../../shared/user-types"
+
+import Layout from "../../client/layout"
+import {UserList} from "../../client/user-list"
+import {request} from "../../client/http-client"
+import {ErrorBoundary} from "../../client/error-boundary"
+import {withAuth, requestInitialProps} from "../../client/with-auth-client"
 
 type Props = {
   users: UserDTO[]

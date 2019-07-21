@@ -1,10 +1,11 @@
-import {NextPage} from "next"
-import Layout from "../modules/app/layout"
 import React from "react"
-import {withAuth} from "../modules/auth/with-auth-client"
-import {ErrorBoundary} from "../modules/app/error-boundary"
-import {UserSettings} from "../modules/users/user-settings"
-import {UserDTO} from "../modules/users/types"
+import {NextPage} from "next"
+
+import {UserDTO} from "../shared/user-types"
+import Layout from "../client/layout"
+import {withAuth} from "../client/with-auth-client"
+import {ErrorBoundary} from "../client/error-boundary"
+import {UserSettings} from "../client/user-settings"
 
 type Props = {
   currentUser: UserDTO

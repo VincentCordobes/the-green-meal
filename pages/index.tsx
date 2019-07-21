@@ -1,13 +1,15 @@
-import {NextPage, NextPageContext} from "next"
-import Layout from "../modules/app/layout"
-import {MealList} from "../modules/meals/meals-list.view"
 import React from "react"
-import {MealListResponse} from "../modules/meals/meals-types"
-import {request} from "../modules/http-client"
-import {withAuth} from "../modules/auth/with-auth-client"
-import {ErrorBoundary} from "../modules/app/error-boundary"
-import {UserDTO} from "../modules/users/types"
+import {NextPage, NextPageContext} from "next"
 import nextCookies from "next-cookies"
+
+import {MealListResponse} from "../shared/meals-types"
+import {UserDTO} from "../shared/user-types"
+
+import Layout from "../client/layout"
+import {MealList} from "../client/meals-list.view"
+import {request} from "../client/http-client"
+import {withAuth} from "../client/with-auth-client"
+import {ErrorBoundary} from "../client/error-boundary"
 
 type Props = {
   meals: MealListResponse

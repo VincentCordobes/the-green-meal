@@ -1,10 +1,11 @@
 import {NextPage} from "next"
-import LoginForm from "../modules/auth/login-form"
-import {ErrorBoundary} from "../modules/app/error-boundary"
+
+import LoginForm from "../client/login-form"
+import {ErrorBoundary} from "../client/error-boundary"
 
 import "antd/dist/antd.css"
 import "./login.css"
-import "../modules/app/style.css"
+import "../client/style.css"
 
 type Props = {
   user: string

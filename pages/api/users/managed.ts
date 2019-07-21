@@ -1,4 +1,4 @@
-import {handle} from "../../../modules/api"
-import {listManagedUsers} from "../../../modules/users/users"
+import {handle} from "../../../server/api"
+import {listManagedUsers} from "../../../server/users"
 
 export default handle(listManagedUsers)

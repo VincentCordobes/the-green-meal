@@ -1,4 +1,4 @@
-import {handle} from "../../../modules/api"
-import {remove} from "../../../modules/meals/meals"
+import {handle} from "../../../server/api"
+import {remove} from "../../../server/meals"
 
 export default handle(remove)

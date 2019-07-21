@@ -1,4 +1,4 @@
-import {handle} from "../../../modules/api"
-import {add} from "../../../modules/users/users"
+import {handle} from "../../../server/api"
+import {add} from "../../../server/users"
 
 export default handle(add)
