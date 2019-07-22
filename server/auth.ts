@@ -25,7 +25,7 @@ export async function auth(
   const [person] = await query<Person>(
     SQL`select id, password, email_validated, role
         from person
-        where email=${email}`,
+        where email=${email.toLowerCase()}`,
   )
 
   if (person) {

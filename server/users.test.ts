@@ -147,6 +147,7 @@ describe("Add users", () => {
         ok: true,
         value: {
           ...dissoc("password", user),
+          email: "vincentcordobes@meals.com",
           id: expect.any(Number),
           emailValidated: false,
           role: "regular",
@@ -156,7 +157,7 @@ describe("Add users", () => {
       expect(personInDb).toEqual(
         expect.objectContaining({
           id: expect.any(Number),
-          email: "VincentCordobes@meals.com",
+          email: "vincentcordobes@meals.com",
           password: expect.not.stringContaining("pass"),
         }),
       )

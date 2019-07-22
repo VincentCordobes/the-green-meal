@@ -123,7 +123,7 @@ export const add = async (
   const emailValidationToken = uuid.v4()
 
   const values = buildValues({
-    email,
+    email: email.toLowerCase(),
     firstname,
     lastname,
     role,
@@ -238,7 +238,12 @@ export const update = withACLs(
 
     return query<UserDTO>(
       sql`update person set `
-        .append(buildUpdateFields(fields))
+        .append(
+          buildUpdateFields({
+            ...fields,
+            ...(fields.email ? {email: fields.email.toLowerCase()} : {}),
+          }),
+        )
         .append(sql` where id = ${userId} `)
         .append(` returning * `),
     )
