@@ -9,7 +9,11 @@ import {
 import {list, add, remove, update, listManagedUsers} from "./users"
 import {findById} from "./person"
 import {closeDb} from "./database"
-import {UserPayload, RemoveUserPayload, UpdateUser} from "../shared/user-types"
+import {
+  UserPayload,
+  RemoveUserRequest,
+  UpdateRequest,
+} from "../shared/user-types"
 
 jest.mock("jsonwebtoken", () => {
   const verify = jest.fn((token, _, cb) => {
@@ -187,7 +191,7 @@ describe("Add users", () => {
 
   test("should remove a user by its id", async () => {
     // given
-    const userToRemove: RemoveUserPayload = {
+    const userToRemove: RemoveUserRequest = {
       userId: 2,
     }
 
@@ -204,7 +208,7 @@ describe("Add users", () => {
 
   test("should return the removed userId when asked by an admin", async () => {
     // given
-    const user: RemoveUserPayload = {
+    const user: RemoveUserRequest = {
       userId: 1,
     }
 
@@ -256,7 +260,7 @@ describe("Add users", () => {
 describe("Update user", () => {
   test("should not update anything when no field are provided", async () => {
     // given
-    const user: UpdateUser = {
+    const user: UpdateRequest = {
       userId: 2,
     }
 
@@ -280,7 +284,7 @@ describe("Update user", () => {
 
   test("should update only provided fields only and returns the whole record", async () => {
     // given
-    const user: UpdateUser = {
+    const user: UpdateRequest = {
       userId: 2,
       values: {firstname: "Vincent"},
     }
@@ -305,7 +309,7 @@ describe("Update user", () => {
 
   test("should not update when the email already exists", async () => {
     // given
-    const user: UpdateUser = {
+    const user: UpdateRequest = {
       userId: 2,
       values: {email: "admin@toto.com"},
     }
@@ -324,7 +328,7 @@ describe("Update user", () => {
 
   test("should update all fields", async () => {
     // given
-    const user: UpdateUser = {
+    const user: UpdateRequest = {
       userId: 2,
       values: {
         firstname: "Vincent",
@@ -356,7 +360,7 @@ describe("Update user", () => {
   test("a manager should not be able to set admin role", async () => {
     expect.assertions(1)
     // given
-    const user: UpdateUser = {
+    const user: UpdateRequest = {
       userId: 1,
       values: {
         role: "admin",

@@ -1,7 +1,7 @@
 import {
-  AddMealDTO,
+  AddMealRequest,
   MealsFilter,
-  UpdateMealDTO,
+  UpdateMealRequest,
   MealDTO,
 } from "../shared/meals-types"
 import {OKResponse} from "../shared/api-types"
@@ -185,7 +185,7 @@ describe("Filter meals", () => {
 describe("Add a meal", () => {
   test("should add meal", async () => {
     // given
-    const meal: AddMealDTO = {
+    const meal: AddMealRequest = {
       calories: 350,
       text: "Pasta",
       at: "2018-07-12T00:00:00.000Z",
@@ -216,7 +216,7 @@ describe("Add a meal", () => {
 describe("Update a meal", () => {
   test("should update all meal fields", async () => {
     // given
-    const meal: UpdateMealDTO = {
+    const meal: UpdateMealRequest = {
       mealId: 1,
       values: {
         calories: 350,
@@ -242,7 +242,7 @@ describe("Update a meal", () => {
 
   test("should update partially a meal fields", async () => {
     // given
-    const meal: UpdateMealDTO = {
+    const meal: UpdateMealRequest = {
       mealId: 1,
       values: {
         calories: 350,
@@ -267,7 +267,7 @@ describe("Update a meal", () => {
   test("should not update a meal that belongs to an other user", async () => {
     // given
     expect.assertions(1)
-    const meal: UpdateMealDTO = {
+    const meal: UpdateMealRequest = {
       mealId: 3, // An admin meal
       values: {
         calories: 350,
@@ -284,7 +284,7 @@ describe("Update a meal", () => {
 
   test("Admin can update all meals", async () => {
     // given
-    const meal: UpdateMealDTO = {
+    const meal: UpdateMealRequest = {
       mealId: 1,
       values: {
         calories: 350,

@@ -1,6 +1,6 @@
-import {AuthPayload} from "../shared/auth"
+import {AuthRequest} from "../shared/auth"
 
-import {auth} from "./auth"
+import {auth, forgotPassword, resetPassword} from "./auth"
 import {aRequest, initTestDb, anAdminRequest} from "./test-helpers"
 import {closeDb} from "./database"
 import {add} from "./users"
@@ -20,11 +20,15 @@ afterAll(() => closeDb())
 jest.mock("uuid", () => ({v4: () => "token"}))
 
 jest.mock("jsonwebtoken", () => {
-  const verify = jest.fn((token, _, cb) =>
-    ["regular", "manager", "admin"].includes(token)
-      ? cb(null, {userId: 1, role: token})
-      : cb("error"),
-  )
+  const verify = jest.fn((token, _, cb) => {
+    if (["regular", "manager", "admin"].includes(token)) {
+      cb(null, {userId: 1, role: token})
+    } else if (token === "passwordResetToken") {
+      cb(null, {email: "vincentcordobes@meals.com", tokenId: "token"})
+    } else {
+      cb("error")
+    }
+  })
 
   return {verify, sign: jest.fn().mockReturnValue("token")}
 })
@@ -32,7 +36,7 @@ jest.mock("jsonwebtoken", () => {
 describe("Auth endpoint", () => {
   test("should authenticate a user and returns an access token", async () => {
     // given
-    const req: ApiRequest<AuthPayload> = anAdminRequest({
+    const req: ApiRequest<AuthRequest> = anAdminRequest({
       body: {
         email: "Vincent@meals.com",
         password: "toto",
@@ -62,7 +66,7 @@ describe("Auth endpoint", () => {
 
   test("should not authenticate the user when the password is wrong", async () => {
     // given
-    const req: ApiRequest<AuthPayload> = anAdminRequest({
+    const req: ApiRequest<AuthRequest> = anAdminRequest({
       body: {
         email: "Vincent@meals.com",
         password: "totoo",
@@ -134,6 +138,54 @@ describe("Auth endpoint", () => {
     // then
     if (!response.ok) {
       expect(response.ok).toBe(true)
+      return
+    }
+    expect(response).toEqual({
+      ok: true,
+      value: {
+        personId: expect.any(Number),
+        token: expect.any(String),
+      },
+    })
+  })
+
+  test("should reset a user password", async () => {
+    await add(
+      anAdminRequest({
+        body: {
+          lastname: "Cordobes",
+          firstname: "Vincent",
+          email: "vincentcordobes@meals.com",
+          password: "pass",
+        },
+      }),
+    )
+    await confirmEmail(aRequest({query: {token: "token"}}))
+    await forgotPassword(aRequest({body: {email: "vincentcordobes@meals.com"}}))
+    await resetPassword(
+      aRequest({
+        body: {
+          newPassword: "myNewPassword",
+          token: "passwordResetToken",
+        },
+      }),
+    )
+    const response = await auth(
+      aRequest({
+        body: {
+          email: "vincentcordobes@meals.com",
+          password: "myNewPassword",
+        },
+      }),
+    )
+
+    // then
+    if (!response.ok) {
+      expect(response).toEqual(
+        expect.objectContaining({
+          ok: true,
+        }),
+      )
       return
     }
     expect(response).toEqual({

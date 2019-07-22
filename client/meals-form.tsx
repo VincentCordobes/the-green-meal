@@ -9,7 +9,7 @@ import {FormComponentProps} from "antd/lib/form"
 import TextArea from "antd/lib/input/TextArea"
 import message from "antd/lib/message"
 
-import {AddMealDTO, MealDTO, UpdateMealDTO} from "../shared/meals-types"
+import {AddMealRequest, MealDTO, UpdateMealRequest} from "../shared/meals-types"
 import {ApiError} from "../shared/api-types"
 
 import {request} from "./http-client"
@@ -17,7 +17,7 @@ import {request} from "./http-client"
 type ModalProps = {
   visible: boolean
   onCancel: () => void
-  onSave: (meal: AddMealDTO) => any
+  onSave: (meal: AddMealRequest) => any
   meal?: MealDTO
 }
 
@@ -39,8 +39,8 @@ type FormValue = {
   calories: number
 }
 
-function updateMeal(mealId: number, meal: Partial<AddMealDTO>) {
-  return request<MealDTO, ApiError, UpdateMealDTO>("/api/meals/edit", {
+function updateMeal(mealId: number, meal: Partial<AddMealRequest>) {
+  return request<MealDTO, ApiError, UpdateMealRequest>("/api/meals/edit", {
     method: "POST",
     body: {
       mealId,
@@ -49,14 +49,14 @@ function updateMeal(mealId: number, meal: Partial<AddMealDTO>) {
   })
 }
 
-function createMeal(meal: AddMealDTO) {
-  return request<MealDTO, ApiError, AddMealDTO>("/api/meals/add", {
+function createMeal(meal: AddMealRequest) {
+  return request<MealDTO, ApiError, AddMealRequest>("/api/meals/add", {
     method: "POST",
     body: meal,
   })
 }
 
-function formatFormValues(values: FormValue): AddMealDTO {
+function formatFormValues(values: FormValue): AddMealRequest {
   const {date, time, calories, text} = values
   const at = moment(date).set({
     hour: time.get("hour"),
@@ -64,7 +64,7 @@ function formatFormValues(values: FormValue): AddMealDTO {
     second: time.get("second"),
   })
 
-  const meal: AddMealDTO = {
+  const meal: AddMealRequest = {
     at: at.toISOString(),
     calories,
     text,

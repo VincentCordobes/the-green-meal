@@ -13,6 +13,7 @@ import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 import {request} from "./http-client"
 import {UserSelect, fullName} from "./select-user"
 import {getRoles} from "../shared/auth"
+import {WrappedFormUtils} from "antd/lib/form/Form"
 
 type UserFormProps = {
   onSave?: () => any
@@ -54,12 +55,55 @@ function createUser(values: UserPayload) {
   })
 }
 
+function usePasswordConfirmation<T>(form: WrappedFormUtils<T>) {
+  const [confirmDirty, setConfirmDirty] = useState(false)
+
+  const handleConfirmBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const {value} = e.target
+    setConfirmDirty(confirmDirty || !!value)
+  }
+
+  const compareToFirstPassword = (
+    _: any,
+    value: string | undefined,
+    callback: any,
+  ) => {
+    if (value && value !== form.getFieldValue("password")) {
+      callback("The password confirmation does not match")
+    } else {
+      callback()
+    }
+  }
+
+  const validateToNextPassword = (
+    _: any,
+    value: string | undefined,
+    callback: any,
+  ) => {
+    if (value && confirmDirty) {
+      form.validateFields(["confirm"], {force: true})
+    }
+    callback()
+  }
+
+  return {
+    handleConfirmBlur,
+    compareToFirstPassword,
+    validateToNextPassword,
+  }
+}
+
 export const UserForm = Form.create<Props>({
   name: "user-form",
 })((props: Props) => {
   const [loading, setLoading] = useState(false)
   const [managedUsers, setManagedUsers] = useState<UserSelectItem[]>([])
   const clearManagedUsers = () => setManagedUsers([])
+  const {
+    validateToNextPassword,
+    compareToFirstPassword,
+    handleConfirmBlur,
+  } = usePasswordConfirmation(props.form)
 
   useEffect(() => {
     if (props.user && props.user.role === "manager") {
@@ -153,11 +197,31 @@ export const UserForm = Form.create<Props>({
         })(<Input autoFocus />)}
       </Form.Item>
       {props.withPassword && (
-        <Form.Item label="Password">
-          {getFieldDecorator("password", {
-            rules: [{required: true, message: "Please enter a password"}],
-          })(<Input type="password" />)}
-        </Form.Item>
+        <>
+          <Form.Item label="Password">
+            {getFieldDecorator("password", {
+              rules: [
+                {required: true, message: "Please enter a password"},
+                {
+                  validator: validateToNextPassword,
+                },
+              ],
+            })(<Input type="password" />)}
+          </Form.Item>
+          <Form.Item label="Confirm Password" hasFeedback>
+            {getFieldDecorator("confirm", {
+              rules: [
+                {
+                  required: true,
+                  message: "Please confirm your password!",
+                },
+                {
+                  validator: compareToFirstPassword,
+                },
+              ],
+            })(<Input.Password onBlur={handleConfirmBlur} />)}
+          </Form.Item>
+        </>
       )}
       <Form.Item label="Firstname">
         {getFieldDecorator("firstname", {

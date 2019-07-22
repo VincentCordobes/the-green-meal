@@ -19,15 +19,16 @@ export type ExpectedMealCalories = {
 }
 
 export type MealItem = MealDTO & ExpectedMealCalories
+
 export type MealListResponse = MealItem[]
 
-export type AddMealDTO = {
+export type AddMealRequest = {
   text: string
   at: string
   calories: number
 }
 
-export type RemoveMealPayload = {
+export type RemoveMealRequest = {
   mealId: number
 }
 
@@ -38,7 +39,7 @@ export type MealsFilter = {
   toDate?: string
 }
 
-export type UpdateMealDTO = {
+export type UpdateMealRequest = {
   mealId: number
-  values?: Partial<AddMealDTO>
+  values?: Partial<AddMealRequest>
 }

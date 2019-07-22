@@ -1,12 +1,20 @@
 import {Role} from "./user-types"
 
-export type AuthPayload = {
+export type AuthRequest = {
   email: string
   password: string
 }
 
 export type AuthResponse = {personId: number; token: string}
+
 export type AuthError = "InvalidCredentials" | "UnvalidatedEmail"
+
+export type ForgotPasswordRequest = {email: string}
+
+export type ResetPasswordRequest = {
+  token: string
+  newPassword: string
+}
 
 export function getRoles(currentUserRole: Role): Role[] {
   const rolePermissions: Record<Role, Role[]> = {

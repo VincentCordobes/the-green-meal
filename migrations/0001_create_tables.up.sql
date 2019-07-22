@@ -5,6 +5,7 @@ create table if not exists person (
   email text unique not null,
   email_validated boolean default false,
   email_validation_token text,
+  password_reset_token text,
   password text not null,
   role role default 'regular',
   firstname text,

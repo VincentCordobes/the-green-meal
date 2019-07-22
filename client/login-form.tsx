@@ -9,7 +9,7 @@ import Alert from "antd/lib/alert"
 import {FormComponentProps} from "antd/lib/form/Form"
 import cookie from "js-cookie"
 
-import {AuthResponse, AuthPayload} from "../shared/auth"
+import {AuthResponse, AuthRequest} from "../shared/auth"
 import {request} from "./http-client"
 
 import "./login-form.css"
@@ -17,7 +17,7 @@ import {useRouter} from "next/router"
 import {pathOr} from "ramda"
 import Link from "next/link"
 
-type Props = FormComponentProps<AuthPayload>
+type Props = FormComponentProps<AuthRequest>
 
 const inlineStyles = {
   loginError: {

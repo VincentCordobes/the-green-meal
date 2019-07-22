@@ -8,8 +8,8 @@ import {
   UserPayload,
   AddUserError,
   RemoveUserResponse,
-  RemoveUserPayload,
-  UpdateUser,
+  RemoveUserRequest,
+  UpdateRequest,
 } from "../shared/user-types"
 import {ApiResponse, KOResponse} from "../shared/api-types"
 
@@ -159,7 +159,7 @@ function handleDuplicateUser(e: DBError): KOResponse<AddUserError> {
 export const remove = withACLs(
   ["admin", "manager"],
   async (req, {userId, role}): Promise<ApiResponse<RemoveUserResponse>> => {
-    const {userId: userIdToRemove} = validate<RemoveUserPayload>(
+    const {userId: userIdToRemove} = validate<RemoveUserRequest>(
       Joi.object({userId: Joi.number()}),
       req.body,
     )
@@ -204,10 +204,10 @@ const updateUserSchema = Joi.object({
 export const update = withACLs(
   ["regular", "admin", "manager"],
   async (
-    req: ApiRequest<UpdateUser>,
+    req: ApiRequest<UpdateRequest>,
     params,
   ): Promise<ApiResponse<UserDTO>> => {
-    const {userId, values} = validate<UpdateUser>(updateUserSchema, req.body)
+    const {userId, values} = validate<UpdateRequest>(updateUserSchema, req.body)
 
     if (!values) {
       const user = await findById(userId)

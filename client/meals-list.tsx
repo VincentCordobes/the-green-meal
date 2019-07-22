@@ -27,7 +27,7 @@ import {MealForm} from "./meals-form"
 import {useFetch} from "./use-fetch"
 import {useCurrentUser} from "./session-context"
 
-import "./meals-list.view.css"
+import "./meals-list.css"
 
 const {RangePicker} = DatePicker
 
@@ -70,7 +70,7 @@ function buildColumns(
       title: "Calories",
       key: "calories",
       render: ({calories, expectedCaloriesPerDay}: MealItem) => {
-        let color: string | undefined
+        let color
         if (expectedCaloriesPerDay) {
           if (expectedCaloriesPerDay < calories) {
             color = "#f5222d"

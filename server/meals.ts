@@ -8,8 +8,8 @@ import {
   Meal,
   MealDTO,
   MealsFilter,
-  RemoveMealPayload,
-  UpdateMealDTO,
+  RemoveMealRequest,
+  UpdateMealRequest,
   MealListResponse,
   ExpectedMealCalories,
 } from "../shared/meals-types"
@@ -104,7 +104,7 @@ export const add = withACLs(
 export const update = withACLs(
   ["regular", "admin", "manager"],
   async (req, {userId, role}): Promise<ApiResponse<MealDTO>> => {
-    const {mealId, values} = validate<UpdateMealDTO>(
+    const {mealId, values} = validate<UpdateMealRequest>(
       Joi.object({
         mealId: Joi.number(),
         values: Joi.object({
@@ -141,7 +141,7 @@ export const update = withACLs(
 export const remove = withACLs(
   ["regular", "admin", "manager"],
   async (req, {userId, role}) => {
-    const {mealId} = validate<RemoveMealPayload>(
+    const {mealId} = validate<RemoveMealRequest>(
       Joi.object({mealId: Joi.number()}),
       req.body,
     )

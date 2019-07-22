@@ -24,10 +24,11 @@ export type UserPayload = {
 
 export type AddUserError = "DuplicateUser"
 
-export type RemoveUserPayload = {userId: number}
+export type RemoveUserRequest = {userId: number}
+
 export type RemoveUserResponse = {userId: number}
 
-export type UpdateUser = {
+export type UpdateRequest = {
   userId: number
   values?: Partial<UserPayload>
 }

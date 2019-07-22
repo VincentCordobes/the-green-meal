@@ -6,7 +6,7 @@ import {MealListResponse} from "../shared/meals-types"
 import {UserDTO} from "../shared/user-types"
 
 import Layout from "../client/layout"
-import {MealList} from "../client/meals-list.view"
+import {MealList} from "../client/meals-list"
 import {request} from "../client/http-client"
 import {withAuth} from "../client/with-auth-client"
 import {ErrorBoundary} from "../client/error-boundary"
