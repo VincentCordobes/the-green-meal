@@ -10,7 +10,7 @@ export type AuthError = "InvalidCredentials" | "UnvalidatedEmail"
 
 export function getRoles(currentUserRole: Role): Role[] {
   const rolePermissions: Record<Role, Role[]> = {
-    regular: [],
+    regular: ["regular"],
     manager: ["regular", "manager"],
     admin: ["regular", "manager", "admin"],
   }
