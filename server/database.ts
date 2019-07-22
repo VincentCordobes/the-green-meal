@@ -3,14 +3,12 @@ import R from "ramda"
 import sql, {SQLStatement} from "sql-template-strings"
 import {HTTPError} from "./error-handler"
 
-export const DB_NAME = "the_green_meal"
-
 export const DB_ERROR = {
   uniqueViolation: "23505",
 }
 
 const pool = new Pool({
-  database: DB_NAME,
+  database: process.env.PGDATABASE || "the_green_meal",
 })
 
 export function closeDb() {
