@@ -1,8 +1,10 @@
 {
-  "name": "next-sample",
+  "name": "the-green-meal",
+  "private": true,
   "version": "1.0.0",
-  "description": "",
+  "description": "An app to keep track of your meals calories",
   "main": "index.js",
+  "author": "Vincent Cordobes <vincent.cordobes@gmail.com>",
   "scripts": {
     "dev": "next",
     "build": "next build",
@@ -14,9 +16,6 @@
     "format": "prettier --write ./pages/**",
     "format:check": "prettier --check ./pages/**"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^15.1.0",
     "@zeit/next-css": "^1.0.1",
