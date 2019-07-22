@@ -93,7 +93,6 @@ export const MealForm = Form.create<Props>({
 
         if (response.ok) {
           await props.onSave(meal)
-          props.form.resetFields()
           message.success("Meal saved")
         } else {
           message.error("An error occurred while serving the meal :(")
@@ -114,6 +113,7 @@ export const MealForm = Form.create<Props>({
       visible={props.visible}
       title="Add meal"
       confirmLoading={loading}
+      afterClose={props.form.resetFields}
       onOk={save}
       onCancel={props.onCancel}
     >
@@ -149,7 +149,9 @@ export const MealForm = Form.create<Props>({
               {validator: validateCalorieCount},
             ],
             initialValue: initialValue("calories"),
-          })(<InputNumber style={{width: "100%"}} />)}
+          })(
+            <InputNumber type="number" max={100000} style={{width: "100%"}} />,
+          )}
         </Form.Item>
         <button hidden />
       </Form>
@@ -162,9 +164,13 @@ function validateCalorieCount(
   value: number,
   cb: (error?: string) => void,
 ) {
-  if (value > 0) {
-    cb()
-  } else {
-    cb("Calories must be positive")
+  if (value <= 0) {
+    return cb("Calories must be positive")
   }
+
+  if (value > 900000) {
+    return cb("You can't eat that much!")
+  }
+
+  return cb()
 }

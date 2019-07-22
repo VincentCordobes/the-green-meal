@@ -86,7 +86,9 @@ export const add = withACLs(
       Joi.object({
         at: Joi.date(),
         text: Joi.string(),
-        calories: Joi.number().positive(),
+        calories: Joi.number()
+          .positive()
+          .max(900000),
       }),
       req.body,
     )
