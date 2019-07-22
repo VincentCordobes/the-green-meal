@@ -1,5 +1,4 @@
 import Joi from "@hapi/joi"
-import bcrypt from "bcrypt"
 import sql from "sql-template-strings"
 
 import {ApiResponse, ApiError} from "../shared/api-types"
@@ -39,9 +38,4 @@ export async function confirmEmail(
     error: "BadRequest",
     statusCode: 401,
   })
-}
-
-export async function hashPassword(plainPassword: string): Promise<string> {
-  const saltRounds = 10
-  return bcrypt.hash(plainPassword, saltRounds)
 }
