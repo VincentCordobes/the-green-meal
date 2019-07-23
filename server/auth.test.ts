@@ -23,8 +23,6 @@ jest.mock("jsonwebtoken", () => {
   const verify = jest.fn((token, _, cb) => {
     if (["regular", "manager", "admin"].includes(token)) {
       cb(null, {userId: 1, role: token})
-    } else if (token === "passwordResetToken") {
-      cb(null, {email: "vincentcordobes@meals.com", tokenId: "token"})
     } else {
       cb("error")
     }
@@ -166,7 +164,7 @@ describe("Auth endpoint", () => {
       aRequest({
         body: {
           newPassword: "myNewPassword",
-          token: "passwordResetToken",
+          token: "token",
         },
       }),
     )

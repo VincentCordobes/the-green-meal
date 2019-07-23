@@ -12,8 +12,9 @@ import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 
 import {request} from "./http-client"
 import {UserSelect, fullName} from "./select-user"
-import {getRoles} from "../shared/auth"
-import {WrappedFormUtils} from "antd/lib/form/Form"
+import {getRoles, ForgotPasswordRequest} from "../shared/auth"
+import {usePasswordConfirmation} from "./use-password-confirmation"
+import Popconfirm from "antd/lib/popconfirm"
 
 type UserFormProps = {
   onSave?: () => any
@@ -53,44 +54,6 @@ function createUser(values: UserPayload) {
     method: "POST",
     body: values,
   })
-}
-
-function usePasswordConfirmation<T>(form: WrappedFormUtils<T>) {
-  const [confirmDirty, setConfirmDirty] = useState(false)
-
-  const handleConfirmBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const {value} = e.target
-    setConfirmDirty(confirmDirty || !!value)
-  }
-
-  const compareToFirstPassword = (
-    _: any,
-    value: string | undefined,
-    callback: any,
-  ) => {
-    if (value && value !== form.getFieldValue("password")) {
-      callback("The password confirmation does not match")
-    } else {
-      callback()
-    }
-  }
-
-  const validateToNextPassword = (
-    _: any,
-    value: string | undefined,
-    callback: any,
-  ) => {
-    if (value && confirmDirty) {
-      form.validateFields(["confirm"], {force: true})
-    }
-    callback()
-  }
-
-  return {
-    handleConfirmBlur,
-    compareToFirstPassword,
-    validateToNextPassword,
-  }
 }
 
 export const UserForm = Form.create<Props>({
@@ -167,6 +130,15 @@ export const UserForm = Form.create<Props>({
         setLoading(false)
       }
     })
+  }
+
+  const resetPassword = async () => {
+    if (props.user) {
+      request<{}, {}, ForgotPasswordRequest>("/api/auth/forgot-password", {
+        method: "POST",
+        body: {email: props.user.email},
+      })
+    }
   }
 
   const initialValue = (field: keyof UserDTO) =>
@@ -262,6 +234,16 @@ export const UserForm = Form.create<Props>({
           {getFieldDecorator("managedUser", {
             initialValue: managedUsers,
           })(<UserSelect users={users} />)}
+        </Form.Item>
+      )}
+      {props.user && (
+        <Form.Item wrapperCol={{sm: {span: 24, offset: 7}}}>
+          <Popconfirm
+            title="Are you sure you want to reset the password?"
+            onConfirm={resetPassword}
+          >
+            <a>Reset password</a>
+          </Popconfirm>
         </Form.Item>
       )}
       <Form.Item wrapperCol={{sm: {span: 24, offset: 7}}}>

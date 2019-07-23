@@ -16,6 +16,8 @@ export type ResetPasswordRequest = {
   newPassword: string
 }
 
+export type ResetPasswordError = "InvalidLink"
+
 export function getRoles(currentUserRole: Role): Role[] {
   const rolePermissions: Record<Role, Role[]> = {
     regular: ["regular"],

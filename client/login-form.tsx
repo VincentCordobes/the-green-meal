@@ -16,6 +16,7 @@ import "./login-form.css"
 import {useRouter} from "next/router"
 import {pathOr} from "ramda"
 import Link from "next/link"
+import Popover from "antd/lib/popover"
 
 type Props = FormComponentProps<AuthRequest>
 
@@ -27,10 +28,10 @@ const inlineStyles = {
 }
 
 const LoginForm: React.FC<Props> = props => {
+  const router = useRouter()
+
   const [apiError, setApiError] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
-
-  const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,12 +57,14 @@ const LoginForm: React.FC<Props> = props => {
   const pendingEmail = pathOr(false, ["query", "pending"], router)
   const {getFieldDecorator} = props.form
 
+  const errorMessage = apiError || (router.query.error && "Unexpected error")
+
   return (
     <>
       <Card>
-        {apiError && (
+        {errorMessage && (
           <Alert
-            message={apiError}
+            message={errorMessage}
             type="error"
             style={inlineStyles.loginError}
           />
@@ -83,7 +86,7 @@ const LoginForm: React.FC<Props> = props => {
         <Form onSubmit={handleSubmit} className="login-form">
           <Form.Item>
             {getFieldDecorator("email", {
-              rules: [{required: true, message: "Please input your email!"}],
+              rules: [{required: true, message: "Please enter your email"}],
             })(
               <Input
                 prefix={<Icon type="user" style={{color: "rgba(0,0,0,.25)"}} />}
@@ -108,9 +111,14 @@ const LoginForm: React.FC<Props> = props => {
               valuePropName: "checked",
               initialValue: true,
             })(<Checkbox>Remember me</Checkbox>)}
-            <a className="login-form-forgot" href="">
-              Forgot password
-            </a>
+            <Popover
+              trigger="click"
+              content="Please contact the admin at admin@meals.com"
+            >
+              <Button type="link" className="login-form-forgot">
+                Forgot password
+              </Button>
+            </Popover>
             <Button
               type="primary"
               htmlType="submit"

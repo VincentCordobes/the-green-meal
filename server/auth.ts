@@ -11,6 +11,7 @@ import {
   AuthError,
   ForgotPasswordRequest,
   ResetPasswordRequest,
+  ResetPasswordError,
 } from "../shared/auth"
 
 import {query, execute} from "./database"
@@ -68,17 +69,18 @@ export async function forgotPassword(req: ApiRequest) {
     req.body,
   )
   const tokenId = uuid.v4()
-  const passwordResetToken = generatePasswordResetToken({email, tokenId})
-
   await execute(sql`update person set 
-                    password_reset_token = ${tokenId}`)
+                    password_reset_token = ${tokenId}
+                    where email =${email}`)
 
-  sendMail(email, resetPasswordTemplate(passwordResetToken))
+  sendMail(email, resetPasswordTemplate(tokenId))
 
   return responseOK({})
 }
 
-export async function resetPassword(req: ApiRequest) {
+export async function resetPassword(
+  req: ApiRequest,
+): Promise<ApiResponse<{}, ResetPasswordError>> {
   const {token, newPassword} = validate<ResetPasswordRequest>(
     Joi.object({
       newPassword: Joi.string(),
@@ -87,18 +89,20 @@ export async function resetPassword(req: ApiRequest) {
     req.body,
   )
 
-  const {email, tokenId} = await verifyPasswordResetToken(token)
   const hashedPassword: string = await hashPassword(newPassword)
 
   const {rowCount} = await execute(
     sql`update person set 
-               password = ${hashedPassword}
-         where email = ${email} 
-           and password_reset_token=${tokenId}`,
+               password = ${hashedPassword},
+               password_reset_token = null
+         where password_reset_token=${token}`,
   )
 
   if (rowCount === 0) {
-    throw new HTTPError(400)
+    return responseKO({
+      error: "InvalidLink",
+      statusCode: 400,
+    })
   }
 
   return responseOK({})
@@ -113,32 +117,6 @@ function generateAccessToken(userId: number, role: Role): string {
   const secret = getAuthSecret()
 
   return jwt.sign({userId, role}, secret, {expiresIn: "48h"})
-}
-
-type PasswordResetTokenPayload = {
-  email: string
-  tokenId: string
-}
-function generatePasswordResetToken(
-  payload: PasswordResetTokenPayload,
-): string {
-  const secret = getAuthSecret()
-
-  return jwt.sign(payload, secret, {expiresIn: "48h"})
-}
-
-function verifyPasswordResetToken(
-  token: string,
-): Promise<PasswordResetTokenPayload> {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, getAuthSecret(), (err, decoded) => {
-      if (err) {
-        return reject(new HTTPError(401))
-      }
-
-      return resolve(decoded as PasswordResetTokenPayload)
-    })
-  })
 }
 
 function getAuthSecret(): string {
