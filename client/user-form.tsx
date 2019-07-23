@@ -134,10 +134,17 @@ export const UserForm = Form.create<Props>({
 
   const resetPassword = async () => {
     if (props.user) {
-      request<{}, {}, ForgotPasswordRequest>("/api/auth/forgot-password", {
-        method: "POST",
-        body: {email: props.user.email},
-      })
+      const {email} = props.user
+      await request<{}, {}, ForgotPasswordRequest>(
+        "/api/auth/forgot-password",
+        {
+          method: "POST",
+          body: {email},
+        },
+      )
+      message.info(
+        `An email has been sent to "${email}" with a reset password link`,
+      )
     }
   }
 
