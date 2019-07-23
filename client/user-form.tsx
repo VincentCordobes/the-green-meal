@@ -108,11 +108,11 @@ export const UserForm = Form.create<Props>({
           ? await updateUser(props.user.id, userPayload)
           : await createUser(userPayload)
 
-        if (props.onSave) {
-          await props.onSave()
-        }
-
         if (response.ok) {
+          if (props.onSave) {
+            await props.onSave()
+          }
+
           setManagedUsers(managedUser)
           props.form.resetFields()
           message.success(props.user ? "Successfully updated" : "User added")
