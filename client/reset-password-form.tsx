@@ -83,7 +83,7 @@ export const ResetPasswordForm = Form.create<Props>({
           htmlType="submit"
           disabled={!props.form.isFieldsTouched()}
         >
-          Reset
+          Save
         </Button>
       </Form.Item>
     </Form>

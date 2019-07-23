@@ -2,7 +2,7 @@ import React, {FC, useState} from "react"
 import Table, {ColumnProps} from "antd/lib/table"
 import TimePicker from "antd/lib/time-picker"
 import Divider from "antd/lib/divider"
-import {dissoc} from "ramda"
+import {dissoc, omit} from "ramda"
 import Tooltip from "antd/lib/tooltip"
 import {DateTime} from "luxon"
 import moment from "moment"
@@ -160,7 +160,10 @@ export const MealList: FC<Props> = props => {
           <RangePicker
             format={PICKER_FORMAT}
             onChange={(_, [start, end]) => {
-              let filterValue: MealsFilter = {}
+              let filterValue: MealsFilter = omit(
+                ["fromDate", "toDate"],
+                filter,
+              )
               const formatDate = (date: string) =>
                 moment(date, PICKER_FORMAT).format("YYYY-MM-DD")
 
@@ -181,7 +184,7 @@ export const MealList: FC<Props> = props => {
             className="date-picker"
             onChange={(_, fromTime) => {
               if (fromTime) {
-                setFilter({fromTime})
+                setFilter({...filter, fromTime})
               } else {
                 setFilter(dissoc("fromTime"))
               }
@@ -192,7 +195,7 @@ export const MealList: FC<Props> = props => {
             placeholder="To time"
             onChange={(_, toTime) => {
               if (toTime) {
-                setFilter({toTime})
+                setFilter({...filter, toTime})
               } else {
                 setFilter(dissoc("toTime"))
               }
