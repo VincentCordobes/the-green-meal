@@ -100,7 +100,9 @@ const addSchema = Joi.object({
   firstname: Joi.string(),
   lastname: Joi.string(),
   role: roleSchema.optional(),
-  expectedCaloriesPerDay: Joi.number().optional(),
+  expectedCaloriesPerDay: Joi.number()
+    .max(900000)
+    .optional(),
 })
 
 export const add = async (

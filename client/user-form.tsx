@@ -6,7 +6,7 @@ import Select from "antd/lib/select"
 import message from "antd/lib/message"
 import {propOr} from "ramda"
 import Button from "antd/lib/button"
-import InputNumber from "antd/lib/input-number"
+import Popconfirm from "antd/lib/popconfirm"
 
 import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 
@@ -14,7 +14,7 @@ import {request} from "./http-client"
 import {UserSelect, fullName} from "./select-user"
 import {getRoles, ForgotPasswordRequest} from "../shared/auth"
 import {usePasswordConfirmation} from "./use-password-confirmation"
-import Popconfirm from "antd/lib/popconfirm"
+import {InputCalories, validateCalorieCount} from "./input-calories"
 
 type UserFormProps = {
   onSave?: () => any
@@ -218,7 +218,8 @@ export const UserForm = Form.create<Props>({
         <Form.Item label="Expected kCal/day">
           {getFieldDecorator("expectedCaloriesPerDay", {
             initialValue: initialValue("expectedCaloriesPerDay"),
-          })(<InputNumber style={{width: "100%"}} />)}
+            rules: [{validator: validateCalorieCount}],
+          })(<InputCalories />)}
         </Form.Item>
       )}
       {props.withRole && props.currentUser && (

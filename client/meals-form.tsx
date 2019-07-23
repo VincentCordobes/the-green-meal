@@ -13,6 +13,7 @@ import {AddMealRequest, MealDTO, UpdateMealRequest} from "../shared/meals-types"
 import {ApiError} from "../shared/api-types"
 
 import {request} from "./http-client"
+import {validateCalorieCount, InputCalories} from "./input-calories"
 
 type ModalProps = {
   visible: boolean
@@ -149,28 +150,10 @@ export const MealForm = Form.create<Props>({
               {validator: validateCalorieCount},
             ],
             initialValue: initialValue("calories"),
-          })(
-            <InputNumber type="number" max={100000} style={{width: "100%"}} />,
-          )}
+          })(<InputCalories />)}
         </Form.Item>
         <button hidden />
       </Form>
     </Modal>
   )
 })
-
-function validateCalorieCount(
-  _: any,
-  value: number,
-  cb: (error?: string) => void,
-) {
-  if (value <= 0) {
-    return cb("Calories must be positive")
-  }
-
-  if (value > 900000) {
-    return cb("You can't eat that much!")
-  }
-
-  return cb()
-}
