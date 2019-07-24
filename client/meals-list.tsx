@@ -201,7 +201,13 @@ export const MealList: FC<Props> = props => {
             }}
           />
         </div>
-        <Button type="primary" onClick={openModal}>
+        <Button
+          type="primary"
+          onClick={() => {
+            setSelectedMeal(undefined)
+            openModal()
+          }}
+        >
           <Icon type="plus" />
           Add meal
         </Button>
