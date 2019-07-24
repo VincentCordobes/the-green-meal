@@ -23,7 +23,9 @@ const timeSchema = Joi.string().regex(
   /^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$/,
 )
 
-const dateSchema = Joi.string().isoDate()
+const dateSchema = Joi.string().regex(
+  /^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/,
+)
 
 const MealsFilterSchema = Joi.object({
   fromTime: timeSchema.optional(),
@@ -79,8 +81,8 @@ export const add = withACLs(
   async (req: ApiRequest, {userId: ownerId}): Promise<ApiResponse<MealDTO>> => {
     const {atDate, atTime, text, calories} = validate<AddMealPayload>(
       Joi.object({
-        atTime: Joi.string(),
-        atDate: Joi.string(),
+        atTime: timeSchema,
+        atDate: dateSchema,
         text: Joi.string(),
         calories: Joi.number()
           .positive()
@@ -106,8 +108,8 @@ export const update = withACLs(
       Joi.object({
         mealId: Joi.number(),
         values: Joi.object({
-          atTime: Joi.string().optional(),
-          atDate: Joi.string().optional(),
+          atTime: timeSchema.optional(),
+          atDate: dateSchema.optional(),
           text: Joi.string().optional(),
           calories: Joi.number()
             .positive()
