@@ -3,13 +3,18 @@ import moment, {Moment} from "moment"
 import Modal from "antd/lib/modal"
 import Form from "antd/lib/form"
 import DatePicker from "antd/lib/date-picker"
-import InputNumber from "antd/lib/input-number"
 import TimePicker from "antd/lib/time-picker"
 import {FormComponentProps} from "antd/lib/form"
 import TextArea from "antd/lib/input/TextArea"
 import message from "antd/lib/message"
 
-import {AddMealRequest, MealDTO, UpdateMealRequest} from "../shared/meals-types"
+import {
+  AddMealRequest,
+  MealDTO,
+  UpdateMealRequest,
+  TIME_FORMAT,
+  DATE_FORMAT,
+} from "../shared/meals-types"
 import {ApiError} from "../shared/api-types"
 
 import {request} from "./http-client"
@@ -59,17 +64,14 @@ function createMeal(meal: AddMealRequest) {
 
 function formatFormValues(values: FormValue): AddMealRequest {
   const {date, time, calories, text} = values
-  const at = moment(date).set({
-    hour: time.get("hour"),
-    minute: time.get("minute"),
-    second: time.get("second"),
-  })
 
   const meal: AddMealRequest = {
-    at: at.toISOString(),
+    atTime: moment(time).format(TIME_FORMAT),
+    atDate: moment(date).format(DATE_FORMAT),
     calories,
     text,
   }
+  moment.ISO_8601
 
   return meal
 }
@@ -106,8 +108,6 @@ export const MealForm = Form.create<Props>({
   const initialValue = (field: keyof MealDTO) =>
     props.meal ? props.meal[field] : ""
 
-  const initialDateTime = props.meal ? moment(props.meal.at) : null
-
   return (
     <Modal
       keyboard={false}
@@ -134,14 +134,14 @@ export const MealForm = Form.create<Props>({
         <Form.Item label="Date">
           {getFieldDecorator("date", {
             rules: [{required: true, message: "Please enter a date"}],
-            initialValue: initialDateTime,
+            initialValue: props.meal && moment(props.meal.atDate),
           })(<DatePicker style={{width: "100%"}} />)}
         </Form.Item>
         <Form.Item label="Time">
           {getFieldDecorator("time", {
             rules: [{required: true, message: "Please enter a time"}],
-            initialValue: initialDateTime,
-          })(<TimePicker style={{width: "100%"}} />)}
+            initialValue: props.meal && moment(props.meal.atTime, TIME_FORMAT),
+          })(<TimePicker style={{width: "100%"}} format={TIME_FORMAT} />)}
         </Form.Item>
         <Form.Item label="Calories (kCal)">
           {getFieldDecorator("calories", {

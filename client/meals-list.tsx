@@ -4,7 +4,6 @@ import TimePicker from "antd/lib/time-picker"
 import Divider from "antd/lib/divider"
 import {dissoc, omit} from "ramda"
 import Tooltip from "antd/lib/tooltip"
-import {DateTime} from "luxon"
 import moment from "moment"
 import Popconfirm from "antd/lib/popconfirm"
 import message from "antd/lib/message"
@@ -19,6 +18,7 @@ import {
   MealsFilter,
   MealListResponse,
   MealItem,
+  DATE_FORMAT,
 } from "../shared/meals-types"
 import {UserDTO} from "../shared/user-types"
 
@@ -57,14 +57,13 @@ function buildColumns(
     {
       title: "Date",
       key: "date",
-      dataIndex: "at",
-      render: (at: string) => DateTime.fromISO(at).toFormat("MM-dd-yyyy"),
+      dataIndex: "atDate",
+      render: (atDate: string) => moment(atDate).format("MM-DD-YYYY"),
     },
     {
       title: "Time",
       key: "time",
-      dataIndex: "at",
-      render: (at: string) => DateTime.fromISO(at).toFormat("HH:mm"),
+      dataIndex: "atTime",
     },
     {
       title: "Calories",
@@ -165,7 +164,7 @@ export const MealList: FC<Props> = props => {
                 filter,
               )
               const formatDate = (date: string) =>
-                moment(date, PICKER_FORMAT).format("YYYY-MM-DD")
+                moment(date, PICKER_FORMAT).format(DATE_FORMAT)
 
               if (start) {
                 filterValue.fromDate = formatDate(start)

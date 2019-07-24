@@ -6,9 +6,10 @@ INSERT INTO person (email, email_validated, email_validation_token, password_res
 ('jake@sully.com', true, '16761c8f-e48d-4a1a-9c63-194fd58ea973', NULL, '$2b$10$dqYqnPdQWP/KEcOGKJwMLeGQhKsAFpttUPSvBxCvpeQwKqBnTqrgq', 'admin', 'Jake', 'Sully', NULL, NULL);
 
 
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Fried chicken with rice', 500, '2018-01-01 12:00:00', 1);
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Banana and 3 apples', 200, '2019-01-01 19:00:00', 1);
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Tom yum Goong', 90, '2019-01-01 19:00:00', 3);
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Côtes d''agneau et pois chiches', 567, '2019-06-12 13:30:31', 3);
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Burger frites', 1000, '2017-07-21 13:30:31', 3);
-INSERT INTO meal (text, calories, at, owner_id) VALUES ('Omelette, salade de tomate, fromage blanc', 689, '2019-01-01 12:29:31', 3);
+INSERT INTO meal (text, calories, at_date, at_time, owner_id) VALUES 
+('Fried chicken with rice', 500, '2018-01-01', '12:00', 1),
+('Banana and 3 apples', 200, '2019-01-01',  '19:00', 1),
+('Tom yum Goong', 90, '2019-01-01',  '19:00', 3),
+('Côtes d''agneau et pois chiches', 567, '2019-06-12', '13:30', 3),
+('Burger frites', 1000, '2017-07-21',  '13:30', 3),
+('Omelette, salade de tomate, fromage blanc', 689, '2019-01-01', '12:29', 3);

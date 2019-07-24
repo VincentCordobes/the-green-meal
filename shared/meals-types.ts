@@ -1,6 +1,12 @@
+/** ISO8601 time part without tz */
+export const TIME_FORMAT = "HH:mm"
+/** ISO8601 date part */
+export const DATE_FORMAT = "YYYY-MM-DD"
+
 export type Meal = {
   id: number
-  at: Date
+  atDate: string
+  atTime: string
   text: string
   calories: number
   ownerId: number
@@ -9,7 +15,8 @@ export type Meal = {
 export type MealDTO = {
   id: number
   text: string
-  at: string
+  atDate: string
+  atTime: string
   calories: number
 }
 
@@ -24,7 +31,8 @@ export type MealListResponse = MealItem[]
 
 export type AddMealRequest = {
   text: string
-  at: string
+  atDate: string
+  atTime: string
   calories: number
 }
 

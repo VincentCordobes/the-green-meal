@@ -1,7 +1,6 @@
 import sql from "sql-template-strings"
 import Joi from "@hapi/joi"
 import {propOr, pick} from "ramda"
-import {DateTime} from "luxon"
 
 import {ApiResponse} from "../shared/api-types"
 import {
@@ -45,34 +44,32 @@ export const list = withACLs(
     const timeTo = propOr("24:00", "toTime", mealsFilter)
 
     const sqlQuery = sql`
-      select meal.id, meal.at, meal.text, meal.calories,
+      select meal.id, meal.at_date, meal.at_time, meal.text, meal.calories,
              concat(p.firstname, ' ', p.lastname) as fullname,
              p.expected_calories_per_day
         from meal join person p on p.id = meal.owner_id
-       where (meal.at::date between ${dateFrom} and ${dateTo})
-         and (meal.at::time between ${timeFrom} and ${timeTo})`
+       where (meal.at_date::date between ${dateFrom} and ${dateTo})
+         and (meal.at_time::time between ${timeFrom} and ${timeTo})`
 
     if (params.role !== "admin") {
       sqlQuery.append(sql` and owner_id = ${params.userId}`)
     }
 
-    sqlQuery.append("order by meal.at desc")
+    sqlQuery.append("order by meal.at_date::date desc, meal.at_time::time desc")
 
     type DbQueryResult = Meal & ExpectedMealCalories
     const meals = await query<DbQueryResult>(sqlQuery)
 
     return {
       ok: true,
-      value: meals.map(meal => ({
-        ...meal,
-        at: formatDate(meal.at),
-      })),
+      value: meals,
     }
   },
 )
 
 type AddMealPayload = {
-  at: Date
+  atDate: string
+  atTime: string
   text: string
   calories: number
 }
@@ -80,11 +77,10 @@ type AddMealPayload = {
 export const add = withACLs(
   ["regular", "admin", "manager"],
   async (req: ApiRequest, {userId: ownerId}): Promise<ApiResponse<MealDTO>> => {
-    type DbMealInsert = Omit<Meal, "id">
-
-    const {at, text, calories} = validate<AddMealPayload>(
+    const {atDate, atTime, text, calories} = validate<AddMealPayload>(
       Joi.object({
-        at: Joi.date(),
+        atTime: Joi.string(),
+        atDate: Joi.string(),
         text: Joi.string(),
         calories: Joi.number()
           .positive()
@@ -95,7 +91,7 @@ export const add = withACLs(
 
     const [meal] = await query<Meal>(
       sql`insert into meal`
-        .append(buildValues<DbMealInsert>({at, text, calories, ownerId}))
+        .append(buildValues({atDate, atTime, text, calories, ownerId}))
         .append(` returning * `),
     )
 
@@ -110,7 +106,8 @@ export const update = withACLs(
       Joi.object({
         mealId: Joi.number(),
         values: Joi.object({
-          at: Joi.date().optional(),
+          atTime: Joi.string().optional(),
+          atDate: Joi.string().optional(),
           text: Joi.string().optional(),
           calories: Joi.number()
             .positive()
@@ -166,14 +163,5 @@ export const remove = withACLs(
 )
 
 function toMealDTO(meal: Meal): MealDTO {
-  return {
-    ...pick(["id", "text", "calories"], meal),
-    at: formatDate(meal.at),
-  }
-}
-
-function formatDate(date: Date) {
-  return DateTime.fromJSDate(date)
-    .toUTC()
-    .toISO()
+  return pick(["id", "text", "calories", "atDate", "atTime"], meal)
 }

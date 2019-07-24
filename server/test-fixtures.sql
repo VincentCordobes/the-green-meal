@@ -16,7 +16,7 @@ values ('admin@toto.com', '$2b$10$8XHQDalaR3KcsyipYt8N3.2a2e0nfBoZNPVbggDNWc8IoQ
 
 
 -- meal
-insert into meal (at, text, calories, owner_id) 
-values ('2018-01-01 12:00:00 +00:00', 'Fried chicken with rice', 500, 2), 
-       ('2019-01-01 19:00:00 +00:00', 'Banana with ice', 400, 2),
-       ('2019-01-01 19:00:00 +00:00', 'Banana with ice', 400, 5);
+insert into meal (at_date,at_time, text, calories, owner_id) 
+values ('2018-01-01', '12:00', 'Fried chicken with rice', 500, 2), 
+       ('2019-01-01', '19:00', 'Banana with ice', 400, 2),
+       ('2019-01-01', '19:00', 'Banana with ice', 400, 5);

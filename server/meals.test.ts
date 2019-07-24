@@ -48,7 +48,8 @@ describe("List meals", () => {
           id: 2,
           fullname: "firstname2 lastname2",
           expectedCaloriesPerDay: 600,
-          at: "2019-01-01T19:00:00.000Z",
+          atDate: "2019-01-01",
+          atTime: "19:00",
           text: "Banana with ice",
           calories: 400,
         },
@@ -56,7 +57,8 @@ describe("List meals", () => {
           id: 1,
           fullname: "firstname2 lastname2",
           expectedCaloriesPerDay: 600,
-          at: "2018-01-01T12:00:00.000Z",
+          atDate: "2018-01-01",
+          atTime: "12:00",
           text: "Fried chicken with rice",
           calories: 500,
         },
@@ -188,7 +190,8 @@ describe("Add a meal", () => {
     const meal: AddMealRequest = {
       calories: 350,
       text: "Pasta",
-      at: "2018-07-12T00:00:00.000Z",
+      atDate: "2018-07-12",
+      atTime: "00:00",
     }
 
     // when
@@ -198,7 +201,8 @@ describe("Add a meal", () => {
     // then
     const addedMeal = {
       id: expect.any(Number),
-      at: "2018-07-12T00:00:00.000Z",
+      atDate: "2018-07-12",
+      atTime: "00:00",
       text: "Pasta",
       calories: 350,
     }
@@ -221,7 +225,8 @@ describe("Update a meal", () => {
       values: {
         calories: 350,
         text: "Pasta",
-        at: "2018-07-12T00:00:00.000Z",
+        atDate: "2018-07-12",
+        atTime: "00:00",
       },
     }
 
@@ -233,7 +238,8 @@ describe("Update a meal", () => {
       ok: true,
       value: {
         id: 1,
-        at: "2018-07-12T00:00:00.000Z",
+        atDate: "2018-07-12",
+        atTime: "00:00",
         text: "Pasta",
         calories: 350,
       },
@@ -257,7 +263,8 @@ describe("Update a meal", () => {
       ok: true,
       value: {
         id: 1,
-        at: "2018-01-01T12:00:00.000Z",
+        atDate: "2018-01-01",
+        atTime: "12:00",
         text: "Fried chicken with rice",
         calories: 350,
       },
@@ -299,7 +306,8 @@ describe("Update a meal", () => {
       ok: true,
       value: {
         id: 1,
-        at: "2018-01-01T12:00:00.000Z",
+        atDate: "2018-01-01",
+        atTime: "12:00",
         text: "Fried chicken with rice",
         calories: 350,
       },
