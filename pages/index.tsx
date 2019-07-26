@@ -7,7 +7,7 @@ import {UserDTO} from "../shared/user-types"
 
 import Layout from "../client/layout"
 import {MealList} from "../client/meals-list"
-import {request} from "../client/http-client"
+import {request} from "../client/request"
 import {withAuth} from "../client/with-auth"
 import {ErrorBoundary} from "../client/error-boundary"
 

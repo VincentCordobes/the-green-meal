@@ -10,7 +10,7 @@ import {FormComponentProps} from "antd/lib/form/Form"
 import cookie from "js-cookie"
 
 import {AuthResponse, AuthRequest} from "../shared/auth"
-import {request} from "./http-client"
+import {request} from "./request"
 
 import "./login-form.css"
 import {useRouter} from "next/router"

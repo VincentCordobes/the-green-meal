@@ -246,7 +246,7 @@ describe("Update a meal", () => {
     })
   })
 
-  test("should update partially a meal fields", async () => {
+  test("should update some meal fields", async () => {
     // given
     const meal: UpdateMealRequest = {
       mealId: 1,

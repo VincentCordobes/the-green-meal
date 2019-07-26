@@ -8,7 +8,7 @@ import {ErrorBoundary} from "../../../client/error-boundary"
 import {UserDTO} from "../../../shared/user-types"
 import {UserForm} from "../../../client/user-form"
 import {useFetch} from "../../../client/use-fetch"
-import {request} from "../../../client/http-client"
+import {request} from "../../../client/request"
 import {UserFormLayout} from "../../../client/user-form-layout"
 
 type Props = {

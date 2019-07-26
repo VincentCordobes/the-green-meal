@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from "react"
-import {request} from "./http-client"
+import {request} from "./request"
 
 type Options<T> = {
   body?: any

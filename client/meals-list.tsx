@@ -22,7 +22,7 @@ import {
 } from "../shared/meals-types"
 import {UserDTO} from "../shared/user-types"
 
-import {request} from "./http-client"
+import {request} from "./request"
 import {MealForm} from "./meals-form"
 import {useFetch} from "./use-fetch"
 import {useCurrentUser} from "./session-context"

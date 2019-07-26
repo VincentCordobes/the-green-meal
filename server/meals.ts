@@ -11,6 +11,7 @@ import {
   UpdateMealRequest,
   MealListResponse,
   ExpectedMealCalories,
+  AddMealRequest,
 } from "../shared/meals-types"
 
 import {validate} from "./validate"
@@ -69,17 +70,10 @@ export const list = withACLs(
   },
 )
 
-type AddMealPayload = {
-  atDate: string
-  atTime: string
-  text: string
-  calories: number
-}
-
 export const add = withACLs(
   ["regular", "admin", "manager"],
   async (req: ApiRequest, {userId: ownerId}): Promise<ApiResponse<MealDTO>> => {
-    const {atDate, atTime, text, calories} = validate<AddMealPayload>(
+    const {atDate, atTime, text, calories} = validate<AddMealRequest>(
       Joi.object({
         atTime: timeSchema,
         atDate: dateSchema,

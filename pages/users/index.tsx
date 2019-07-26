@@ -5,7 +5,7 @@ import {UserDTO} from "../../shared/user-types"
 
 import Layout from "../../client/layout"
 import {UserList} from "../../client/user-list"
-import {request} from "../../client/http-client"
+import {request} from "../../client/request"
 import {ErrorBoundary} from "../../client/error-boundary"
 import {withAuth, requestInitialProps} from "../../client/with-auth"
 

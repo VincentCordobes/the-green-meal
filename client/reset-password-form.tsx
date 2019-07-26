@@ -4,7 +4,7 @@ import {usePasswordConfirmation} from "./use-password-confirmation"
 import Input from "antd/lib/input"
 import Button from "antd/lib/button"
 import {useState} from "react"
-import {request} from "./http-client"
+import {request} from "./request"
 import {ResetPasswordRequest, ResetPasswordError} from "../shared/auth"
 
 type FormValues = {

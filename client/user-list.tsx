@@ -12,7 +12,7 @@ import Link from "next/link"
 
 import {UserDTO} from "../shared/user-types"
 import {useFetch} from "./use-fetch"
-import {request} from "./http-client"
+import {request} from "./request"
 import "./user-list.css"
 
 function buildColumns(params: {

@@ -6,7 +6,7 @@ import {NextPageContext} from "next"
 
 import {UserDTO} from "../shared/user-types"
 import {ApiResponse, OKResponse} from "../shared/api-types"
-import {request} from "./http-client"
+import {request} from "./request"
 
 const getDisplayName = (Component: any) =>
   Component.displayName || Component.name || "Component"

@@ -17,7 +17,7 @@ import {
 } from "../shared/meals-types"
 import {ApiError} from "../shared/api-types"
 
-import {request} from "./http-client"
+import {request} from "./request"
 import {validateCalorieCount, InputCalories} from "./input-calories"
 
 type ModalProps = {

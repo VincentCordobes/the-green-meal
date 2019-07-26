@@ -10,7 +10,7 @@ import Popconfirm from "antd/lib/popconfirm"
 
 import {UserDTO, UserPayload, AddUserError, Role} from "../shared/user-types"
 
-import {request} from "./http-client"
+import {request} from "./request"
 import {UserSelect, fullName} from "./select-user"
 import {getRoles, ForgotPasswordRequest} from "../shared/auth"
 import {usePasswordConfirmation} from "./use-password-confirmation"
