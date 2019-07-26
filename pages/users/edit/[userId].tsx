@@ -3,7 +3,7 @@ import React from "react"
 import Router, {useRouter} from "next/router"
 
 import Layout from "../../../client/layout"
-import {withAuth, requestInitialProps} from "../../../client/with-auth-client"
+import {withAuth, requestInitialProps} from "../../../client/with-auth"
 import {ErrorBoundary} from "../../../client/error-boundary"
 import {UserDTO} from "../../../shared/user-types"
 import {UserForm} from "../../../client/user-form"

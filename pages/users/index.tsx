@@ -7,7 +7,7 @@ import Layout from "../../client/layout"
 import {UserList} from "../../client/user-list"
 import {request} from "../../client/http-client"
 import {ErrorBoundary} from "../../client/error-boundary"
-import {withAuth, requestInitialProps} from "../../client/with-auth-client"
+import {withAuth, requestInitialProps} from "../../client/with-auth"
 
 type Props = {
   users: UserDTO[]

@@ -4,7 +4,7 @@ import Router from "next/router"
 
 import {UserDTO} from "../../shared/user-types"
 import Layout from "../../client/layout"
-import {withAuth, requestInitialProps} from "../../client/with-auth-client"
+import {withAuth, requestInitialProps} from "../../client/with-auth"
 import {ErrorBoundary} from "../../client/error-boundary"
 import {UserForm} from "../../client/user-form"
 import {useFetch} from "../../client/use-fetch"
