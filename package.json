@@ -34,6 +34,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "sql-template-strings": "^2.2.2",
+    "sql-template-tag": "^3.2.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

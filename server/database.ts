@@ -2,6 +2,7 @@ import {Pool} from "pg"
 import R from "ramda"
 import sql, {SQLStatement} from "sql-template-strings"
 import {HTTPError} from "./error-handler"
+import sql1, {Sql, raw, empty} from "sql-template-tag"
 
 export const DB_ERROR = {
   uniqueViolation: "23505",
@@ -15,7 +16,7 @@ export function closeDb() {
   return pool.end()
 }
 
-export async function query<T>(sql: SQLStatement): Promise<T[]> {
+export async function query<T>(sql: SQLStatement | Sql): Promise<T[]> {
   try {
     const {rows} = await pool.query(sql)
     return rows.map(row => mapKeys(camelCase, row))
@@ -28,7 +29,7 @@ export function execute(sql: string | SQLStatement) {
   return pool.query(sql)
 }
 
-export async function queryOne<T>(sqlQuery: SQLStatement): Promise<T> {
+export async function queryOne<T>(sqlQuery: SQLStatement | Sql): Promise<T> {
   const [result] = await query<T>(sqlQuery)
   if (!result) {
     throw new HTTPError(400)
@@ -48,6 +49,38 @@ export function buildUpdateFields<T extends object>(record: T): SQLStatement {
 
     return sqlQuery
   }, sql` `)
+}
+
+export function buildUpdateFields1<T extends object>(record: T): Sql {
+  const entries = Object.entries(record)
+
+  return entries.reduce((sqlQuery, [key, value], i) => {
+    const field = sql1`${raw(snakeCase(key))} = ${value}`
+    if (i === 0) {
+      return field
+    } else {
+      return sql1`${sqlQuery}, ${field}`
+    }
+  }, sql1` `)
+}
+
+export function buildValues1<T extends object>(record: T): Sql {
+  type ColumnsValues = [string, Sql]
+  const entries = Object.entries(record)
+
+  const [columns, values] = entries.reduce<ColumnsValues>(
+    (acc, [key, value], i) => {
+      const [columns, values] = acc
+      if (i === 0) {
+        return [snakeCase(key), sql1`${value}`]
+      } else {
+        return [`${columns}, ${snakeCase(key)}`, sql1`${values}, ${value}`]
+      }
+    },
+    ["", sql1``],
+  )
+
+  return sql1`(${raw(columns)}) values (${values})`
 }
 
 export function buildValues<T extends object>(record: T): SQLStatement {

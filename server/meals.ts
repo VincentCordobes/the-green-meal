@@ -1,4 +1,4 @@
-import sql from "sql-template-strings"
+import sql, {empty} from "sql-template-tag"
 import Joi from "@hapi/joi"
 import {propOr, pick} from "ramda"
 
@@ -15,7 +15,13 @@ import {
 } from "../shared/meals-types"
 
 import {validate} from "./validate"
-import {query, buildUpdateFields, queryOne, buildValues} from "./database"
+import {
+  query,
+  buildUpdateFields,
+  queryOne,
+  buildValues1,
+  buildUpdateFields1,
+} from "./database"
 import {responseOK, ApiRequest} from "./api"
 import {withACLs} from "./with-auth"
 import {HTTPError} from "./error-handler"
@@ -40,11 +46,14 @@ export const list = withACLs(
   async (req: ApiRequest, params): Promise<ApiResponse<MealListResponse>> => {
     const mealsFilter = validate<MealsFilter>(MealsFilterSchema, req.query)
 
-    const dateFrom = propOr("-infinity", "fromDate", mealsFilter)
-    const dateTo = propOr("infinity", "toDate", mealsFilter)
+    const dateFrom: string = propOr("-infinity", "fromDate", mealsFilter)
+    const dateTo: string = propOr("infinity", "toDate", mealsFilter)
 
-    const timeFrom = propOr("00:00", "fromTime", mealsFilter)
-    const timeTo = propOr("24:00", "toTime", mealsFilter)
+    const timeFrom: string = propOr("00:00", "fromTime", mealsFilter)
+    const timeTo: string = propOr("24:00", "toTime", mealsFilter)
+
+    const ownerFilter =
+      params.role !== "admin" ? sql` and owner_id = ${params.userId}` : empty
 
     const sqlQuery = sql`
       select meal.id, meal.at_date, meal.at_time, meal.text, meal.calories,
@@ -52,13 +61,9 @@ export const list = withACLs(
              p.expected_calories_per_day
         from meal join person p on p.id = meal.owner_id
        where (meal.at_date::date between ${dateFrom} and ${dateTo})
-         and (meal.at_time::time between ${timeFrom} and ${timeTo})`
-
-    if (params.role !== "admin") {
-      sqlQuery.append(sql` and owner_id = ${params.userId}`)
-    }
-
-    sqlQuery.append("order by meal.at_date::date desc, meal.at_time::time desc")
+         and (meal.at_time::time between ${timeFrom} and ${timeTo})
+             ${ownerFilter}
+         order by meal.at_date::date desc, meal.at_time::time desc`
 
     type DbQueryResult = Meal & ExpectedMealCalories
     const meals = await query<DbQueryResult>(sqlQuery)
@@ -85,10 +90,15 @@ export const add = withACLs(
       req.body,
     )
 
+    const values = buildValues1({
+      atDate,
+      atTime,
+      text,
+      calories,
+      ownerId,
+    })
     const [meal] = await query<Meal>(
-      sql`insert into meal`
-        .append(buildValues({atDate, atTime, text, calories, ownerId}))
-        .append(` returning * `),
+      sql`insert into meal ${values} returning *`,
     )
 
     return responseOK(toMealDTO(meal))
@@ -115,19 +125,19 @@ export const update = withACLs(
 
     if (!values || !Object.keys(values).length) {
       const meal = await queryOne<Meal>(
-        sql`select * from meal`.append(
-          role !== "admin" ? sql`where owner_id = ${userId}` : "",
-        ),
+        sql`select * from meal
+        ${role !== "admin" ? sql`where owner_id = ${userId}` : empty} `,
       )
+
       return responseOK(toMealDTO(meal))
     }
 
     const meal = await queryOne<Meal>(
-      sql`update meal set `
-        .append(buildUpdateFields(values))
-        .append(sql` where meal.id = ${mealId}`)
-        .append(role !== "admin" ? sql` and owner_id = ${userId}` : "")
-        .append(` returning * `),
+      sql`update meal 
+          set ${buildUpdateFields1(values)}
+          where meal.id = ${mealId}
+          ${role !== "admin" ? sql` and owner_id = ${userId}` : empty}
+          returning *`,
     )
     return responseOK(toMealDTO(meal))
   },
@@ -141,13 +151,14 @@ export const remove = withACLs(
       req.body,
     )
 
-    const ownerFilter = role !== "admin" ? sql` and owner_id = ${userId}` : ""
+    const ownerFilter =
+      role !== "admin" ? sql` and owner_id = ${userId}` : empty
 
     const [meal] = await query<Meal>(
       sql`delete from meal
-          where id =  ${mealId}`
-        .append(ownerFilter)
-        .append(` returning *`),
+          where id = ${mealId}
+                ${ownerFilter}
+          returning * `,
     )
 
     if (!meal) {
