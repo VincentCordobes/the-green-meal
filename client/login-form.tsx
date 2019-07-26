@@ -76,13 +76,13 @@ const LoginForm: React.FC<Props> = props => {
             style={inlineStyles.loginError}
           />
         )}
-        {pendingEmail && (
+        {/** pendingEmail && (
           <Alert
             message="Please confirm your email address before logging in"
             type="info"
             style={inlineStyles.loginError}
           />
-        )}
+        ) */}
         <Form onSubmit={handleSubmit} className="login-form">
           <Form.Item>
             {getFieldDecorator("email", {
@@ -90,7 +90,7 @@ const LoginForm: React.FC<Props> = props => {
             })(
               <Input
                 prefix={<Icon type="user" style={{color: "rgba(0,0,0,.25)"}} />}
-                placeholder="email"
+                placeholder="email (admin@meals.com)"
               />,
             )}
           </Form.Item>
@@ -101,7 +101,7 @@ const LoginForm: React.FC<Props> = props => {
               <Input
                 prefix={<Icon type="lock" style={{color: "rgba(0,0,0,.25)"}} />}
                 type="password"
-                placeholder="Password"
+                placeholder="Password (meals)"
               />,
             )}
           </Form.Item>

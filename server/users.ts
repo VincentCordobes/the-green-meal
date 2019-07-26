@@ -129,6 +129,7 @@ export const add = async (
     firstname,
     lastname,
     role,
+    emailValidated: process.env.NODE_ENV !== "test", // For the demo
     emailValidationToken,
     password,
     managerId,
