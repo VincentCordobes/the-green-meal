@@ -2,7 +2,13 @@
 
 > Keep track of your meals calories
 
-This is a [nextjs](https://nextjs.org/) app written in TypeScript.
+Next.js 9, antd, Node, PostgreSQL demo app—written in TypeScript with raw sql.
+
+What's implemented:
+- Authentication and ACLs
+- CRUD meals and users
+
+----
 
 - [Setup](#setup)
   - [Requirements](#requirements)
