@@ -8,7 +8,7 @@ What's implemented:
 - Authentication and ACLs
 - CRUD meals and users
 
-----
+## Table of contents
 
 - [Setup](#setup)
   - [Requirements](#requirements)
