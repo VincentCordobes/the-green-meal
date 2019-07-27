@@ -160,7 +160,7 @@ export const MealList: FC<Props> = props => {
   return (
     <>
       <Row type="flex" justify="space-between" className="table-actions">
-        <Col>
+        <Col className="meals-filters">
           <RangePicker
             format={PICKER_FORMAT}
             onChange={(_, [start, end]) => {
@@ -182,29 +182,31 @@ export const MealList: FC<Props> = props => {
             }}
           />
           <Divider type="vertical" />
-          <TimePicker
-            format="HH:mm"
-            placeholder="From time"
-            className="date-picker"
-            onChange={(_, fromTime) => {
-              if (fromTime) {
-                setFilter({...filter, fromTime})
-              } else {
-                setFilter(dissoc("fromTime"))
-              }
-            }}
-          />
-          <TimePicker
-            format="HH:mm"
-            placeholder="To time"
-            onChange={(_, toTime) => {
-              if (toTime) {
-                setFilter({...filter, toTime})
-              } else {
-                setFilter(dissoc("toTime"))
-              }
-            }}
-          />
+          <div className="time-pickers">
+            <TimePicker
+              format="HH:mm"
+              placeholder="From time"
+              className="date-picker"
+              onChange={(_, fromTime) => {
+                if (fromTime) {
+                  setFilter({...filter, fromTime})
+                } else {
+                  setFilter(dissoc("fromTime"))
+                }
+              }}
+            />
+            <TimePicker
+              format="HH:mm"
+              placeholder="To time"
+              onChange={(_, toTime) => {
+                if (toTime) {
+                  setFilter({...filter, toTime})
+                } else {
+                  setFilter(dissoc("toTime"))
+                }
+              }}
+            />
+          </div>
         </Col>
         <Col>
           <Button

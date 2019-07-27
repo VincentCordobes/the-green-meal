@@ -1,5 +1,15 @@
 .table-actions {
   margin-bottom: 16px;
+  flex-wrap: nowrap;
+}
+
+.meals-filters {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.time-pickers {
+  min-width: 256px;
 }
 
 .meal-item {

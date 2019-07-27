@@ -8,6 +8,9 @@
 .avatar-header {
   cursor: pointer;
   user-select: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .current-user {
