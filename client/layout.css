@@ -10,6 +10,10 @@
   border-bottom: 1px solid #e8e8e8;
 }
 
+.ant-layout-header {
+  padding: 0;
+}
+
 .menu-container {
   display: flex;
 }

@@ -28,6 +28,7 @@ import {useFetch} from "./use-fetch"
 import {useCurrentUser} from "./session-context"
 
 import "./meals-list.css"
+import {Col} from "antd"
 
 const {RangePicker} = DatePicker
 
@@ -93,7 +94,11 @@ function buildColumns(
       render: (_, user) => (
         <>
           <Tooltip title="Edit" placement="bottom">
-            <Button type="link" onClick={() => params.onEdit(user)}>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => params.onEdit(user)}
+            >
               <Icon type="edit" />
             </Button>
           </Tooltip>
@@ -103,9 +108,9 @@ function buildColumns(
             onConfirm={() => params.onDelete(user)}
           >
             <Tooltip title="Delete" placement="bottom">
-              <a>
+              <Button type="link" size="small">
                 <Icon type="delete" />
-              </a>
+              </Button>
             </Tooltip>
           </Popconfirm>
         </>
@@ -155,7 +160,7 @@ export const MealList: FC<Props> = props => {
   return (
     <>
       <Row type="flex" justify="space-between" className="table-actions">
-        <div>
+        <Col>
           <RangePicker
             format={PICKER_FORMAT}
             onChange={(_, [start, end]) => {
@@ -200,17 +205,19 @@ export const MealList: FC<Props> = props => {
               }
             }}
           />
-        </div>
-        <Button
-          type="primary"
-          onClick={() => {
-            setSelectedMeal(undefined)
-            openModal()
-          }}
-        >
-          <Icon type="plus" />
-          Add meal
-        </Button>
+        </Col>
+        <Col>
+          <Button
+            type="primary"
+            onClick={() => {
+              setSelectedMeal(undefined)
+              openModal()
+            }}
+          >
+            <Icon type="plus" />
+            Add meal
+          </Button>
+        </Col>
       </Row>
       <Row>
         <Table

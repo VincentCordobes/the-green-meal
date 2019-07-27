@@ -62,11 +62,11 @@ function buildColumns(params: {
       render: (_, user) => (
         <>
           <Link href="/users/edit/[userId]" as={`/users/edit/${user.id}`}>
-            <a>
+            <Button type="link" size="small">
               <Tooltip title="Edit" placement="bottom">
                 <Icon type="edit" />
               </Tooltip>
-            </a>
+            </Button>
           </Link>
           <Divider type="vertical" />
           <Popconfirm
@@ -74,9 +74,9 @@ function buildColumns(params: {
             onConfirm={() => params.onDelete(user)}
           >
             <Tooltip title="Delete" placement="bottom">
-              <a>
+              <Button type="link" size="small">
                 <Icon type="delete" />
-              </a>
+              </Button>
             </Tooltip>
           </Popconfirm>
         </>
