@@ -1,6 +1,5 @@
 import React, {Component} from "react"
 import Router from "next/router"
-import nextCookie from "next-cookies"
 import nextCookies from "next-cookies"
 import {NextPageContext} from "next"
 
@@ -53,7 +52,7 @@ const redirectToLogin = (ctx: NextPageContext) => {
 }
 
 export const auth = (ctx: NextPageContext) => {
-  const {token} = nextCookie(ctx)
+  const {token} = nextCookies(ctx)
 
   if (!token) {
     redirectToLogin(ctx)
