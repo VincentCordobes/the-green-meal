@@ -1,40 +1,21 @@
 import {AuthRequest} from "../shared/auth"
 
 import {auth, forgotPassword, resetPassword} from "./auth"
-import {aRequest, initTestDb, anAdminRequest} from "./test-helpers"
+import {aRequest, initTestDb} from "./test-helpers"
 import {closeDb} from "./database"
 import {add} from "./users"
 import {confirmEmail} from "./confirm-email"
 import {ApiRequest} from "./api"
-
-beforeAll(() => {
-  process.env = {
-    ...process.env,
-    AUTH_SECRET: "secret",
-  }
-})
 
 beforeEach(() => initTestDb())
 afterAll(() => closeDb())
 
 jest.mock("uuid", () => ({v4: () => "token"}))
 
-jest.mock("jsonwebtoken", () => {
-  const verify = jest.fn((token, _, cb) => {
-    if (["regular", "manager", "admin"].includes(token)) {
-      cb(null, {userId: 1, role: token})
-    } else {
-      cb("error")
-    }
-  })
-
-  return {verify, sign: jest.fn().mockReturnValue("token")}
-})
-
 describe("Auth endpoint", () => {
   test("should authenticate a user and returns an access token", async () => {
     // given
-    const req: ApiRequest<AuthRequest> = anAdminRequest({
+    const req = aRequest({
       body: {
         email: "Vincent@meals.com",
         password: "toto",
@@ -64,7 +45,7 @@ describe("Auth endpoint", () => {
 
   test("should not authenticate the user when the password is wrong", async () => {
     // given
-    const req: ApiRequest<AuthRequest> = anAdminRequest({
+    const req = aRequest<AuthRequest>({
       body: {
         email: "Vincent@meals.com",
         password: "totoo",
@@ -85,7 +66,7 @@ describe("Auth endpoint", () => {
 
   test("should not authenticate the user when the email is not confirmed", async () => {
     await add(
-      anAdminRequest({
+      aRequest({
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",
@@ -114,7 +95,7 @@ describe("Auth endpoint", () => {
 
   test("should authenticate a newly added and confirmed user", async () => {
     await add(
-      anAdminRequest({
+      aRequest({
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",
@@ -149,7 +130,7 @@ describe("Auth endpoint", () => {
 
   test("should reset a user password", async () => {
     await add(
-      anAdminRequest({
+      aRequest({
         body: {
           lastname: "Cordobes",
           firstname: "Vincent",
