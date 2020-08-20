@@ -20,7 +20,7 @@
     "@hapi/joi": "^16.1.7",
     "@zeit/next-css": "^1.0.1",
     "antd": "^3.24.3",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "isomorphic-unfetch": "^3.0.0",
     "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
