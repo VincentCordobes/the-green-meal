@@ -4,7 +4,7 @@ import sql from "sql-template-strings"
 import jwt from "jsonwebtoken"
 import uuid from "uuid"
 
-import {ApiResponse} from "../shared/api-types"
+import {ApiResponse} from "../shared/api_types"
 import {
   AuthRequest,
   AuthResponse,
@@ -18,9 +18,9 @@ import {query, execute} from "./database"
 import {responseKO, responseOK, ApiRequest} from "./api"
 import {Person} from "./person"
 import {validate} from "./validate"
-import {Role} from "../shared/user-types"
+import {Role} from "../shared/user_types"
 import {sendMail, resetPasswordTemplate} from "./mailing"
-import {HTTPError} from "./error-handler"
+import {HTTPError} from "./error_handler"
 
 const requestSchema = Joi.object({
   email: Joi.string().required(),

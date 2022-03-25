@@ -12,11 +12,12 @@ import cookie from "js-cookie"
 import {AuthResponse, AuthRequest} from "../shared/auth"
 import {request} from "./request"
 
-import "./login-form.css"
 import {useRouter} from "next/router"
 import {pathOr} from "ramda"
 import Link from "next/link"
 import Popover from "antd/lib/popover"
+
+import styles from "./login_form.module.css"
 
 type Props = FormComponentProps<AuthRequest>
 
@@ -27,7 +28,7 @@ const inlineStyles = {
   },
 }
 
-const LoginForm: React.FC<Props> = props => {
+const LoginForm: React.FC<Props> = (props) => {
   const router = useRouter()
 
   const [apiError, setApiError] = useState<string | undefined>()
@@ -39,7 +40,7 @@ const LoginForm: React.FC<Props> = props => {
       if (!err) {
         setLoading(true)
         request<AuthResponse>("/api/auth", {method: "POST", body}).then(
-          response => {
+          (response) => {
             if (response.ok) {
               cookie.set("token", response.value.token, {expires: 7})
               router.replace("/")
@@ -83,7 +84,7 @@ const LoginForm: React.FC<Props> = props => {
             style={inlineStyles.loginError}
           />
         ) */}
-        <Form onSubmit={handleSubmit} className="login-form">
+        <Form onSubmit={handleSubmit} className={styles.loginForm}>
           <Form.Item>
             {getFieldDecorator("email", {
               rules: [{required: true, message: "Please enter your email"}],
@@ -115,14 +116,14 @@ const LoginForm: React.FC<Props> = props => {
               trigger="click"
               content="Please contact the admin at admin@meals.com"
             >
-              <Button type="link" className="login-form-forgot">
+              <Button type="link" className={styles.loginFormForgot}>
                 Forgot password
               </Button>
             </Popover>
             <Button
               type="primary"
               htmlType="submit"
-              className="login-form-button"
+              className={styles.loginFormButton}
               loading={loading}
             >
               Log in

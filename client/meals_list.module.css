@@ -1,26 +1,25 @@
-.table-actions {
+.tableActions {
   margin-bottom: 16px;
   flex-wrap: nowrap;
 }
 
-.meals-filters {
+.mealsFilters {
   display: flex;
   flex-wrap: wrap;
 }
 
-.time-pickers {
+.timePickers {
   min-width: 256px;
 }
 
-.meal-item {
+.mealItem {
   background: white;
 }
 
-.meal-calories {
+.mealCalories {
   font-weight: bold;
-  /* color: black; */
 }
 
-.date-picker {
+.datePicker {
   margin-right: 5px;
 }

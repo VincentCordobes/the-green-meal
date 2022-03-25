@@ -1,7 +1,7 @@
 import {head, pickBy, isNil} from "ramda"
 import sql, {SQLStatement} from "sql-template-strings"
 import Joi from "@hapi/joi"
-import uuid from "uuid"
+import {v4 as uuidv4} from "uuid"
 
 import {
   UserDTO,
@@ -10,8 +10,8 @@ import {
   RemoveUserResponse,
   RemoveUserRequest,
   UpdateRequest,
-} from "../shared/user-types"
-import {ApiResponse, KOResponse} from "../shared/api-types"
+} from "../shared/user_types"
+import {ApiResponse, KOResponse} from "../shared/api_types"
 
 import {
   query,
@@ -26,8 +26,8 @@ import {validate} from "./validate"
 import {Person, findAll, findById, findByManagerId} from "./person"
 import {hashPassword} from "./auth"
 import {confirmEmailTemplate, sendMail} from "./mailing"
-import {withACLs, checkAccess} from "./with-auth"
-import {HTTPError} from "./error-handler"
+import {withACLs, checkAccess} from "./with_auth"
+import {HTTPError} from "./error_handler"
 import {getRoles} from "../shared/auth"
 
 export const list = withACLs(
@@ -40,7 +40,7 @@ export const list = withACLs(
 
     const persons = await findAll()
     return responseOK(
-      persons.filter(user => user.id !== params.userId).map(toUserDTO),
+      persons.filter((user) => user.id !== params.userId).map(toUserDTO),
     )
   },
 )
@@ -100,9 +100,7 @@ const addSchema = Joi.object({
   firstname: Joi.string(),
   lastname: Joi.string(),
   role: roleSchema.optional(),
-  expectedCaloriesPerDay: Joi.number()
-    .max(900000)
-    .optional(),
+  expectedCaloriesPerDay: Joi.number().max(900000).optional(),
 })
 
 export const add = async (
@@ -118,11 +116,11 @@ export const add = async (
 
   const user = await checkAccess(
     req.cookies.token || req.headers.authorization,
-  ).catch(_ => null)
+  ).catch((_) => null)
 
   const password: string = await hashPassword(plainPassword)
   const managerId = user && user.role === "manager" ? user.userId : null
-  const emailValidationToken = uuid.v4()
+  const emailValidationToken = uuidv4()
 
   const values = buildValues({
     email: email.toLowerCase(),
@@ -138,9 +136,8 @@ export const add = async (
   return query<Person>(
     sql`insert into person`.append(values).append(` returning *`),
   )
-    .then(head)
-    .then(user => responseOK(toUserDTO(user)))
-    .then(response => {
+    .then((users) => responseOK(toUserDTO(users[0])))
+    .then((response) => {
       sendMail(email, confirmEmailTemplate(emailValidationToken))
       return response
     })
@@ -194,13 +191,9 @@ const updateUserSchema = Joi.object({
     password: Joi.string().optional(),
     firstname: Joi.string().optional(),
     lastname: Joi.string().optional(),
-    expectedCaloriesPerDay: Joi.number()
-      .allow(null)
-      .optional(),
+    expectedCaloriesPerDay: Joi.number().allow(null).optional(),
     role: roleSchema.optional(),
-    managedUserIds: Joi.array()
-      .items(Joi.number())
-      .optional(),
+    managedUserIds: Joi.array().items(Joi.number()).optional(),
   }).optional(),
 }).optional()
 
@@ -239,7 +232,7 @@ export const update = withACLs(
       fields.password = await hashPassword(fields.password)
     }
 
-    return query<UserDTO>(
+    return query<Person>(
       sql`update person set `
         .append(
           buildUpdateFields({
@@ -250,8 +243,7 @@ export const update = withACLs(
         .append(sql` where id = ${userId} `)
         .append(` returning * `),
     )
-      .then(head)
-      .then(user => responseOK(toUserDTO(user)))
+      .then((users) => responseOK(toUserDTO(users[0])))
       .catch(handleDuplicateUser)
   },
 )

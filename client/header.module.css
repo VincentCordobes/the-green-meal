@@ -1,0 +1,23 @@
+.appHeader {
+  position: fixed;
+  z-index: 99;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.appHeaderMenu {
+  line-height: 64px;
+  height: 64px;
+}
+
+.menuContainer {
+  display: flex;
+}
+
+.logo {
+  color: white;
+  float: left;
+  font-size: 2em;
+  margin-right: 20px;
+}

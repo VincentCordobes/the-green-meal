@@ -2,7 +2,7 @@ import sql from "sql-template-strings"
 import Joi from "@hapi/joi"
 import {propOr, pick} from "ramda"
 
-import {ApiResponse} from "../shared/api-types"
+import {ApiResponse} from "../shared/api_types"
 import {
   Meal,
   MealDTO,
@@ -12,13 +12,13 @@ import {
   MealListResponse,
   ExpectedMealCalories,
   AddMealRequest,
-} from "../shared/meals-types"
+} from "../shared/meals_types"
 
 import {validate} from "./validate"
 import {query, buildUpdateFields, queryOne, buildValues} from "./database"
 import {responseOK, ApiRequest} from "./api"
-import {withACLs} from "./with-auth"
-import {HTTPError} from "./error-handler"
+import {withACLs} from "./with_auth"
+import {HTTPError} from "./error_handler"
 
 const timeSchema = Joi.string().regex(
   /^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$/,
@@ -78,9 +78,7 @@ export const add = withACLs(
         atTime: timeSchema,
         atDate: dateSchema,
         text: Joi.string(),
-        calories: Joi.number()
-          .positive()
-          .max(900000),
+        calories: Joi.number().positive().max(900000),
       }),
       req.body,
     )
@@ -105,9 +103,7 @@ export const update = withACLs(
           atTime: timeSchema.optional(),
           atDate: dateSchema.optional(),
           text: Joi.string().optional(),
-          calories: Joi.number()
-            .positive()
-            .optional(),
+          calories: Joi.number().positive().optional(),
         }).optional(),
       }).optional(),
       req.body,

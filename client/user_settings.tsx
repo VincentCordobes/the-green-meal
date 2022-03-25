@@ -1,11 +1,11 @@
 import {FC} from "react"
 
-import {UserDTO} from "../shared/user-types"
+import {UserDTO} from "../shared/user_types"
 
-import {UserForm} from "./user-form"
-import {useCurrentUser} from "./session-context"
-import {useFetch} from "./use-fetch"
-import {UserFormLayout} from "./user-form-layout"
+import {UserForm} from "./user_form"
+import {useCurrentUser} from "./session_context"
+import {useFetch} from "./use_fetch"
+import {UserFormLayout} from "./user_form_layout"
 
 export const UserSettings: FC = () => {
   const {currentUser, refresh} = useCurrentUser()

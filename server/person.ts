@@ -1,6 +1,6 @@
 import sql from "sql-template-strings"
 import {query} from "./database"
-import {Role} from "../shared/user-types"
+import {Role} from "../shared/user_types"
 
 export type Person = {
   id: number

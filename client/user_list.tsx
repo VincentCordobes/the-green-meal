@@ -10,10 +10,10 @@ import Divider from "antd/lib/divider"
 import Tag from "antd/lib/tag"
 import Link from "next/link"
 
-import {UserDTO} from "../shared/user-types"
-import {useFetch} from "./use-fetch"
+import {UserDTO} from "../shared/user_types"
+import {useFetch} from "./use_fetch"
 import {request} from "./request"
-import "./user-list.css"
+import styles from "./user_list.module.css"
 
 function buildColumns(params: {
   onDelete: (user: UserDTO) => any
@@ -89,13 +89,13 @@ type Props = {
   users: UserDTO[]
 }
 
-export const UserList: FC<Props> = props => {
+export const UserList: FC<Props> = (props) => {
   const {data: users, refetch} = useFetch<UserDTO[]>("/api/users", {
     initialData: props.users,
   })
 
   const columns = buildColumns({
-    onDelete: async user => {
+    onDelete: async (user) => {
       await request("/api/users/remove", {
         method: "POST",
         body: {userId: user.id},
@@ -108,8 +108,8 @@ export const UserList: FC<Props> = props => {
 
   return (
     <>
-      <Row type="flex" justify="end" className="table-actions">
-        <Link href="/users/add">
+      <Row type="flex" justify="end" className={styles.tableActions}>
+        <Link href="/users/add" passHref>
           <Button type="primary">
             <Icon type="plus" />
             Add user
@@ -118,7 +118,7 @@ export const UserList: FC<Props> = props => {
       </Row>
       <Row>
         <Table
-          rowClassName={() => "user-item"}
+          rowClassName={() => styles.userItem}
           rowKey="id"
           dataSource={users}
           columns={columns}

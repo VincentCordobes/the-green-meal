@@ -3,15 +3,15 @@ import {
   MealsFilter,
   UpdateMealRequest,
   MealDTO,
-} from "../shared/meals-types"
-import {OKResponse} from "../shared/api-types"
+} from "../shared/meals_types"
+import {OKResponse} from "../shared/api_types"
 
 import {list, add, remove, update} from "./meals"
-import {aRequest, initDbWithFixtures, anAdminRequest} from "./test-helpers"
+import {aRequest, initDbWithFixtures, anAdminRequest} from "./test_helpers"
 import {closeDb} from "./database"
-import {withErrorHandler} from "./error-handler"
+import {withErrorHandler} from "./error_handler"
 
-beforeEach(() => initDbWithFixtures("test-fixtures.sql"))
+beforeEach(() => initDbWithFixtures("test_fixtures.sql"))
 afterAll(() => closeDb())
 
 jest.mock("jsonwebtoken", () => {
@@ -69,7 +69,7 @@ describe("List meals", () => {
 
 describe("Filter meals", () => {
   const getIds = (response: OKResponse<MealDTO[]>) =>
-    response.value.map(meal => meal.id).sort()
+    response.value.map((meal) => meal.id).sort()
 
   test("should return KO when the meal filter is invalid", async () => {
     // when
@@ -329,7 +329,7 @@ describe("Remove a meal", () => {
     // then
     expect(
       response.ok &&
-        response.value.find(user => user.id === mealToRemove.mealId),
+        response.value.find((user) => user.id === mealToRemove.mealId),
     ).toBeFalsy()
   })
 
@@ -357,7 +357,7 @@ describe("Remove a meal", () => {
     // then
     expect(
       response.ok &&
-        response.value.find(user => user.id === mealToRemove.mealId),
+        response.value.find((user) => user.id === mealToRemove.mealId),
     ).toBeFalsy()
   })
 })

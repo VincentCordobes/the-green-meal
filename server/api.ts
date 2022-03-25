@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next"
 import {IncomingHttpHeaders} from "http"
-import {KOResponse, OKResponse, ApiResponse} from "../shared/api-types"
-import {withErrorHandler} from "./error-handler"
+import {KOResponse, OKResponse, ApiResponse} from "../shared/api_types"
+import {withErrorHandler} from "./error_handler"
 
 export type NextHandler = (
   req: NextApiRequest,

@@ -1,15 +1,15 @@
-import {ApiError} from "../shared/api-types"
+import {ApiError} from "../shared/api_types"
 import logger from "./logger"
 import {responseKO, RequestHandler} from "./api"
 
 export function withErrorHandler<T>(
   fn: RequestHandler<T>,
 ): RequestHandler<T, ApiError> {
-  return async req => {
+  return async (req) => {
     try {
       const res = await fn(req)
       return res
-    } catch (e) {
+    } catch (e: any) {
       if (e.statusCode === 401) {
         return responseKO({
           error: "Unauthorized",

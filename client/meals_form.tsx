@@ -14,11 +14,11 @@ import {
   UpdateMealRequest,
   TIME_FORMAT,
   DATE_FORMAT,
-} from "../shared/meals-types"
-import {ApiError} from "../shared/api-types"
+} from "../shared/meals_types"
+import {ApiError} from "../shared/api_types"
 
 import {request} from "./request"
-import {validateCalorieCount, InputCalories} from "./input-calories"
+import {validateCalorieCount, InputCalories} from "./input_calories"
 
 type ModalProps = {
   visible: boolean
@@ -120,7 +120,7 @@ export const MealForm = Form.create<Props>({
     >
       <Form
         {...formItemLayout}
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault()
           save()
         }}

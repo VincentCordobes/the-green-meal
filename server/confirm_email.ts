@@ -1,7 +1,7 @@
 import Joi from "@hapi/joi"
 import sql from "sql-template-strings"
 
-import {ApiResponse, ApiError} from "../shared/api-types"
+import {ApiResponse, ApiError} from "../shared/api_types"
 import {query} from "./database"
 import {Person} from "./person"
 import {validate} from "./validate"

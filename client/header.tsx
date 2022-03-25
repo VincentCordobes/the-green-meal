@@ -6,8 +6,9 @@ import Menu from "antd/lib/menu"
 import Icon from "antd/lib/icon"
 import Layout from "antd/lib/layout"
 
-import {AvatarDropDown} from "./avatar-dropdown"
-import {useCurrentUser} from "./session-context"
+import {AvatarDropDown} from "./avatar_dropdown"
+import {useCurrentUser} from "./session_context"
+import styles from "./header.module.css"
 
 type Props = {}
 
@@ -19,32 +20,32 @@ export const AppHeader: FC<Props> = () => {
   const role = currentUser.role
 
   return (
-    <Header className="app-header">
-      <div className="container menu-container">
-        <div className="logo">🍒</div>
+    <Header className={styles.appHeader}>
+      <div className={`container ${styles.menuContainer}`}>
+        <div className={styles.logo}>🍒</div>
         <Menu
           theme="light"
           mode="horizontal"
           defaultSelectedKeys={[
             startsWith("/users", router.route) ? "/users" : router.route,
           ]}
-          className="app-header-menu"
+          className={styles.appHeaderMenu}
         >
           <Menu.Item style={{top: 0, height: 64}} key="/">
             <Link href="/">
-              <div>
+              <a>
                 <Icon type="home" />
                 Home
-              </div>
+              </a>
             </Link>
           </Menu.Item>
           {["admin", "manager"].includes(role) && (
             <Menu.Item style={{top: 0, height: 64}} key="/users">
               <Link href="/users">
-                <div>
+                <a>
                   <Icon type="usergroup-delete" />
                   Users
-                </div>
+                </a>
               </Link>
             </Menu.Item>
           )}

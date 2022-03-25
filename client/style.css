@@ -17,6 +17,14 @@ body {
   padding-right: 24px;
 }
 
+.ant-layout-header {
+  padding: 0;
+}
+
+#nprogress .bar {
+  background: #1890ff;
+}
+
 h3 {
   margin-bottom: 24px;
 }

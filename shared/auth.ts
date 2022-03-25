@@ -1,4 +1,4 @@
-import {Role} from "./user-types"
+import {Role} from "./user_types"
 
 export type AuthRequest = {
   email: string

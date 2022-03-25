@@ -2,21 +2,21 @@ import React from "react"
 import {NextPage, NextPageContext} from "next"
 import nextCookies from "next-cookies"
 
-import {MealListResponse} from "../shared/meals-types"
-import {UserDTO} from "../shared/user-types"
+import {MealListResponse} from "../shared/meals_types"
+import {UserDTO} from "../shared/user_types"
 
 import Layout from "../client/layout"
-import {MealList} from "../client/meals-list"
+import {MealList} from "../client/meals_list"
 import {request} from "../client/request"
-import {withAuth} from "../client/with-auth"
-import {ErrorBoundary} from "../client/error-boundary"
+import {withAuth} from "../client/with_auth"
+import {ErrorBoundary} from "../client/error_boundary"
 
 type Props = {
   meals: MealListResponse
   currentUser: UserDTO
 }
 
-const Index: NextPage<Props> = props => (
+const Index: NextPage<Props> = (props) => (
   <Layout currentUser={props.currentUser}>
     <ErrorBoundary>
       <MealList meals={props.meals} />

@@ -1,7 +1,7 @@
 import fetch from "isomorphic-unfetch"
 import queryString from "query-string"
 
-import {ApiResponse} from "../shared/api-types"
+import {ApiResponse} from "../shared/api_types"
 
 const API_URL = process.env.API_URL
 

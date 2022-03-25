@@ -1,0 +1,15 @@
+.layout {
+  min-height: calc(100vh);
+}
+
+.appContent {
+  margin-top: 96px;
+}
+
+.heart {
+  color: #ac4d4d;
+}
+
+.footer {
+  text-align: center;
+}

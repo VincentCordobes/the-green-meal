@@ -1,6 +1,6 @@
 import React, {FC} from "react"
-import {UserDTO} from "../shared/user-types"
-import {useFetch} from "./use-fetch"
+import {UserDTO} from "../shared/user_types"
+import {useFetch} from "./use_fetch"
 
 export const CurrentUserContext = React.createContext<
   {currentUser: UserDTO; refresh: () => void} | undefined

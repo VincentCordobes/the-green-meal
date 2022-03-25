@@ -1,4 +1,4 @@
-import {withErrorHandler, HTTPError} from "./error-handler"
+import {withErrorHandler, HTTPError} from "./error_handler"
 
 describe("error-handler", () => {
   test("should reply with statusCode 500 on unhandled error", async () => {

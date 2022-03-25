@@ -3,13 +3,13 @@ import React from "react"
 import Router, {useRouter} from "next/router"
 
 import Layout from "../../../client/layout"
-import {withAuth, requestInitialProps} from "../../../client/with-auth"
-import {ErrorBoundary} from "../../../client/error-boundary"
-import {UserDTO} from "../../../shared/user-types"
-import {UserForm} from "../../../client/user-form"
-import {useFetch} from "../../../client/use-fetch"
+import {withAuth, requestInitialProps} from "../../../client/with_auth"
+import {ErrorBoundary} from "../../../client/error_boundary"
+import {UserDTO} from "../../../shared/user_types"
+import {UserForm} from "../../../client/user_form"
+import {useFetch} from "../../../client/use_fetch"
 import {request} from "../../../client/request"
-import {UserFormLayout} from "../../../client/user-form-layout"
+import {UserFormLayout} from "../../../client/user_form_layout"
 
 type Props = {
   users: UserDTO[]
@@ -17,7 +17,7 @@ type Props = {
   selectedUser?: UserDTO
 }
 
-const Index: NextPage<Props> = props => {
+const Index: NextPage<Props> = (props) => {
   const router = useRouter()
 
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
@@ -51,7 +51,7 @@ Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   const {userId} = ctx ? ctx.query : Router.query
   return requestInitialProps(
     ctx,
-    token =>
+    (token) =>
       Promise.all([
         request<UserDTO[]>("/api/users", {token}),
         request<UserDTO>(`/api/users/${userId}`, {token}),

@@ -1,9 +1,9 @@
 import {NextApiResponse, NextApiRequest} from "next"
 
-import {confirmEmail} from "../../../server/confirm-email"
-import {withErrorHandler} from "../../../server/error-handler"
+import {confirmEmail} from "../../../server/confirm_email"
+import {withErrorHandler} from "../../../server/error_handler"
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+async function handleConfirmEmail(req: NextApiRequest, res: NextApiResponse) {
   const result = await withErrorHandler(confirmEmail)(req)
   if (result.ok) {
     res.writeHead(302, {Location: "/login?confirmed=true"})
@@ -13,3 +13,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.json(result)
   }
 }
+
+export default handleConfirmEmail

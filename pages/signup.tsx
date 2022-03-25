@@ -7,18 +7,16 @@ import Form from "antd/lib/form"
 import Router from "next/router"
 import Link from "next/link"
 
-import {ErrorBoundary} from "../client/error-boundary"
-import {UserForm} from "../client/user-form"
+import {ErrorBoundary} from "../client/error_boundary"
+import {UserForm} from "../client/user_form"
 
-import "antd/dist/antd.css"
-import "./signup.css"
-import "../client/style.css"
+import styles from "./signup.module.css"
 
 type Props = {}
 
 const Index: NextPage<Props> = () => (
   <ErrorBoundary>
-    <Row className="signup-container">
+    <Row className={styles.signupContainer}>
       <Col
         xs={{span: 24}}
         md={{span: 16, offset: 4}}

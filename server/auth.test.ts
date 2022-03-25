@@ -1,10 +1,10 @@
 import {AuthRequest} from "../shared/auth"
 
 import {auth, forgotPassword, resetPassword} from "./auth"
-import {aRequest, initTestDb} from "./test-helpers"
+import {aRequest, initTestDb} from "./test_helpers"
 import {closeDb} from "./database"
 import {add} from "./users"
-import {confirmEmail} from "./confirm-email"
+import {confirmEmail} from "./confirm_email"
 import {ApiRequest} from "./api"
 
 beforeEach(() => initTestDb())
