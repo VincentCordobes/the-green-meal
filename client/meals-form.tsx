@@ -120,7 +120,7 @@ export const MealForm = Form.create<Props>({
     >
       <Form
         {...formItemLayout}
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault()
           save()
         }}

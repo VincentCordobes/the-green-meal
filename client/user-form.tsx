@@ -62,11 +62,8 @@ export const UserForm = Form.create<Props>({
   const [loading, setLoading] = useState(false)
   const [managedUsers, setManagedUsers] = useState<UserSelectItem[]>([])
   const clearManagedUsers = () => setManagedUsers([])
-  const {
-    validateToNextPassword,
-    compareToFirstPassword,
-    handleConfirmBlur,
-  } = usePasswordConfirmation(props.form)
+  const {validateToNextPassword, compareToFirstPassword, handleConfirmBlur} =
+    usePasswordConfirmation(props.form)
 
   useEffect(() => {
     if (props.user && props.user.role === "manager") {
@@ -74,10 +71,10 @@ export const UserForm = Form.create<Props>({
         params: {
           managerId: props.user.id,
         },
-      }).then(response => {
+      }).then((response) => {
         if (response.ok) {
           setManagedUsers(
-            response.value.map(user => ({
+            response.value.map((user) => ({
               key: String(user.id),
               label: fullName(user),
             })),
@@ -154,14 +151,14 @@ export const UserForm = Form.create<Props>({
   const {Option} = Select
 
   const users = props.users.filter(
-    user => user.id !== (props.user && props.user.id),
+    (user) => user.id !== (props.user && props.user.id),
   )
 
   return (
     <Form
       labelCol={{sm: {span: 7}}}
       wrapperCol={{sm: {span: 15}}}
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault()
         save()
       }}
@@ -228,7 +225,7 @@ export const UserForm = Form.create<Props>({
             initialValue: initialValue("role") || "regular",
           })(
             <Select disabled={props.readOnlyRole}>
-              {getRoles(props.currentUser.role).map(role => (
+              {getRoles(props.currentUser.role).map((role) => (
                 <Option key={role} value={role}>
                   {formatRole(role)}
                 </Option>

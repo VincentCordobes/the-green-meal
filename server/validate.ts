@@ -4,14 +4,14 @@ import Joi from "@hapi/joi"
 import {HTTPError} from "./error-handler"
 
 export function validate<T>(schema: Joi.Schema, valueToCheck: any): T {
-  const {error, value} = schema.validate<T>(valueToCheck, {
+  const {error, value} = schema.validate(valueToCheck, {
     stripUnknown: true,
     presence: "required",
     abortEarly: true,
   })
 
   if (error) {
-    const {message} = head(error.details)
+    const {message} = head(error.details)!
     throw new HTTPError(400, message)
   }
 

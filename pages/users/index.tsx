@@ -14,7 +14,7 @@ type Props = {
   currentUser: UserDTO
 }
 
-const Index: NextPage<Props> = props => (
+const Index: NextPage<Props> = (props) => (
   <ErrorBoundary>
     <Layout currentUser={props.currentUser}>
       <UserList users={props.users} />
@@ -25,8 +25,8 @@ const Index: NextPage<Props> = props => (
 Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   return requestInitialProps(
     ctx,
-    token => request<UserDTO[]>("/api/users", {token}),
-    value => ({users: value}),
+    (token) => request<UserDTO[]>("/api/users", {token}),
+    (value) => ({users: value}),
     () => ({users: []}),
   )
 }

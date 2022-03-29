@@ -17,11 +17,8 @@ export const ResetPasswordForm = Form.create<Props>({
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const {
-    validateToNextPassword,
-    compareToFirstPassword,
-    handleConfirmBlur,
-  } = usePasswordConfirmation(props.form)
+  const {validateToNextPassword, compareToFirstPassword, handleConfirmBlur} =
+    usePasswordConfirmation(props.form)
 
   const {getFieldDecorator} = props.form
 
@@ -55,7 +52,7 @@ export const ResetPasswordForm = Form.create<Props>({
     <Form
       labelCol={{md: {span: 8}}}
       wrapperCol={{md: {span: 16}}}
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault()
         save()
       }}

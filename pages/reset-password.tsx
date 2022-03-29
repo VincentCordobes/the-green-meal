@@ -7,16 +7,14 @@ import Card from "antd/lib/card"
 import {ErrorBoundary} from "../client/error-boundary"
 import {ResetPasswordForm} from "../client/reset-password-form"
 
-import "antd/dist/antd.css"
-import "./reset-password.css"
-import "../client/style.css"
+import styles from "./reset-password.module.css"
 
 type Props = {}
 
 const Index: NextPage<Props> = () => {
   return (
     <ErrorBoundary>
-      <Row className="reset-password-container">
+      <Row className={styles.resetPasswordContainer}>
         <Col span={12}>
           <Card>
             <h3>Reset password</h3>

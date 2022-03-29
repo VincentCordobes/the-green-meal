@@ -12,6 +12,7 @@ import Icon from "antd/lib/icon"
 import Row from "antd/lib/row"
 import DatePicker from "antd/lib/date-picker"
 import Tag from "antd/lib/tag"
+import {Col} from "antd"
 
 import {
   MealDTO,
@@ -27,8 +28,7 @@ import {MealForm} from "./meals-form"
 import {useFetch} from "./use-fetch"
 import {useCurrentUser} from "./session-context"
 
-import "./meals-list.css"
-import {Col} from "antd"
+import styles from "./meals-list.module.css"
 
 const {RangePicker} = DatePicker
 
@@ -80,7 +80,7 @@ function buildColumns(
         }
         return (
           <Tag color={color}>
-            <span className="meal-calories">{calories} kCal</span>
+            <span className={styles.mealCalories}>{calories} kCal</span>
           </Tag>
         )
       },
@@ -123,7 +123,7 @@ type Props = {
   meals: MealListResponse
 }
 
-export const MealList: FC<Props> = props => {
+export const MealList: FC<Props> = (props) => {
   const {isOpen, openModal, closeModal} = useModal()
   const [filter, setFilter] = useState<MealsFilter>()
   const [selectedMeal, setSelectedMeal] = useState<MealDTO>()
@@ -140,7 +140,7 @@ export const MealList: FC<Props> = props => {
   }
 
   const columns = buildColumns(currentUser, {
-    onDelete: async meal => {
+    onDelete: async (meal) => {
       await request("/api/meals/remove", {
         method: "POST",
         body: {mealId: meal.id},
@@ -149,7 +149,7 @@ export const MealList: FC<Props> = props => {
       await refetch()
       message.success(`Meal successfully removed`)
     },
-    onEdit: meal => {
+    onEdit: (meal) => {
       setSelectedMeal(meal)
       openModal()
     },
@@ -159,8 +159,8 @@ export const MealList: FC<Props> = props => {
 
   return (
     <>
-      <Row type="flex" justify="space-between" className="table-actions">
-        <Col className="meals-filters">
+      <Row type="flex" justify="space-between" className={styles.tableActions}>
+        <Col className={styles.mealsFilters}>
           <RangePicker
             format={PICKER_FORMAT}
             onChange={(_, [start, end]) => {
@@ -182,16 +182,17 @@ export const MealList: FC<Props> = props => {
             }}
           />
           <Divider type="vertical" />
-          <div className="time-pickers">
+          <div className={styles.timePickers}>
             <TimePicker
               format="HH:mm"
               placeholder="From time"
-              className="date-picker"
+              className={styles.datePicker}
               onChange={(_, fromTime) => {
                 if (fromTime) {
                   setFilter({...filter, fromTime})
                 } else {
-                  setFilter(dissoc("fromTime"))
+                  const newFilter: MealsFilter = dissoc("fromTime", filter!)
+                  setFilter(newFilter)
                 }
               }}
             />
@@ -202,7 +203,8 @@ export const MealList: FC<Props> = props => {
                 if (toTime) {
                   setFilter({...filter, toTime})
                 } else {
-                  setFilter(dissoc("toTime"))
+                  const newFilter: MealsFilter = dissoc("toTime", filter!)
+                  setFilter(newFilter)
                 }
               }}
             />
@@ -223,7 +225,7 @@ export const MealList: FC<Props> = props => {
       </Row>
       <Row>
         <Table
-          rowClassName={() => "meal-item"}
+          rowClassName={() => styles.mealItem}
           rowKey="id"
           dataSource={meals}
           columns={columns}

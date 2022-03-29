@@ -7,11 +7,7 @@ import NProgress from "nprogress"
 import {UserDTO} from "../shared/user-types"
 import {CurrentUserProvider} from "./session-context"
 import {AppHeader} from "./header"
-
-import "antd/dist/antd.css"
-import "nprogress/nprogress.css"
-import "./style.css"
-import "./layout.css"
+import styles from "./layout.module.css"
 
 message.config({
   top: 70,
@@ -33,16 +29,16 @@ type Props = {
   currentUser: UserDTO
 }
 
-const AppLayout: FC<Props> = props => {
+const AppLayout: FC<Props> = (props) => {
   return (
     <CurrentUserProvider initialData={props.currentUser}>
-      <Layout className="layout">
+      <Layout className={styles.layout}>
         <AppHeader />
-        <Content className="app-content">
+        <Content className={styles.appContent}>
           <div className="container">{props.children}</div>
         </Content>
-        <Footer className="footer">
-          Made with <span id="heart">♥</span> by Vincent Cordobes.
+        <Footer className={styles.footer}>
+          Made with <span className={styles.heart}>♥</span> by Vincent Cordobes.
         </Footer>
       </Layout>
     </CurrentUserProvider>

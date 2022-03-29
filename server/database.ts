@@ -1,5 +1,5 @@
 import {Pool} from "pg"
-import R from "ramda"
+import {toPairs, fromPairs, map} from "ramda"
 import sql, {SQLStatement} from "sql-template-strings"
 import {HTTPError} from "./error-handler"
 
@@ -9,6 +9,7 @@ export const DB_ERROR = {
 
 const pool = new Pool({
   database: process.env.PGDATABASE || "the_green_meal",
+  connectionString: process.env.DATABASE_URL,
 })
 
 export function closeDb() {
@@ -18,8 +19,8 @@ export function closeDb() {
 export async function query<T>(sql: SQLStatement): Promise<T[]> {
   try {
     const {rows} = await pool.query(sql)
-    return rows.map(row => mapKeys(camelCase, row))
-  } catch (e) {
+    return rows.map((row) => mapKeys(camelCase, row))
+  } catch (e: any) {
     throw new DBError(e)
   }
 }
@@ -102,5 +103,5 @@ function snakeCase(text: string) {
 }
 
 const mapKeys = (fn: (key: string) => string, obj: any): any => {
-  return R.fromPairs(R.map(([key, value]) => [fn(key), value], R.toPairs(obj)))
+  return fromPairs(map(([key, value]) => [fn(key), value], toPairs(obj)))
 }

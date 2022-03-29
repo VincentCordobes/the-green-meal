@@ -16,7 +16,7 @@ type Props = {
   currentUser: UserDTO
 }
 
-const Index: NextPage<Props> = props => {
+const Index: NextPage<Props> = (props) => {
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
     initialData: props.users,
   })
@@ -42,8 +42,8 @@ const Index: NextPage<Props> = props => {
 Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   return requestInitialProps(
     ctx,
-    token => request<UserDTO[]>("/api/users", {token}),
-    users => ({users}),
+    (token) => request<UserDTO[]>("/api/users", {token}),
+    (users) => ({users}),
     () => ({users: []}),
   )
 }

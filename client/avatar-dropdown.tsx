@@ -8,7 +8,7 @@ import Avatar from "antd/lib/avatar"
 import {fullName} from "./user-select"
 import {useCurrentUser} from "./session-context"
 
-import "./avatar-dropdown.css"
+import styles from "./avatar-dropdown.module.css"
 
 type Props = {}
 export const AvatarDropDown: FC<Props> = () => {
@@ -17,26 +17,26 @@ export const AvatarDropDown: FC<Props> = () => {
     <Menu>
       <Menu.Item key="settings">
         <Link href="/settings">
-          <span>
+          <a>
             <Icon type="setting" /> Settings
-          </span>
+          </a>
         </Link>
       </Menu.Item>
       <Menu.Item key="logout">
         <Link href="/logout">
-          <span>
+          <a>
             <Icon type="logout" /> Logout
-          </span>
+          </a>
         </Link>
       </Menu.Item>
     </Menu>
   )
 
   return (
-    <Dropdown overlay={menu} trigger={["click"]} className="logout-menu">
-      <span className="avatar-header">
+    <Dropdown overlay={menu} trigger={["click"]} className={styles.logoutMenu}>
+      <span className={styles.avatarHeader}>
         <Avatar size="small" />
-        <span className="current-user">{fullName(currentUser)}</span>
+        <span className={styles.currentUser}>{fullName(currentUser)}</span>
       </span>
     </Dropdown>
   )

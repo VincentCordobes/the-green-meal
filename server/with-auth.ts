@@ -10,7 +10,7 @@ export function withACLs<T, E>(
   acls: Role[],
   fn: (req: ApiRequest, params: AccessResult) => Promise<ApiResponse<T, E>>,
 ): RequestHandler<T, E | ApiError> {
-  return async req => {
+  return async (req) => {
     const user = await checkAccess(
       req.cookies.token || req.headers.authorization,
     )

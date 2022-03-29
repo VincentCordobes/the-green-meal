@@ -86,7 +86,7 @@ export async function requestInitialProps<P>(
   const response = await fn(token)
   if (Array.isArray(response)) {
     if (areResponsesOk(response)) {
-      return onOk(response.map(response => response.value))
+      return onOk(response.map((response) => response.value))
     } else {
       return redirectOnError()
     }
@@ -102,5 +102,5 @@ export async function requestInitialProps<P>(
 function areResponsesOk<T, E = any>(
   responses: ApiResponse<T, E>[],
 ): responses is OKResponse<T>[] {
-  return responses.every(response => response.ok)
+  return responses.every((response) => response.ok)
 }

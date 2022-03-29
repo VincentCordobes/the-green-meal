@@ -16,7 +16,7 @@ type Props = {
   currentUser: UserDTO
 }
 
-const Index: NextPage<Props> = props => (
+const Index: NextPage<Props> = (props) => (
   <Layout currentUser={props.currentUser}>
     <ErrorBoundary>
       <MealList meals={props.meals} />

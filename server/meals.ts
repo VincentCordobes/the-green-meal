@@ -78,9 +78,7 @@ export const add = withACLs(
         atTime: timeSchema,
         atDate: dateSchema,
         text: Joi.string(),
-        calories: Joi.number()
-          .positive()
-          .max(900000),
+        calories: Joi.number().positive().max(900000),
       }),
       req.body,
     )
@@ -105,9 +103,7 @@ export const update = withACLs(
           atTime: timeSchema.optional(),
           atDate: dateSchema.optional(),
           text: Joi.string().optional(),
-          calories: Joi.number()
-            .positive()
-            .optional(),
+          calories: Joi.number().positive().optional(),
         }).optional(),
       }).optional(),
       req.body,

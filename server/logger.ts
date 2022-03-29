@@ -10,7 +10,9 @@ export function log<T>(value: T, ...optionalParams: any[]): T {
   return value
 }
 
-export default {
+const logger = {
   info,
   log,
 }
+
+export default logger

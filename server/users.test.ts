@@ -36,7 +36,7 @@ jest.mock("jsonwebtoken", () => {
   return {verify}
 })
 
-beforeEach(() => initDbWithFixtures("test-fixtures.sql"))
+beforeEach(() => initDbWithFixtures("test_fixtures.sql"))
 afterAll(() => closeDb())
 
 describe("List users", () => {
@@ -202,7 +202,7 @@ describe("Add users", () => {
     // then
     expect(
       response.ok &&
-        response.value.find(user => user.id === userToRemove.userId),
+        response.value.find((user) => user.id === userToRemove.userId),
     ).toBeFalsy()
   })
 
@@ -370,7 +370,7 @@ describe("Update user", () => {
     // when
     try {
       await update(aManagerRequest({body: user}))
-    } catch (e) {
+    } catch (e: any) {
       expect(e.statusCode).toBe(401)
     }
   })

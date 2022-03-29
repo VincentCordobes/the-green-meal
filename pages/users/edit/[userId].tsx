@@ -17,7 +17,7 @@ type Props = {
   selectedUser?: UserDTO
 }
 
-const Index: NextPage<Props> = props => {
+const Index: NextPage<Props> = (props) => {
   const router = useRouter()
 
   const {data: users} = useFetch<UserDTO[]>("/api/users", {
@@ -51,7 +51,7 @@ Index.getInitialProps = (ctx: NextPageContext): Promise<any> => {
   const {userId} = ctx ? ctx.query : Router.query
   return requestInitialProps(
     ctx,
-    token =>
+    (token) =>
       Promise.all([
         request<UserDTO[]>("/api/users", {token}),
         request<UserDTO>(`/api/users/${userId}`, {token}),

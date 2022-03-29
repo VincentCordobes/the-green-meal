@@ -5,11 +5,11 @@ import {responseKO, RequestHandler} from "./api"
 export function withErrorHandler<T>(
   fn: RequestHandler<T>,
 ): RequestHandler<T, ApiError> {
-  return async req => {
+  return async (req) => {
     try {
       const res = await fn(req)
       return res
-    } catch (e) {
+    } catch (e: any) {
       if (e.statusCode === 401) {
         return responseKO({
           error: "Unauthorized",
@@ -24,9 +24,7 @@ export function withErrorHandler<T>(
           errorMessage: e.message,
         })
       } else {
-        if (process.env.NODE_ENV === "development") {
-          logger.info(e)
-        }
+        logger.info(e)
         return responseKO({
           statusCode: 500,
           error: "InternalServerError",
